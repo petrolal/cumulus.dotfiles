@@ -1,0 +1,3 @@
+.dotfiles_backup/
+*.swp
+.DS_Store

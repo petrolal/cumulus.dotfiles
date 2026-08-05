@@ -1,0 +1,290 @@
+### ~/.config/sway/config
+### Production Sway configuration — Ubuntu 24.04, enterprise/dev workstation.
+### Style: plain, native Sway defaults + Catppuccin Mocha colors. No animations,
+### no SwayFX, no experimental compositors. ML4W-inspired keybindings.
+###
+### Reload after edits with: SUPER+SHIFT+C  (or `swaymsg reload`)
+
+### ────────────────────────────────────────────────────────────────
+### Variables
+### ────────────────────────────────────────────────────────────────
+set $mod Mod4
+set $left h
+set $down j
+set $up k
+set $right l
+
+set $term kitty
+set $launcher wofi --show drun --allow-images
+set $lock swaylock -f -c 1e1e2e
+
+set $ws1 "1:web"
+set $ws2 "2:code"
+set $ws3 "3:term"
+set $ws4 "4:containers"
+set $ws5 "5:comms"
+set $ws6 "6:notes"
+set $ws7 "7:infra"
+set $ws8 "8:misc"
+set $ws9 "9:scratch"
+
+### ────────────────────────────────────────────────────────────────
+### Autostart (Wayland-first, corporate-compatible)
+### ────────────────────────────────────────────────────────────────
+# Wallpaper — flat solid Catppuccin base color; swap for `swaybg -i <path> -m fill` if you have an image.
+exec_always swaybg -c "#1e1e2e"
+
+# Notification daemon (SwayNC) — must start before waybar to register the swaync tray icon correctly.
+exec swaync
+
+# Status bar
+exec waybar
+
+# System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
+# connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
+exec nm-applet --indicator
+
+# 1Password — starts minimized to tray, unlocks against the already-running gnome-keyring/PAM session.
+exec 1password --silent
+
+# Idle management (lock -> screen off -> suspend). See swayidle config comments below.
+exec swayidle -w \
+  timeout 300 'swaylock -f -c 1e1e2e' \
+  timeout 600 'swaymsg "output * dpms off"' \
+    resume 'swaymsg "output * dpms on"' \
+  timeout 900 'systemctl suspend' \
+  before-sleep 'swaylock -f -c 1e1e2e'
+
+# Polkit authentication agent — required for GUI privilege prompts (Intune, NetworkManager, disk mounts).
+# GNOME's polkit agent is reused since it is desktop-agnostic; no separate install needed.
+exec /usr/libexec/polkit-gnome-authentication-agent-1
+
+### ────────────────────────────────────────────────────────────────
+### Environment variables (Wayland-first app behavior)
+### ────────────────────────────────────────────────────────────────
+# Force Wayland-native rendering where supported; apps without Wayland support automatically fall
+# back to XWayland (already provided by the `sway` package dependency chain), so nothing breaks.
+exec_always systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec_always hash dbus-update-activation-environment 2>/dev/null && \
+  dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
+
+set $XDG_CURRENT_DESKTOP sway
+set $XDG_SESSION_TYPE wayland
+set $MOZ_ENABLE_WAYLAND 1
+set $NIXOS_OZONE_WL 1
+
+### ────────────────────────────────────────────────────────────────
+### Output (monitor) configuration — auto-detect + sane fallback
+### ────────────────────────────────────────────────────────────────
+# Sway auto-detects and enables all connected outputs at their preferred resolution by default.
+# The wildcard line below is an explicit safety net so behavior is documented, not implicit.
+# output * resolution auto position auto
+
+# If you use a fixed docking setup, override with explicit lines, e.g.:
+# output eDP-1 resolution 1920x1080 position 0,0
+# output DP-1  resolution 2560x1440 position 1920,0
+#
+# Discover exact output names any time with: swaymsg -t get_outputs
+
+### ────────────────────────────────────────────────────────────────
+### Input configuration
+### ────────────────────────────────────────────────────────────────
+input type:keyboard {
+    xkb_layout br
+    repeat_delay 300
+    repeat_rate 40
+}
+
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+    dwt enabled
+}
+
+### ────────────────────────────────────────────────────────────────
+### Appearance — Catppuccin Mocha, no animations/effects
+### ────────────────────────────────────────────────────────────────
+font pango:JetBrainsMono Nerd Font 10
+
+# class                 border    bg        text      indicator child_border
+client.focused          #89b4fa   #1e1e2e   #cdd6f4   #89b4fa   #89b4fa
+client.focused_inactive #45475a   #1e1e2e   #cdd6f4   #45475a   #45475a
+client.unfocused        #313244   #1e1e2e   #a6adc8   #313244   #313244
+client.urgent           #f38ba8   #1e1e2e   #f38ba8   #f38ba8   #f38ba8
+
+default_border pixel 2
+default_floating_border pixel 2
+gaps inner 4
+gaps outer 0
+smart_borders on
+
+### ────────────────────────────────────────────────────────────────
+### Workspace names (mapped to numbers so SUPER+1..9 still works)
+### ────────────────────────────────────────────────────────────────
+workspace $ws1
+workspace $ws2
+workspace $ws3
+workspace $ws4
+workspace $ws5
+workspace $ws6
+workspace $ws7
+workspace $ws8
+workspace $ws9
+
+### ────────────────────────────────────────────────────────────────
+### Application -> workspace assignment
+### ────────────────────────────────────────────────────────────────
+# Matched by Wayland app_id where the app supports Wayland natively, and by X11 window class
+# as a fallback for apps still running under XWayland (IntelliJ, some Electron builds).
+
+# 1: web
+assign [app_id="microsoft-edge"] $ws1
+assign [class="Microsoft-edge"] $ws1
+assign [app_id="firefox"] $ws1
+assign [class="firefox"] $ws1
+
+# 2: code
+assign [class="jetbrains-idea"] $ws2
+assign [class="jetbrains-idea-ce"] $ws2
+assign [app_id="code"] $ws2
+assign [class="Code"] $ws2
+
+# 3: term
+assign [app_id="kitty"] $ws3
+
+# 4: containers
+assign [app_id="docker-desktop"] $ws4
+assign [class="Docker Desktop"] $ws4
+assign [app_id="lens"] $ws4
+assign [class="Lens"] $ws4
+
+# 5: comms
+assign [app_id="thunderbird"] $ws5
+assign [class="Thunderbird"] $ws5
+# Teams and Outlook Web run as Edge/Firefox tabs or PWAs — match their PWA window class if installed:
+assign [app_id="microsoft-edge" title="Microsoft Teams"] $ws5
+assign [app_id="microsoft-edge" title="Outlook"] $ws5
+
+# 6: notes
+assign [app_id="obsidian"] $ws6
+assign [class="obsidian"] $ws6
+
+# 7: infra — terminal windows explicitly titled for VPN/infra work land here;
+# general infra CLI (openvpn3, kubectl, etc.) is run inside kitty terminals you move manually
+# with SUPER+SHIFT+7, since CLI tools have no window of their own to match on.
+assign [app_id="kitty" title="infra"] $ws7
+
+# 8: misc
+assign [app_id="telegramdesktop"] $ws8
+assign [class="TelegramDesktop"] $ws8
+
+### ────────────────────────────────────────────────────────────────
+### Key bindings — stock Sway defaults (overrides previous ML4W custom set)
+### ────────────────────────────────────────────────────────────────
+
+# Basics
+bindsym $mod+Return exec $term
+bindsym $mod+Shift+q kill
+bindsym $mod+d exec $launcher
+floating_modifier $mod normal
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+# Moving around
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Workspaces
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+# Layout
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus parent
+
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+# Resizing
+bindsym $mod+r mode "resize"
+
+# which-key style cheatsheet — shows all bindings from this config in wofi
+bindsym $mod+Shift+slash exec ~/.config/sway/scripts/whichkey.sh
+
+### ────────────────────────────────────────────────────────────────
+### Modes
+### ────────────────────────────────────────────────────────────────
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+### ────────────────────────────────────────────────────────────────
+### Bar (disabled — Waybar replaces the built-in swaybar entirely)
+### ────────────────────────────────────────────────────────────────
+bar {
+    mode invisible
+}
+
+### ────────────────────────────────────────────────────────────────
+### Corporate/Wayland compatibility notes (read before editing further)
+### ────────────────────────────────────────────────────────────────
+# - Microsoft Edge: launched via `microsoft-edge-stable`, which auto-detects the Wayland session
+#   and enables `--ozone-platform=wayland` internally on 24.04's packaged build. No flag needed.
+# - Intune Company Portal / Microsoft Identity Broker / Entra SSO: pure D-Bus/systemd services,
+#   unaffected by window manager. No Sway-specific configuration required.
+# - OpenVPN3: CLI-driven (`openvpn3 session-start --config ...`); NetworkManager/nm-applet in the
+#   tray reflects VPN state if the profile is imported into NetworkManager instead of used standalone.
+# - Screen sharing (Teams/Zoom in Chromium/Firefox): requires xdg-desktop-portal-wlr + PipeWire,
+#   both installed/enabled by install.sh. Browsers will prompt for a portal screen picker.

@@ -1,0 +1,8 @@
+# ~/.zshrc_custom
+#
+# Old zsh configuration kept from before migrating to Sway.
+# Add here anything from your pre-Sway setup (X11-specific tools,
+# old aliases, WM-specific env vars, etc.) that you don't want
+# mixed into the main, clean ~/.zshrc.
+#
+# This file is sourced automatically from ~/.zshrc.
