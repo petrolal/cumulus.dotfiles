@@ -8,6 +8,7 @@ fully working within a couple of commands.
 ## Contents
 
 ```
+bootstrap.sh                      # curl-able one-liner: clones/updates the repo, then runs install.sh
 install.sh                       # deploys everything below via symlinks
 zsh/.zshrc                        # thin oh-my-zsh bootstrap + modular config loader
 zsh/zsh_config/                   # actual zsh config, one *.zsh file per concern (see below)
@@ -43,6 +44,34 @@ safely:
    `~/.dotfiles_backup/<timestamp>/` first, then link. Nothing is ever
    deleted.
 3. Optionally (`--packages`) installs every required package first.
+
+## Quick Installation
+
+On a brand-new machine, skip the manual clone — this one-liner fetches
+`bootstrap.sh`, clones the repo to `~/dotfiles` (or updates it if already
+present), and hands off straight into `install.sh`:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/dotfiles/master/bootstrap.sh)
+```
+
+Flags are forwarded verbatim to `install.sh`, so a full fresh-machine setup
+(packages + every tool installer) is one command:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/dotfiles/master/bootstrap.sh) --packages --all-tools
+```
+
+Preview everything first with zero side effects:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/dotfiles/master/bootstrap.sh) --dry-run --all-tools
+```
+
+> Run this as your normal user, **not** root/sudo — it sets up your
+> interactive desktop session (Sway/zsh/theme). `bootstrap.sh` refuses to
+> run as root for this reason. See [Install](#install) below for the
+> manual clone + flag reference.
 
 ## Install
 
