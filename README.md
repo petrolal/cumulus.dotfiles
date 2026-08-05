@@ -138,6 +138,7 @@ the which-key cheatsheet below — this is just a quick reference.
 | `Mod+D` | App launcher (wofi drun — fuzzy search installed apps) |
 | `Mod+Shift+B` | Open Google Chrome |
 | `Mod+Shift+/` | **Which-key cheatsheet** — searchable popup of every binding, parsed live from `config/sway/config` |
+| `Mod+Shift+T` | **Theme picker** — wofi GUI to pick a Catppuccin flavor + background mode (flat/wallpaper/rotate), front-end for `dotfiles-theme` |
 | `Mod+Shift+Q` | Kill focused window |
 | `Mod+Shift+C` | Reload Sway config |
 | `Mod+Shift+E` | Exit Sway session (with confirmation) |
@@ -253,9 +254,17 @@ Switching themes reloads sway (`swaymsg reload`) so client borders, the
 background, and the waybar/wofi stylesheets pick up the new colors
 immediately — no logout required.
 
+Prefer a GUI? Press `Mod+Shift+T` to open the **theme picker**
+(`config/sway/scripts/theme-picker.sh`) — a wofi-driven walkthrough
+(flavor → flat/wallpaper/rotate → wallpaper file or interval) that calls
+`dotfiles-theme set` for you and shows a desktop notification when done.
+It's a thin front-end only; all validation/state/reload logic still lives
+in `theme.sh`.
+
 Adding a new flavor: drop a `themes/palettes/<name>.sh` file defining the
 same ~26 `BASE`/`TEXT`/`SURFACE0`/`BLUE`/... variables as the existing
-palettes, and it's picked up automatically by `dotfiles-theme list`/`set`.
+palettes, and it's picked up automatically by `dotfiles-theme list`/`set`
+and by the theme picker.
 
 ## Updating
 

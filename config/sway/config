@@ -247,6 +247,10 @@ bindsym $mod+r mode "resize"
 # which-key style cheatsheet — shows all bindings from this config in wofi
 bindsym $mod+Shift+slash exec ~/.config/sway/scripts/whichkey.sh
 
+# Theme picker — wofi GUI to pick a Catppuccin flavor + background mode
+# (flat color / wallpaper / rotate), front-end for dotfiles-theme.
+bindsym $mod+Shift+t exec ~/.config/sway/scripts/theme-picker.sh
+
 # Lock screen (manual — same styling swayidle uses automatically)
 # Note: not bound to $mod+Shift+l — that collides with $mod+Shift+$right
 # (vim-style "l" = right, see `set $right l` above), which silently wins
