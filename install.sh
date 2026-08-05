@@ -7,11 +7,14 @@
 #   2. Symlinks every config file into place under $HOME.
 #   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
-#   5. Applies the saved theme (Catppuccin flavor + flat color/wallpaper/
+#   5. Installs the JetBrainsMono Nerd Font (unconditionally — kitty/waybar/
+#      wofi/sway configs hardcode it, so icons render as boxes without it)
+#      — see scripts/install-fonts.sh.
+#   6. Applies the saved theme (Catppuccin flavor + flat color/wallpaper/
 #      rotation), or the default (mocha / flat) on first run — see
 #      scripts/theme.sh.
-#   6. (Optionally) runs one or more of the scripts/install-*.sh installers.
-#   7. Runs scripts/validate.sh at the end to confirm everything is correctly
+#   7. (Optionally) runs one or more of the scripts/install-*.sh installers.
+#   8. Runs scripts/validate.sh at the end to confirm everything is correctly
 #      in place (skipped in --dry-run, or with --no-validate).
 #
 # Usage:
@@ -180,6 +183,13 @@ main() {
   done
 
   link_scripts
+
+  if ! $DRY_RUN; then
+    log "Ensuring Nerd Font is installed (needed by kitty/waybar/wofi/sway configs)..."
+    "$DOTFILES_DIR/scripts/install-fonts.sh"
+  else
+    log "+ '$DOTFILES_DIR/scripts/install-fonts.sh'"
+  fi
 
   if ! $DRY_RUN; then
     log "Applying theme (flavor + background mode)..."

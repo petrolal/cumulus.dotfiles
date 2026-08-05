@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# install-zsh.sh — install zsh + oh-my-zsh with the Cloud theme, install
-# Nerd Fonts (JetBrainsMono, used across kitty/waybar/wofi), and make
-# Neovim the default editor system-wide.
+# install-zsh.sh — install zsh + oh-my-zsh with the Cloud theme, ensure the
+# Nerd Font (JetBrainsMono, used across kitty/waybar/wofi) is present via
+# install-fonts.sh, and make Neovim the default editor system-wide.
 #
 # This script only installs the *framework* and fonts. The actual
 # oh-my-zsh bootstrap + modular config loading lives in zsh/.zshrc and
@@ -27,9 +27,8 @@ done
 log() { printf '\033[1;34m[zsh]\033[0m %s\n' "$*"; }
 run() { if $DRY_RUN; then echo "+ $*"; else eval "$@"; fi }
 
-NERD_FONT_NAME="JetBrainsMono"
-NERD_FONT_VERSION="v3.2.1"
-FONTS_DIR="$HOME/.local/share/fonts"
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPTS_DIR="$(dirname "$SELF")"
 
 install_zsh() {
   if command -v zsh >/dev/null 2>&1; then
@@ -68,25 +67,39 @@ set_default_shell() {
     log "OK (already default shell): zsh"
     return
   fi
+
   log "Setting zsh as default login shell..."
-  run "chsh -s '$zsh_path' '$USER'"
+  if $DRY_RUN; then
+    echo "+ chsh -s '$zsh_path' '$USER'"
+    return
+  fi
+
+  if chsh -s "$zsh_path" "$USER" 2>/tmp/chsh-err.$$; then
+    rm -f /tmp/chsh-err.$$
+    return
+  fi
+
+  # `chsh` talks to the local /etc/passwd (and PAM) directly. On AD/LDAP/
+  # SSSD-joined machines the account resolves via `getent`/NSS but chsh
+  # still fails against it — observed as either "user does not exist in
+  # /etc/passwd" or "PAM: Authentication failure" depending on the session.
+  # Either way, fall back to `usermod`, which goes through NSS and works
+  # with directory-backed accounts too.
+  log "chsh failed (likely an AD/LDAP/SSSD-managed account, not local /etc/passwd):"
+  sed 's/^/  /' /tmp/chsh-err.$$ >&2
+  rm -f /tmp/chsh-err.$$
+  log "Falling back to usermod..."
+  if run "sudo usermod -s '$zsh_path' '$USER'"; then
+    log "Default shell set via usermod."
+  else
+    log "WARN: could not change default shell (chsh and usermod both failed)."
+    log "  This account is likely managed centrally (AD/LDAP) — ask your admin to"
+    log "  update the loginShell attribute, or add: exec $zsh_path  to ~/.bash_profile"
+  fi
 }
 
 install_nerd_font() {
-  local match_count
-  match_count="$(fc-list 2>/dev/null | grep -ci "JetBrainsMono Nerd Font" || true)"
-  if [ "${match_count:-0}" -gt 0 ]; then
-    log "OK (already installed): $NERD_FONT_NAME Nerd Font"
-    return
-  fi
-  log "Installing $NERD_FONT_NAME Nerd Font $NERD_FONT_VERSION..."
-  run "mkdir -p '$FONTS_DIR'"
-  run "curl -fLo /tmp/${NERD_FONT_NAME}.zip \
-    'https://github.com/ryanoasis/nerd-fonts/releases/download/${NERD_FONT_VERSION}/${NERD_FONT_NAME}.zip'"
-  run "unzip -o -q /tmp/${NERD_FONT_NAME}.zip -d '$FONTS_DIR' '*.ttf'"
-  run "rm -f /tmp/${NERD_FONT_NAME}.zip"
-  run "fc-cache -f '$FONTS_DIR'"
-  log "Installed. kitty/waybar/wofi in this repo already default to '$NERD_FONT_NAME Nerd Font'."
+  "$SCRIPTS_DIR/install-fonts.sh" $($DRY_RUN && echo --dry-run)
 }
 
 set_default_editor() {

@@ -109,7 +109,7 @@ if command -v zsh >/dev/null 2>&1; then
   if [ "$SHELL" = "$(command -v zsh)" ]; then
     ok "zsh is the default login shell"
   else
-    warn "default login shell is \$SHELL=$SHELL, not zsh — run dotfiles-install-zsh or 'chsh -s \$(command -v zsh)'"
+    warn "default login shell is \$SHELL=$SHELL, not zsh — run dotfiles-install-zsh (falls back to usermod on AD/LDAP accounts where chsh fails)"
   fi
   if [ -d "$HOME/.oh-my-zsh" ]; then
     ok "oh-my-zsh installed"
@@ -128,11 +128,13 @@ if command -v zsh >/dev/null 2>&1; then
 else
   warn "zsh not found — run dotfiles-install-zsh"
 fi
+
+section "Fonts"
 fc_count="$(fc-list 2>/dev/null | grep -ci "JetBrainsMono Nerd Font" || true)"
 if [ "$fc_count" -gt 0 ]; then
   ok "JetBrainsMono Nerd Font installed"
 else
-  warn "JetBrainsMono Nerd Font not found — run dotfiles-install-zsh"
+  warn "JetBrainsMono Nerd Font not found — run dotfiles-install-fonts (or ./install.sh)"
 fi
 
 section "Neovim"
