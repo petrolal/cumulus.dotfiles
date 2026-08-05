@@ -1,23 +1,46 @@
 #!/usr/bin/env bash
 #
-# lock.sh — swaylock wrapper with consistent Catppuccin Mocha styling.
-# Bind this to Mod+Shift+L (or call from idle.sh) instead of raw swaylock,
-# so the look stays defined in one place.
+# lock.sh — swaylock wrapper with styling that follows the active
+# dotfiles theme (see scripts/theme.sh). Bind this to Mod+Shift+L (or
+# call from idle.sh) instead of raw swaylock, so the look stays defined
+# in one place and updates automatically when you switch flavors.
 #
 set -euo pipefail
 
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
+STATE_FILE="$HOME/.config/dotfiles/theme/state"
+
+FLAVOR="mocha"
+if [ -f "$STATE_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$STATE_FILE"
+  FLAVOR="${FLAVOR:-mocha}"
+fi
+
+PALETTE="$DOTFILES_DIR/themes/palettes/$FLAVOR.sh"
+[ -f "$PALETTE" ] || PALETTE="$DOTFILES_DIR/themes/palettes/mocha.sh"
+# shellcheck disable=SC1090
+. "$PALETTE"
+
+# swaylock wants colors without the leading '#'.
+strip_hash() { printf '%s' "${1#\#}"; }
+
+BASE_C="$(strip_hash "$BASE")"
+BLUE_C="$(strip_hash "$BLUE")"
+TEXT_C="$(strip_hash "$TEXT")"
+GREEN_C="$(strip_hash "$GREEN")"
+
 exec swaylock \
-  --image "" \
-  --color 1e1e2e \
-  --inside-color 1e1e2e \
-  --ring-color 89b4fa \
-  --line-color 1e1e2e \
-  --text-color cdd6f4 \
-  --inside-ver-color 89b4fa \
-  --ring-ver-color 89b4fa \
-  --key-hl-color a6e3a1 \
-  --separator-color 1e1e2e \
+  --color "$BASE_C" \
+  --inside-color "$BASE_C" \
+  --ring-color "$BLUE_C" \
+  --line-color "$BASE_C" \
+  --text-color "$TEXT_C" \
+  --inside-ver-color "$BLUE_C" \
+  --ring-ver-color "$BLUE_C" \
+  --key-hl-color "$GREEN_C" \
+  --separator-color "$BASE_C" \
   --font "JetBrainsMono Nerd Font" \
   --indicator-radius 100 \
-  --indicator-thickness 10 \
-  --fade-in 0.2
+  --indicator-thickness 10

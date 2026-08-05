@@ -31,7 +31,8 @@
 #
 set -euo pipefail
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
 PALETTES_DIR="$DOTFILES_DIR/themes/palettes"
 WALLPAPERS_DIR="$DOTFILES_DIR/themes/wallpapers"
 STATE_DIR="$HOME/.config/dotfiles/theme"
