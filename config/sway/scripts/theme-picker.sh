@@ -18,6 +18,14 @@ DOTFILES_DIR="$(cd "$(dirname "$SELF")/../../.." && pwd)"
 THEME_SH="$DOTFILES_DIR/scripts/theme.sh"
 PALETTES_DIR="$DOTFILES_DIR/themes/palettes"
 WALLPAPERS_DIR="$DOTFILES_DIR/themes/wallpapers"
+STATE_FILE="$HOME/.config/cumulus/theme/state"
+
+current_flavor=""
+if [ -f "$STATE_FILE" ]; then
+  # shellcheck disable=SC1090
+  source "$STATE_FILE"
+  current_flavor="${FLAVOR:-}"
+fi
 
 notify() {
   command -v notify-send >/dev/null 2>&1 && notify-send "Theme" "$1" || true
@@ -34,12 +42,15 @@ for f in "$PALETTES_DIR"/*.sh; do
   name="$(basename -s .sh "$f")"
   # shellcheck disable=SC1090
   label="$(source "$f"; echo "$THEME_LABEL")"
-  flavor_lines+="$name — $label"$'\n'
+  marker=""
+  [ "$name" = "$current_flavor" ] && marker="✓ "
+  flavor_lines+="$marker$name — $label"$'\n'
 done
 
 flavor_choice="$(printf '%s' "$flavor_lines" | pick "Theme flavor")"
 [ -n "$flavor_choice" ] || exit 0
 flavor="${flavor_choice%% —*}"
+flavor="${flavor#✓ }"
 
 # ── 2. Background mode ───────────────────────────────────────────────────
 mode_choice="$(printf 'Flat color\nWallpaper (pick an image)\nRotate wallpapers (timer)' | pick "Background mode")"

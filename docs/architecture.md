@@ -118,10 +118,10 @@ shows up as a spurious diff against the template.
 ### State & subcommands
 
 Theme choice persists at `~/.config/cumulus/theme/state` (`FLAVOR=`,
-`MODE=`, `WALLPAPER=`, `INTERVAL=` — plain `KEY=VALUE` lines, directly
-`source`-able):
+`MODE=`, `WALLPAPER=`, `INTERVAL=`, and `NVIM_COLORSCHEME=` — plain
+`KEY=VALUE` lines, directly `source`-able):
 
-- `theme.sh set <flavor> [--flat | --wallpaper <path> | --rotate [--interval N]]` — validates the flavor against `themes/palettes/*.sh`, resolves the wallpaper path (bare filename resolved against `themes/wallpapers/`, or an absolute/relative path), regenerates all four config fragments, reloads sway (`swaymsg reload`), and updates the state file.
+- `theme.sh set <flavor> [--flat | --wallpaper <path> | --rotate [--interval N] | --preserve-background]` — validates the flavor against `themes/palettes/*.sh`, resolves the wallpaper path (bare filename resolved against `themes/wallpapers/`, or an absolute/relative path), regenerates all four config fragments, reloads sway (`swaymsg reload`), and updates the state file. `--preserve-background` is used by Neovim synchronization to retain the current wallpaper/rotation mode.
 - `theme.sh apply` — re-applies whatever's in the state file; this is what `install.sh` calls on every run, and what you'd wire into a login hook.
 - `theme.sh next` — advances rotation by one wallpaper; called by the systemd timer, but safe to run manually too.
 - `theme.sh list` / `theme.sh current` — introspection, no side effects.

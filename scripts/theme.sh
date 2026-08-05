@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #
-# theme.sh — select the Catppuccin flavor + background mode for this whole
+# theme.sh — select a desktop flavor + background mode for this whole
 # desktop (sway, waybar, wofi, kitty) and apply it live.
 #
 # Concepts:
-#   - Flavor: one of the 4 official Catppuccin palettes (themes/palettes/*.sh):
-#       mocha (dark, default), macchiato (dark, soft), frappe (dark, muted),
-#       latte (light).
+#   - Flavor: one of the palettes in themes/palettes/*.sh, including the four
+#       Catppuccin flavors and the AWS/Azure/GCP/OCI cloud themes.
 #   - Background mode:
 #       flat      — solid color using the flavor's "base" swatch (default,
 #                   no wallpaper image at all).
@@ -20,7 +19,8 @@
 # ./install.sh (wired automatically).
 #
 # Usage:
-#   ./theme.sh set <mocha|macchiato|frappe|latte>        # flat color (default mode)
+#   ./theme.sh set <flavor>                              # flat color (default mode)
+#   ./theme.sh set <flavor> --preserve-background        # keep current wallpaper/rotation mode
 #   ./theme.sh set <flavor> --wallpaper <path|filename>  # static wallpaper
 #   ./theme.sh set <flavor> --rotate [--interval 30m]    # rotate images in themes/wallpapers/
 #   ./theme.sh set <flavor> --flat                       # force flat color mode
@@ -49,11 +49,22 @@ is_valid_flavor() {
   [ -f "$PALETTES_DIR/$f.sh" ]
 }
 
+validate_palette() {
+  local flavor="$1" var
+  for var in BASE MANTLE CRUST TEXT SUBTEXT1 SUBTEXT0 SURFACE0 SURFACE1 \
+             SURFACE2 OVERLAY0 BLUE LAVENDER SAPPHIRE SKY TEAL GREEN YELLOW \
+             PEACH MAROON RED MAUVE PINK FLAMINGO ROSEWATER; do
+    [ -n "${!var:-}" ] || die "palette '$flavor' is missing required variable: $var"
+  done
+}
+
 # ── Generate colors.conf/colors.css for each app from a palette file ────────
 generate_configs() {
   local flavor="$1" mode="$2" wallpaper="${3:-}"
+  unset NVIM_COLORSCHEME
   # shellcheck disable=SC1090
   source "$PALETTES_DIR/$flavor.sh"
+  validate_palette "$flavor"
 
   mkdir -p "$STATE_DIR"
 
@@ -183,15 +194,25 @@ cmd_set() {
   is_valid_flavor "$flavor" || die "unknown flavor '$flavor' — choices: $(valid_flavors | tr '\n' ' ')"
 
   local mode="flat" wallpaper="" interval="30m"
+  local preserve_background=false mode_explicit=false
   while [ $# -gt 0 ]; do
     case "$1" in
-      --wallpaper) mode="wallpaper"; wallpaper="$2"; shift 2 ;;
-      --rotate) mode="rotate"; shift ;;
+      --wallpaper) mode="wallpaper"; mode_explicit=true; wallpaper="$2"; shift 2 ;;
+      --rotate) mode="rotate"; mode_explicit=true; shift ;;
       --interval) interval="$2"; shift 2 ;;
-      --flat) mode="flat"; shift ;;
+      --flat) mode="flat"; mode_explicit=true; shift ;;
+      --preserve-background) preserve_background=true; shift ;;
       *) die "unknown option: $1" ;;
     esac
   done
+
+  if $preserve_background && ! $mode_explicit && [ -f "$STATE_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$STATE_FILE"
+    mode="${MODE:-flat}"
+    wallpaper="${WALLPAPER:-}"
+    interval="${INTERVAL:-30m}"
+  fi
 
   if [ "$mode" = "wallpaper" ]; then
     [ -n "$wallpaper" ] || die "--wallpaper requires a path"
@@ -211,12 +232,19 @@ cmd_set() {
     wallpaper="${images[0]}"
   fi
 
+  # Load and validate metadata before persisting shared state.
+  unset NVIM_COLORSCHEME
+  # shellcheck disable=SC1090
+  source "$PALETTES_DIR/$flavor.sh"
+  validate_palette "$flavor"
+
   mkdir -p "$STATE_DIR"
   {
     echo "FLAVOR=$flavor"
     echo "MODE=$mode"
     echo "WALLPAPER=${wallpaper:-}"
     echo "INTERVAL=$interval"
+    echo "NVIM_COLORSCHEME=${NVIM_COLORSCHEME:-}"
   } > "$STATE_FILE"
 
   generate_configs "$flavor" "$mode" "$wallpaper"
@@ -294,7 +322,9 @@ cmd_current() {
     echo "Flavor:  $FLAVOR"
     echo "Mode:    $MODE"
     [ -n "${WALLPAPER:-}" ] && echo "Image:   $(basename "$WALLPAPER")"
-    [ "$MODE" = "rotate" ] && echo "Interval: ${INTERVAL:-30m}"
+    if [ "$MODE" = "rotate" ]; then
+      echo "Interval: ${INTERVAL:-30m}"
+    fi
   else
     echo "No theme set yet (default is mocha / flat)."
   fi
