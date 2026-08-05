@@ -186,6 +186,45 @@ up in `zsh_config/40-environment.zsh`).
 | `dotfiles-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
 | `dotfiles-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin) via Docker's official apt/pacman repo, Terraform via HashiCorp's official apt repo (or pacman's `terraform` package on Arch), and Ansible via apt/pacman. Also adds you to the `docker` group. Idempotent — skips anything already installed. Works on both apt and pacman. `--dry-run` supported. |
 
+## Theming
+
+Colors and background come from `dotfiles-theme` (`scripts/theme.sh`), which
+renders the Catppuccin flavor + background mode you pick into the actual
+sway/kitty/waybar/wofi configs. The default is **mocha, flat color** (no
+wallpaper). State is saved to `~/.config/dotfiles/theme/state` and
+re-applied automatically every time you run `./install.sh`.
+
+Flavors: `mocha` (dark), `macchiato` (dark, soft), `frappe` (dark, muted),
+`latte` (light).
+
+```sh
+dotfiles-theme list                              # show flavors + wallpapers found
+dotfiles-theme current                           # show what's active now
+
+dotfiles-theme set mocha                         # flat color background (default mode)
+dotfiles-theme set latte --wallpaper beach.jpg    # static wallpaper (path or bare filename
+                                                   # resolved against themes/wallpapers/)
+dotfiles-theme set frappe --rotate --interval 30m # rotate through every image in
+                                                   # themes/wallpapers/ every 30 minutes
+
+dotfiles-theme apply                             # re-apply the saved theme (used by install.sh)
+dotfiles-theme next                              # manually advance rotation by one image
+```
+
+Drop any `.jpg`/`.jpeg`/`.png`/`.webp` files into `themes/wallpapers/` (not
+tracked by git — add your own) to make them available to `--wallpaper`/
+`--rotate`. Rotation is driven by a `systemd --user` timer
+(`dotfiles-wallpaper-rotate.timer`/`.service`), so it survives reboots and
+is automatically disabled when you switch back to flat/static modes.
+
+Switching themes reloads sway (`swaymsg reload`) so client borders, the
+background, and the waybar/wofi stylesheets pick up the new colors
+immediately — no logout required.
+
+Adding a new flavor: drop a `themes/palettes/<name>.sh` file defining the
+same ~26 `BASE`/`TEXT`/`SURFACE0`/`BLUE`/... variables as the existing
+palettes, and it's picked up automatically by `dotfiles-theme list`/`set`.
+
 ## Updating
 
 Edit files directly under `~/.config/...` or `~/.zshrc*` as usual — since

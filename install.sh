@@ -7,8 +7,11 @@
 #   2. Symlinks every config file into place under $HOME.
 #   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
-#   5. (Optionally) runs one or more of the scripts/install-*.sh installers.
-#   6. Runs scripts/validate.sh at the end to confirm everything is correctly
+#   5. Applies the saved theme (Catppuccin flavor + flat color/wallpaper/
+#      rotation), or the default (mocha / flat) on first run — see
+#      scripts/theme.sh.
+#   6. (Optionally) runs one or more of the scripts/install-*.sh installers.
+#   7. Runs scripts/validate.sh at the end to confirm everything is correctly
 #      in place (skipped in --dry-run, or with --no-validate).
 #
 # Usage:
@@ -174,6 +177,13 @@ main() {
   done
 
   link_scripts
+
+  if ! $DRY_RUN; then
+    log "Applying theme (flavor + background mode)..."
+    "$DOTFILES_DIR/scripts/theme.sh" apply
+  else
+    log "+ '$DOTFILES_DIR/scripts/theme.sh' apply"
+  fi
 
   if $DO_ALL_TOOLS; then
     local installer
