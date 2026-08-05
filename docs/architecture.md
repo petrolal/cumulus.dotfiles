@@ -15,9 +15,9 @@ pieces and how they hand off to each other.
 ## Architecture Pattern: Symlink-Sourced Configuration
 
 ```
-~/dotfiles/config/sway   <──symlink──   ~/.config/sway
-~/dotfiles/zsh/.zshrc    <──symlink──   ~/.zshrc
-~/dotfiles/scripts/*.sh  <──symlink──   ~/.local/bin/dotfiles-*
+~/cumulus.dotfiles/config/sway   <──symlink──   ~/.config/sway
+~/cumulus.dotfiles/zsh/.zshrc    <──symlink──   ~/.zshrc
+~/cumulus.dotfiles/scripts/*.sh  <──symlink──   ~/.local/bin/cumulus-*
 ```
 
 The repo directory is the **only real copy** of every managed file. Nothing
@@ -30,7 +30,7 @@ repo. Consequences of this choice (all deliberate):
 - `install.sh` is safe to re-run at any time: if the target already is the
   correct symlink, it's a no-op; if the target is a *real* file/directory
   (e.g. first run on a fresh machine, or a config that predates this repo),
-  it's moved to `~/.dotfiles_backup/<timestamp>/` before linking — nothing
+  it's moved to `~/.cumulus_backup/<timestamp>/` before linking — nothing
   is ever silently deleted.
 - Multi-machine sync is just `git pull && ./install.sh` — no rsync, no
   stow-style dotfile manager, no extra dependency beyond git + bash.
@@ -47,7 +47,7 @@ repo. Consequences of this choice (all deliberate):
    pairs, e.g. `config/sway → .config/sway`) via `link_one()`, which
    implements the backup-before-overwrite safety described above.
 3. **`link_scripts()`** — globs `scripts/*.sh`, symlinks each into
-   `~/.local/bin/dotfiles-<name>` (stripping `.sh`), so every script in this
+   `~/.local/bin/cumulus-<name>` (stripping `.sh`), so every script in this
    repo automatically becomes a callable command with zero additional
    wiring when you add a new file there.
 4. **`scripts/install-fonts.sh apply`** — installs the JetBrainsMono Nerd
@@ -117,7 +117,7 @@ shows up as a spurious diff against the template.
 
 ### State & subcommands
 
-Theme choice persists at `~/.config/dotfiles/theme/state` (`FLAVOR=`,
+Theme choice persists at `~/.config/cumulus/theme/state` (`FLAVOR=`,
 `MODE=`, `WALLPAPER=`, `INTERVAL=` — plain `KEY=VALUE` lines, directly
 `source`-able):
 
@@ -130,7 +130,7 @@ Theme choice persists at `~/.config/dotfiles/theme/state` (`FLAVOR=`,
 
 Rotation deliberately avoids a background `while true; do sleep; done` loop
 process — instead, `write_rotate_units()` generates
-`~/.config/systemd/user/dotfiles-wallpaper-rotate.service` (oneshot, runs
+`~/.config/systemd/user/cumulus-wallpaper-rotate.service` (oneshot, runs
 `theme.sh next`) and `.timer` (`OnUnitActiveSec=<interval>`,
 `Persistent=true`), then `systemctl --user daemon-reload && enable --now`.
 This means: rotation survives reboots without needing an autostart entry
@@ -161,7 +161,7 @@ and it never needs to be duplicated elsewhere.
 ### Symlink-safe self-location (important gotcha)
 
 Because every script in `scripts/` is invoked through a symlink in
-`~/.local/bin/dotfiles-<name>`, any script that needs to find its own
+`~/.local/bin/cumulus-<name>`, any script that needs to find its own
 repo location (to read `themes/`, other scripts, etc.) **must** resolve the
 *real* path first:
 
@@ -231,7 +231,7 @@ security-sensitive, user-judgment step).
 
 ## Known Constraints / Non-Goals
 
-- This is a **personal** dotfiles repo, not a general-purpose dotfiles
+- This is a **personal** cumulus.dotfiles repo, not a general-purpose dotfiles
   framework — hardcoded assumptions (single user, specific font/terminal
   choices) are intentional, not oversights.
 - No automated test suite in the CI sense — validation is `scripts/validate.sh`

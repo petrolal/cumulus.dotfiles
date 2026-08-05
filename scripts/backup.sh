@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 #
-# backup.sh — snapshot the dotfiles-managed live config into a timestamped
+# backup.sh — snapshot the cumulus.dotfiles-managed live config into a timestamped
 # tarball, independent of git history. Useful right before risky experiments,
 # or as an extra safety net alongside `install.sh`'s automatic backups.
 #
 # Usage:
-#   backup.sh                 # snapshot to ~/dotfiles-backups/<timestamp>.tar.gz
+#   backup.sh                 # snapshot to ~/cumulus-backups/<timestamp>.tar.gz
 #   backup.sh --list          # list existing snapshots
 #
 set -euo pipefail
 
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
-BACKUPS_DIR="$HOME/dotfiles-backups"
+BACKUPS_DIR="$HOME/cumulus-backups"
 log() { printf '\033[1;34m[backup]\033[0m %s\n' "$*"; }
 
 # Same target list install.sh manages — kept in sync manually since bash
 # doesn't easily share associative arrays across scripts.
 TARGETS=(
   ".zshrc"
-  ".config/dotfiles/zsh_config"
+  ".config/cumulus/zsh_config"
   ".config/sway"
   ".config/wofi"
   ".config/waybar"

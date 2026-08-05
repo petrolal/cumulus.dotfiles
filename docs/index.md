@@ -1,13 +1,13 @@
-# dotfiles — Project Documentation Index
+# cumulus.dotfiles — Project Documentation Index
 
 > Generated: 2026-08-05 | Scan Level: Deep | Mode: Initial Scan (BMAD document-project pattern)
 
 ## Project Overview
 
-- **Name:** dotfiles
+- **Name:** cumulus.dotfiles
 - **Type:** Personal system-configuration monorepo (not a software product — no runtime/build/deploy pipeline)
 - **Primary Languages:** Bash (scripts, install logic), Zsh (shell config), plain-text config DSLs (Sway, waybar/wofi GTK CSS, kitty.conf)
-- **Architecture:** Symlink-based dotfiles repo + a small idempotent installer + a Catppuccin theme-rendering engine
+- **Architecture:** Symlink-based cumulus.dotfiles repo + a small idempotent installer + a Catppuccin theme-rendering engine
 - **License:** Personal use (no LICENSE file — not distributed as a product)
 
 ## Quick Reference
@@ -15,8 +15,8 @@
 - **Target platforms:** Ubuntu 24.04 (apt) and Arch Linux (pacman/AUR) — Sway/Wayland desktop
 - **Entry point:** `install.sh` (symlinks configs, installs the Nerd Font unconditionally, optionally installs packages/tools, applies theme, runs validation)
 - **Core pattern:** every managed config lives as a real file *in this repo* and is **symlinked** into `$HOME`/`~/.config` — editing the live config *is* editing the tracked file
-- **Automation:** `scripts/*.sh`, each auto-symlinked onto `$PATH` as `dotfiles-<name>`
-- **Theming:** `scripts/theme.sh` (Catppuccin flavor + flat/wallpaper/rotate background), state in `~/.config/dotfiles/theme/state`
+- **Automation:** `scripts/*.sh`, each auto-symlinked onto `$PATH` as `cumulus-<name>`
+- **Theming:** `scripts/theme.sh` (Catppuccin flavor + flat/wallpaper/rotate background), state in `~/.config/cumulus/theme/state`
 
 ## Generated Documentation
 
@@ -33,8 +33,8 @@
 ## Getting Started
 
 ```bash
-git clone <this-repo-url> ~/dotfiles
-cd ~/dotfiles
+git clone <this-repo-url> ~/cumulus.dotfiles
+cd ~/cumulus.dotfiles
 ./install.sh --packages    # symlink configs + install required packages
 swaymsg reload              # or Mod+Shift+C inside Sway
 source ~/.zshrc

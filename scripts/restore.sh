@@ -8,8 +8,8 @@
 #
 set -euo pipefail
 
-BACKUPS_DIR="$HOME/dotfiles-backups"
-PRE_RESTORE_DIR="$HOME/.dotfiles_backup/pre-restore_$(date +%Y%m%d_%H%M%S)"
+BACKUPS_DIR="$HOME/cumulus-backups"
+PRE_RESTORE_DIR="$HOME/.cumulus_backup/pre-restore_$(date +%Y%m%d_%H%M%S)"
 log() { printf '\033[1;34m[restore]\033[0m %s\n' "$*"; }
 
 ARCHIVE_NAME="${1:-}"

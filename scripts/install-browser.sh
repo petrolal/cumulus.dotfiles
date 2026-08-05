@@ -96,7 +96,7 @@ verify() {
     log "Sway keybinding OK: \$mod+Shift+b launches google-chrome-stable"
   else
     log "NOTE: no \$mod+Shift+b browser keybinding found in config/sway/config"
-    log "      (expected if you haven't pulled the latest dotfiles config yet)"
+    log "      (expected if you haven't pulled the latest cumulus.dotfiles config yet)"
   fi
 }
 

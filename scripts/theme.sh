@@ -15,7 +15,7 @@
 #                   timer (systemd --user timer), same flavor's colors used
 #                   throughout regardless of which image is showing.
 #
-# State is persisted in ~/.config/dotfiles/theme/state so it re-applies the
+# State is persisted in ~/.config/cumulus/theme/state so it re-applies the
 # same way after reboot/login (wired into sway's exec_always) and after
 # ./install.sh (wired automatically).
 #
@@ -35,7 +35,7 @@ SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
 PALETTES_DIR="$DOTFILES_DIR/themes/palettes"
 WALLPAPERS_DIR="$DOTFILES_DIR/themes/wallpapers"
-STATE_DIR="$HOME/.config/dotfiles/theme"
+STATE_DIR="$HOME/.config/cumulus/theme"
 STATE_FILE="$STATE_DIR/state"
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 
@@ -142,18 +142,18 @@ write_rotate_units() {
   local interval="$1"
   mkdir -p "$SYSTEMD_USER_DIR"
 
-  cat > "$SYSTEMD_USER_DIR/dotfiles-wallpaper-rotate.service" <<EOF
+  cat > "$SYSTEMD_USER_DIR/cumulus-wallpaper-rotate.service" <<EOF
 [Unit]
-Description=dotfiles wallpaper rotation (single tick)
+Description=cumulus.dotfiles wallpaper rotation (single tick)
 
 [Service]
 Type=oneshot
 ExecStart=$DOTFILES_DIR/scripts/theme.sh next
 EOF
 
-  cat > "$SYSTEMD_USER_DIR/dotfiles-wallpaper-rotate.timer" <<EOF
+  cat > "$SYSTEMD_USER_DIR/cumulus-wallpaper-rotate.timer" <<EOF
 [Unit]
-Description=dotfiles wallpaper rotation timer
+Description=cumulus.dotfiles wallpaper rotation timer
 
 [Timer]
 OnBootSec=$interval
@@ -165,13 +165,13 @@ WantedBy=timers.target
 EOF
 
   systemctl --user daemon-reload
-  systemctl --user enable --now dotfiles-wallpaper-rotate.timer
-  log "Enabled rotation timer: every $interval (systemctl --user status dotfiles-wallpaper-rotate.timer)"
+  systemctl --user enable --now cumulus-wallpaper-rotate.timer
+  log "Enabled rotation timer: every $interval (systemctl --user status cumulus-wallpaper-rotate.timer)"
 }
 
 disable_rotate_units() {
-  if systemctl --user list-unit-files 2>/dev/null | grep -q dotfiles-wallpaper-rotate.timer; then
-    systemctl --user disable --now dotfiles-wallpaper-rotate.timer >/dev/null 2>&1 || true
+  if systemctl --user list-unit-files 2>/dev/null | grep -q cumulus-wallpaper-rotate.timer; then
+    systemctl --user disable --now cumulus-wallpaper-rotate.timer >/dev/null 2>&1 || true
     log "Disabled rotation timer."
   fi
 }

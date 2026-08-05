@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# validate.sh — sanity-check that this dotfiles repo is correctly deployed.
+# validate.sh — sanity-check that this cumulus.dotfiles repo is correctly deployed.
 #
 # Meant to be run at the end of install.sh (automatic), or any time by hand
 # to check the current state of the machine. Never modifies anything —
@@ -65,7 +65,7 @@ check_cmd() {
 
 section "Symlinked configs"
 check_link "zsh/.zshrc" ".zshrc"
-check_link "zsh/zsh_config" ".config/dotfiles/zsh_config"
+check_link "zsh/zsh_config" ".config/cumulus/zsh_config"
 check_link "config/sway" ".config/sway"
 check_link "config/wofi" ".config/wofi"
 check_link "config/waybar" ".config/waybar"
@@ -75,16 +75,16 @@ section "Scripts on PATH"
 for script in "$DOTFILES_DIR"/scripts/*.sh; do
   [ -e "$script" ] || continue
   name="$(basename "$script" .sh)"
-  cmd="$HOME/.local/bin/dotfiles-$name"
+  cmd="$HOME/.local/bin/cumulus-$name"
   if [ -L "$cmd" ] && [ "$(readlink -f "$cmd")" = "$(readlink -f "$script")" ]; then
-    ok "dotfiles-$name"
+    ok "cumulus-$name"
   else
-    fail "dotfiles-$name is missing or not linked to $script"
+    fail "cumulus-$name is missing or not linked to $script"
   fi
 done
 case ":$PATH:" in
   *":$HOME/.local/bin:"*) ok "\$HOME/.local/bin is on \$PATH" ;;
-  *) warn "\$HOME/.local/bin is not on \$PATH in this shell — dotfiles-* commands won't resolve" ;;
+  *) warn "\$HOME/.local/bin is not on \$PATH in this shell — cumulus-* commands won't resolve" ;;
 esac
 
 section "Sway"
@@ -111,12 +111,12 @@ if command -v zsh >/dev/null 2>&1; then
   if [ "$SHELL" = "$(command -v zsh)" ]; then
     ok "zsh is the default login shell"
   else
-    warn "default login shell is \$SHELL=$SHELL, not zsh — run dotfiles-install-zsh (falls back to usermod on AD/LDAP accounts where chsh fails)"
+    warn "default login shell is \$SHELL=$SHELL, not zsh — run cumulus-install-zsh (falls back to usermod on AD/LDAP accounts where chsh fails)"
   fi
   if [ -d "$HOME/.oh-my-zsh" ]; then
     ok "oh-my-zsh installed"
   else
-    warn "oh-my-zsh not installed — run dotfiles-install-zsh"
+    warn "oh-my-zsh not installed — run cumulus-install-zsh"
   fi
   zsh_out="$(timeout 10 zsh -i -c 'echo "$ZSH_THEME|$EDITOR"' 2>/tmp/zsh-validate.$$)"
   zsh_rc=$?
@@ -130,7 +130,7 @@ if command -v zsh >/dev/null 2>&1; then
     rm -f "/tmp/zsh-validate.$$"
   fi
 else
-  warn "zsh not found — run dotfiles-install-zsh"
+  warn "zsh not found — run cumulus-install-zsh"
 fi
 
 section "Fonts"
@@ -138,7 +138,7 @@ fc_count="$(fc-list 2>/dev/null | grep -ci "JetBrainsMono Nerd Font" || true)"
 if [ "$fc_count" -gt 0 ]; then
   ok "JetBrainsMono Nerd Font installed"
 else
-  warn "JetBrainsMono Nerd Font not found — run dotfiles-install-fonts (or ./install.sh)"
+  warn "JetBrainsMono Nerd Font not found — run cumulus-install-fonts (or ./install.sh)"
 fi
 
 section "Neovim"
@@ -148,7 +148,7 @@ check_cmd "ripgrep" rg
 if command -v fd >/dev/null 2>&1 || command -v fdfind >/dev/null 2>&1; then
   ok "fd/fdfind found"
 else
-  warn "fd not found — run dotfiles-install-nvim-deps"
+  warn "fd not found — run cumulus-install-nvim-deps"
 fi
 check_cmd "tree-sitter-cli" tree-sitter
 check_cmd "lazygit" lazygit
@@ -162,7 +162,7 @@ if command -v docker >/dev/null 2>&1; then
   if id -nG "$USER" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
     ok "$USER is in the docker group"
   else
-    warn "$USER is not in the docker group — run dotfiles-install-devops (re-login required after)"
+    warn "$USER is not in the docker group — run cumulus-install-devops (re-login required after)"
   fi
 fi
 check_cmd "terraform" terraform version

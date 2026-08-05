@@ -9,7 +9,7 @@
 # reload, state persistence all still happen there).
 #
 # Bound to $mod+Shift+t in config/sway/config. Can also be run by hand:
-#   ~/dotfiles/config/sway/scripts/theme-picker.sh
+#   ~/cumulus.dotfiles/config/sway/scripts/theme-picker.sh
 #
 set -euo pipefail
 

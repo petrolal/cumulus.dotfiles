@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# bootstrap.sh — one-line remote installer for this dotfiles repo.
+# bootstrap.sh — one-line remote installer for cumulus.dotfiles.
 #
 # Meant to be piped straight into bash on a brand-new machine, before the
 # repo is even cloned:
 #
-#   bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/dotfiles/master/bootstrap.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
 #
 # All it does: make sure git is available, clone (or update, if already
-# present) this repo into ~/dotfiles, then exec its real install.sh with
-# whatever flags you passed through. It never runs anything install.sh
+# present) this repo into ~/cumulus.dotfiles, then exec its real install.sh
+# with whatever flags you passed through. It never runs anything install.sh
 # itself wouldn't — this is purely "get the repo, then hand off" glue.
 #
 # Usage (flags are forwarded verbatim to install.sh):
@@ -18,15 +18,15 @@
 #   bash <(curl -fsSL .../bootstrap.sh) --dry-run --all-tools    # preview everything first
 #
 # Env overrides:
-#   DOTFILES_REPO  git URL to clone (default: https://github.com/petrolal/dotfiles.git)
-#   DOTFILES_DIR   target directory (default: $HOME/dotfiles)
-#   DOTFILES_REF   branch/tag to check out (default: master)
+#   CUMULUS_REPO  git URL to clone (default: https://github.com/petrolal/cumulus.dotfiles.git)
+#   CUMULUS_DIR   target directory (default: $HOME/cumulus.dotfiles)
+#   CUMULUS_REF   branch/tag to check out (default: master)
 #
 set -euo pipefail
 
-REPO="${DOTFILES_REPO:-https://github.com/petrolal/dotfiles.git}"
-DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
-REF="${DOTFILES_REF:-master}"
+REPO="${CUMULUS_REPO:-https://github.com/petrolal/cumulus.dotfiles.git}"
+DIR="${CUMULUS_DIR:-$HOME/cumulus.dotfiles}"
+REF="${CUMULUS_REF:-master}"
 
 log()  { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31m[bootstrap] error:\033[0m %s\n' "$*" >&2; exit 1; }
@@ -41,7 +41,7 @@ if [ -d "$DIR/.git" ]; then
   git -C "$DIR" checkout --quiet "$REF"
   git -C "$DIR" pull --quiet --ff-only origin "$REF"
 elif [ -e "$DIR" ]; then
-  die "$DIR exists and isn't a git checkout of this repo — move it aside first, or set DOTFILES_DIR to another path."
+  die "$DIR exists and isn't a git checkout of this repo — move it aside first, or set CUMULUS_DIR to another path."
 else
   log "Cloning $REPO -> $DIR ..."
   git clone --quiet --branch "$REF" "$REPO" "$DIR"

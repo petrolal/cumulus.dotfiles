@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# install.sh — deploy this dotfiles repo onto a fresh machine.
+# install.sh — deploy cumulus.dotfiles onto a fresh machine.
 #
 # What it does:
 #   1. (Optionally) installs required packages via apt/pacman.
 #   2. Symlinks every config file into place under $HOME.
-#   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
+#   3. Symlinks every scripts/*.sh into ~/.local/bin/cumulus-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
 #   5. Installs the JetBrainsMono Nerd Font (unconditionally — kitty/waybar/
 #      wofi/sway configs hardcode it, so icons render as boxes without it)
@@ -32,7 +32,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$HOME/.dotfiles_backup/$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="$HOME/.cumulus_backup/$(date +%Y%m%d_%H%M%S)"
 DRY_RUN=false
 DO_PACKAGES=false
 DO_ZSH=false
@@ -68,7 +68,7 @@ run()  { if $DRY_RUN; then echo "+ $*"; else eval "$@"; fi }
 # Map of "source (relative to this repo)" -> "destination (relative to $HOME)"
 declare -A LINKS=(
   ["zsh/.zshrc"]=".zshrc"
-  ["zsh/zsh_config"]=".config/dotfiles/zsh_config"
+  ["zsh/zsh_config"]=".config/cumulus/zsh_config"
   ["config/sway"]=".config/sway"
   ["config/wofi"]=".config/wofi"
   ["config/waybar"]=".config/waybar"
@@ -145,7 +145,7 @@ link_scripts() {
   for script in "$DOTFILES_DIR"/scripts/*.sh; do
     [ -e "$script" ] || continue
     name="$(basename "$script" .sh)"
-    cmd="$bin_dir/dotfiles-$name"
+    cmd="$bin_dir/cumulus-$name"
 
     if [ -L "$cmd" ] && [ "$(readlink -f "$cmd")" = "$(readlink -f "$script")" ]; then
       log "OK (already linked): $cmd"

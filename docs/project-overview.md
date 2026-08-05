@@ -1,6 +1,6 @@
 # Project Overview
 
-## dotfiles — Personal Sway/Wayland Desktop Configuration
+## cumulus.dotfiles — Personal Sway/Wayland Desktop Configuration
 
 A single git repository that *is* the live configuration for a Sway/Wayland
 desktop: window manager, launcher, status bar, terminal, shell, screen
@@ -25,11 +25,11 @@ because the live config files *are* symlinks into this repo.
 - **Cross-distro package installation** — `--packages` flag auto-detects apt (Ubuntu) vs pacman (Arch) and installs the right package names; AUR fallback covers Arch-only packages with no official-repo equivalent (currently just Google Chrome).
 - **Nerd Font installed unconditionally** (`scripts/install-fonts.sh`) — every `install.sh` run installs JetBrainsMono Nerd Font from the upstream GitHub release (same on apt/pacman, no distro package needed), since kitty/waybar/wofi/sway configs hardcode it; not gated behind `--zsh`/`--packages`.
 - **Modular zsh config** — oh-my-zsh (Cloud theme) + numbered `*.zsh` files in `zsh_config/`, auto-sourced in order; drop in a new file to extend, no `.zshrc` edits needed.
-- **Catppuccin theme engine** (`dotfiles-theme`) — pick a flavor (mocha/macchiato/frappe/latte) and a background mode (flat color, static wallpaper, or timed rotation via a systemd `--user` timer), applied live and re-applied on every install.
+- **Catppuccin theme engine** (`cumulus-theme`) — pick a flavor (mocha/macchiato/frappe/latte) and a background mode (flat color, static wallpaper, or timed rotation via a systemd `--user` timer), applied live and re-applied on every install.
 - **Which-key cheatsheet** — `config/sway/scripts/whichkey.sh` fetches the *live, fully-resolved* config from the running compositor (`swaymsg -t get_config`, includes and `$var` substitutions already expanded) and shows every current keybinding in a searchable popup, so the keybinding docs can never drift out of sync with the actual config — even bindings defined in an `include`d file.
 - **Tool installers** — dedicated `scripts/install-*.sh` for Neovim + full toolchain, default desktop apps, DevOps tooling (Docker/Terraform/Ansible), zsh/oh-my-zsh, and Google Chrome — each idempotent and `--dry-run`-able, auto-discovered by `install.sh --all-tools`.
-- **Validation** — `dotfiles-validate` (`scripts/validate.sh`) is a read-only sanity check across the whole setup (symlinks, `$PATH` commands, sway config validity, zsh/fonts, Neovim toolchain, DevOps tools), runs automatically at the end of every real `install.sh` invocation.
-- **Backup/restore** — `dotfiles-backup`/`dotfiles-restore` snapshot everything this repo manages independently of git history (useful before risky experiments).
+- **Validation** — `cumulus-validate` (`scripts/validate.sh`) is a read-only sanity check across the whole setup (symlinks, `$PATH` commands, sway config validity, zsh/fonts, Neovim toolchain, DevOps tools), runs automatically at the end of every real `install.sh` invocation.
+- **Backup/restore** — `cumulus-backup`/`cumulus-restore` snapshot everything this repo manages independently of git history (useful before risky experiments).
 
 ## Tech Stack Summary
 
@@ -52,20 +52,20 @@ because the live config files *are* symlinks into this repo.
 
 ## Architecture Type
 
-**Symlink-based dotfiles monorepo** with three cooperating layers:
+**Symlink-based cumulus.dotfiles monorepo** with three cooperating layers:
 
 1. **Config layer** (`config/`, `zsh/`) — the actual config files, tracked in git, symlinked into `$HOME`.
-2. **Automation layer** (`scripts/`) — standalone Bash scripts, each symlinked onto `$PATH` as `dotfiles-<name>`, covering installers, theming, backup/restore, screenshots, lock/idle, and validation.
+2. **Automation layer** (`scripts/`) — standalone Bash scripts, each symlinked onto `$PATH` as `cumulus-<name>`, covering installers, theming, backup/restore, screenshots, lock/idle, and validation.
 3. **Theme layer** (`themes/`) — source-of-truth Catppuccin palettes + user-supplied wallpapers, rendered by `scripts/theme.sh` into generated (gitignored) config fragments consumed by layer 1's configs via native `include` directives (sway/kitty) or full template rendering (waybar/wofi, which need it due to GTK CSS's CWD-relative `@import` behavior).
 
 ## Repository Structure
 
 ```
-dotfiles/
+cumulus.dotfiles/
 ├── install.sh              Idempotent entrypoint: symlink configs, install packages/tools, apply theme, validate
 ├── config/                 Sway, wofi, waybar, kitty configs (symlinked into ~/.config)
-├── zsh/                    .zshrc + modular zsh_config/*.zsh (symlinked into $HOME / ~/.config/dotfiles)
-├── scripts/                Automations, symlinked onto $PATH as dotfiles-<name>
+├── zsh/                    .zshrc + modular zsh_config/*.zsh (symlinked into $HOME / ~/.config/cumulus)
+├── scripts/                Automations, symlinked onto $PATH as cumulus-<name>
 ├── themes/                 Catppuccin palettes (tracked) + wallpapers/ (user-supplied, gitignored)
 ├── docs/                   This documentation set
 └── README.md                User-facing quick-start

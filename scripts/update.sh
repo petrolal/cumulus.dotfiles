@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# update.sh — pull the latest dotfiles and re-apply them.
+# update.sh — pull the latest cumulus.dotfiles and re-apply them.
 #
 # Usage:
 #   update.sh              # git pull + re-run install.sh (no package install)

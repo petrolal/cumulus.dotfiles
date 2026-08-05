@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # lock.sh — swaylock wrapper with styling that follows the active
-# dotfiles theme (see scripts/theme.sh). Bind this to Mod+Escape (or
+# cumulus.dotfiles theme (see scripts/theme.sh). Bind this to Mod+Escape (or
 # call from idle.sh) instead of raw swaylock, so the look stays defined
 # in one place and updates automatically when you switch flavors.
 #
@@ -9,7 +9,7 @@ set -euo pipefail
 
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
-STATE_FILE="$HOME/.config/dotfiles/theme/state"
+STATE_FILE="$HOME/.config/cumulus/theme/state"
 
 FLAVOR="mocha"
 if [ -f "$STATE_FILE" ]; then
