@@ -44,12 +44,36 @@ declare -A LINKS=(
   ["config/kitty"]=".config/kitty"
 )
 
-REQUIRED_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle swaynag)
+# swaynag ships as part of the "sway" package on both Ubuntu and Arch, so it's
+# not listed as a separate dependency here.
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle)
+# Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
+AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
 
 install_packages() {
-  log "Installing required packages via apt..."
-  run "sudo apt update"
-  run "sudo apt install -y ${REQUIRED_PACKAGES[*]}"
+  if command -v apt >/dev/null 2>&1; then
+    log "Installing required packages via apt (Debian/Ubuntu)..."
+    run "sudo apt update"
+    run "sudo apt install -y ${APT_PACKAGES[*]}"
+  elif command -v pacman >/dev/null 2>&1; then
+    log "Installing required packages via pacman (Arch)..."
+    run "sudo pacman -Syu --needed --noconfirm ${PACMAN_PACKAGES[*]}"
+    if command -v yay >/dev/null 2>&1; then
+      log "Installing AUR packages via yay..."
+      run "yay -S --needed --noconfirm ${AUR_PACKAGES[*]}"
+    elif command -v paru >/dev/null 2>&1; then
+      log "Installing AUR packages via paru..."
+      run "paru -S --needed --noconfirm ${AUR_PACKAGES[*]}"
+    else
+      log "No AUR helper (yay/paru) found — skipping: ${AUR_PACKAGES[*]}"
+      log "Install an AUR helper or install these manually if you want the Nerd Font."
+    fi
+  else
+    log "No supported package manager found (apt/pacman). Install manually:"
+    log "  ${APT_PACKAGES[*]}"
+    exit 1
+  fi
 }
 
 link_one() {

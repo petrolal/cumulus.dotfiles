@@ -23,9 +23,18 @@ install.sh              # deploys everything above via symlinks
 git clone <this-repo-url> ~/dotfiles
 cd ~/dotfiles
 ./install.sh              # symlink configs into $HOME (existing files are backed up)
-./install.sh --packages    # also apt-install sway, wofi, waybar, kitty, etc. first
+./install.sh --packages    # also install sway, wofi, waybar, kitty, etc. first
 ./install.sh --dry-run     # preview what would happen, no changes made
 ```
+
+`--packages` auto-detects your package manager:
+- **Debian/Ubuntu (apt)**: installs everything via `apt install`.
+- **Arch (pacman)**: installs everything via `pacman -S`, plus the Nerd Font
+  (`ttf-jetbrains-mono-nerd`) via an AUR helper (`yay` or `paru`) if one is
+  found on `$PATH`. If no AUR helper is installed, install one first
+  (e.g. `sudo pacman -S --needed base-devel git && git clone
+  https://aur.archlinux.org/yay.git && cd yay && makepkg -si`) or grab the
+  font manually afterwards.
 
 Any real (non-symlink) file/dir currently at a target location is moved to
 `~/.dotfiles_backup/<timestamp>/` before the symlink is created, so nothing
