@@ -1,0 +1,10 @@
+# ── Kubernetes aliases ──
+alias k='kubectl'
+alias kgp='kubectl get pods'
+alias kgs='kubectl get svc'
+alias kgd='kubectl get deploy'
+alias kaf='kubectl apply -f'
+alias kdel='kubectl delete -f'
+alias klog='kubectl logs -f'
+alias kctx='kubectl config use-context'
+alias kns='kubectl config set-context --current --namespace'

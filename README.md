@@ -9,8 +9,8 @@ fully working within a couple of commands.
 
 ```
 install.sh                       # deploys everything below via symlinks
-zsh/.zshrc                       # main zsh config (history, aliases, prompt, NVM/SDKMAN/cargo)
-zsh/.zshrc_custom                # sourced from .zshrc — kept separate for old/pre-Sway tweaks
+zsh/.zshrc                        # thin oh-my-zsh bootstrap + modular config loader
+zsh/zsh_config/                   # actual zsh config, one *.zsh file per concern (see below)
 config/sway/config                # Sway window manager config (stock keybindings + which-key)
 config/sway/scripts/whichkey.sh   # parses config live, shows a searchable keybinding cheatsheet
 config/wofi/                      # app launcher (Mod+D) look & behavior
@@ -25,12 +25,12 @@ This repo *is* the source of truth — nothing is copied into `$HOME`, it's
 **symlinked**:
 
 ```
-~/.zshrc              -> ~/dotfiles/zsh/.zshrc
-~/.zshrc_custom        -> ~/dotfiles/zsh/.zshrc_custom
-~/.config/sway         -> ~/dotfiles/config/sway
-~/.config/wofi         -> ~/dotfiles/config/wofi
-~/.config/waybar       -> ~/dotfiles/config/waybar
-~/.config/kitty        -> ~/dotfiles/config/kitty
+~/.zshrc                          -> ~/dotfiles/zsh/.zshrc
+~/.config/dotfiles/zsh_config      -> ~/dotfiles/zsh/zsh_config
+~/.config/sway                    -> ~/dotfiles/config/sway
+~/.config/wofi                    -> ~/dotfiles/config/wofi
+~/.config/waybar                  -> ~/dotfiles/config/waybar
+~/.config/kitty                   -> ~/dotfiles/config/kitty
 ```
 
 So editing `~/.config/sway/config` directly *is* editing the file tracked in
@@ -112,12 +112,46 @@ These are the stock Sway default bindings (reset from an earlier
 ML4W-inspired custom set) with a few additions: the which-key cheatsheet,
 manual lock, and screenshots.
 
+## Zsh setup
+
+`zsh/.zshrc` is intentionally thin — it just bootstraps
+[oh-my-zsh](https://ohmyz.sh/) with the **Cloud** theme (`ZSH_THEME="cloud"`)
+and then sources every `*.zsh` file it finds in
+`~/.config/dotfiles/zsh_config/` (symlinked from `zsh/zsh_config/` in this
+repo), in alphabetical/numeric order:
+
+```
+zsh_config/00-history.zsh               # HISTFILE, HISTSIZE, dedup/share options
+zsh_config/10-completion-keybindings.zsh # completion menu/matcher, emacs keybindings
+zsh_config/20-ssh-agent.zsh             # reuse one ssh-agent across shells
+zsh_config/30-aliases-general.zsh       # ll/la/l, .., grep, vim->nvim, reload
+zsh_config/31-aliases-git.zsh           # g/gs/ga/gc/gp/gl/...
+zsh_config/32-aliases-docker.zsh        # d/dc/dps/dexec/...
+zsh_config/33-aliases-k8s.zsh           # k/kgp/kaf/kctx/...
+zsh_config/34-aliases-tmux.zsh          # t/ta/tn/tls
+zsh_config/40-environment.zsh           # EDITOR/VISUAL=nvim, PATH, Wayland hints
+zsh_config/90-nvm.zsh                   # loads NVM if installed
+zsh_config/99-sdkman-cargo.zsh          # SDKMAN + cargo — MUST stay last
+```
+
+**Adding your own config:** just drop a new file in
+`~/.config/dotfiles/zsh_config/` (e.g. `50-work-stuff.zsh`) — it's
+auto-sourced on the next shell start, no need to edit `.zshrc` itself. Since
+that directory is a symlink into this repo, anything you add there is
+already tracked by git. Keep new files numbered below `99-` so SDKMAN still
+loads last (its init script requires that).
+
+Run `dotfiles-install-zsh` (see below) to install zsh + oh-my-zsh, the Cloud
+theme's requirements, JetBrainsMono Nerd Font, and set Neovim as the
+default editor — then `./install.sh` to symlink `.zshrc`/`zsh_config/` into
+place.
+
 ## Scripts & automation
 
 Everything in `scripts/` is symlinked by `install.sh` into
 `~/.local/bin/dotfiles-<name>` (stripping the `.sh`), so each is callable as
 a plain command from anywhere once `~/.local/bin` is on `$PATH` (already set
-up in `zsh/.zshrc`).
+up in `zsh_config/40-environment.zsh`).
 
 | Command | What it does |
 |---|---|
@@ -129,6 +163,7 @@ up in `zsh/.zshrc`).
 | `dotfiles-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
 | `dotfiles-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram via snap, and `spotify_player` via cargo. `--dry-run` supported. |
 | `dotfiles-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
+| `dotfiles-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
 
 ## Updating
 

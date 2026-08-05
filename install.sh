@@ -38,7 +38,7 @@ run()  { if $DRY_RUN; then echo "+ $*"; else eval "$@"; fi }
 # Map of "source (relative to this repo)" -> "destination (relative to $HOME)"
 declare -A LINKS=(
   ["zsh/.zshrc"]=".zshrc"
-  ["zsh/.zshrc_custom"]=".zshrc_custom"
+  ["zsh/zsh_config"]=".config/dotfiles/zsh_config"
   ["config/sway"]=".config/sway"
   ["config/wofi"]=".config/wofi"
   ["config/waybar"]=".config/waybar"

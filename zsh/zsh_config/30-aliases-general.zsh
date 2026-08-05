@@ -1,0 +1,11 @@
+# ── General aliases ──
+alias ll='ls -alh --color=auto'
+alias la='ls -A --color=auto'
+alias l='ls -CF --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias grep='grep --color=auto'
+alias vim='nvim'
+alias vi='nvim'
+alias c='clear'
+alias reload='source ~/.zshrc'
