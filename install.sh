@@ -21,6 +21,7 @@
 #   ./install.sh --nvim       # also run scripts/install-nvim-deps.sh
 #   ./install.sh --apps       # also run scripts/install-apps.sh
 #   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
+#   ./install.sh --browser    # also run scripts/install-browser.sh (Google Chrome + default browser)
 #   ./install.sh --all-tools  # auto-discover and run every scripts/install-*.sh
 #   ./install.sh --no-validate # skip the final scripts/validate.sh run
 #   ./install.sh --dry-run    # show what would happen, change nothing (forwarded to installers too)
@@ -35,6 +36,7 @@ DO_ZSH=false
 DO_NVIM=false
 DO_APPS=false
 DO_DEVOPS=false
+DO_BROWSER=false
 DO_ALL_TOOLS=false
 DO_VALIDATE=true
 
@@ -46,6 +48,7 @@ for arg in "$@"; do
     --nvim) DO_NVIM=true ;;
     --apps) DO_APPS=true ;;
     --devops) DO_DEVOPS=true ;;
+    --browser) DO_BROWSER=true ;;
     --all-tools) DO_ALL_TOOLS=true ;;
     --no-validate) DO_VALIDATE=false ;;
     -h|--help)
@@ -196,6 +199,7 @@ main() {
     $DO_NVIM   && run_installer install-nvim-deps.sh
     $DO_APPS   && run_installer install-apps.sh
     $DO_DEVOPS && run_installer install-devops.sh
+    $DO_BROWSER && run_installer install-browser.sh
   fi
 
   log "Done. Backups (if any) saved under: $BACKUP_DIR"

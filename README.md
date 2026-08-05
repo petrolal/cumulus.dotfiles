@@ -66,6 +66,7 @@ tool installers straight from `install.sh` — no need to invoke them by hand:
 ./install.sh --nvim       # latest Neovim + full plugin toolchain
 ./install.sh --apps       # default desktop applications (browsers, IDEs, chat, etc.)
 ./install.sh --devops     # Docker + Terraform + Ansible
+./install.sh --browser    # Google Chrome + set as default browser
 ./install.sh --all-tools  # auto-discovers and runs every scripts/install-*.sh
 ```
 
@@ -106,6 +107,7 @@ the which-key cheatsheet below — this is just a quick reference.
 |---|---|
 | `Mod+Return` | Open terminal (kitty) |
 | `Mod+D` | App launcher (wofi drun — fuzzy search installed apps) |
+| `Mod+Shift+B` | Open Google Chrome |
 | `Mod+Shift+/` | **Which-key cheatsheet** — searchable popup of every binding, parsed live from `config/sway/config` |
 | `Mod+Shift+Q` | Kill focused window |
 | `Mod+Shift+C` | Reload Sway config |
@@ -122,7 +124,7 @@ the which-key cheatsheet below — this is just a quick reference.
 | `Mod+A` | Focus parent container |
 | `Mod+Minus` / `Mod+Shift+Minus` | Show / send to scratchpad |
 | `Mod+R` | Enter resize mode (then h/j/k/l or arrows to resize, Return/Escape to exit) |
-| `Mod+Shift+L` | Lock screen now (`scripts/lock.sh`) |
+| `Mod+Escape` | Lock screen now (`scripts/lock.sh`) |
 | `Print` | Screenshot — full screen |
 | `Mod+Print` | Screenshot — select a region |
 | `Mod+Shift+Print` | Screenshot — focused window |
@@ -179,12 +181,13 @@ up in `zsh_config/40-environment.zsh`).
 | `dotfiles-backup` | Tars up all dotfiles-managed files/dirs from `$HOME` into `~/dotfiles-backups/<timestamp>.tar.gz` — a snapshot independent of git history. `--list` shows existing snapshots. |
 | `dotfiles-restore [archive]` | Restores a `dotfiles-backup` snapshot (defaults to the most recent). Asks for confirmation and saves whatever's currently in place to `~/.dotfiles_backup/pre-restore_<timestamp>/` first. |
 | `dotfiles-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
-| `dotfiles-lock` | swaylock wrapper with the repo's Catppuccin Mocha styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Shift+L`. |
+| `dotfiles-lock` | swaylock wrapper with the repo's Catppuccin Mocha styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Escape`. |
 | `dotfiles-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
 | `dotfiles-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram via snap, and `spotify_player` via cargo. `--dry-run` supported. |
 | `dotfiles-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
 | `dotfiles-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
 | `dotfiles-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin) via Docker's official apt/pacman repo, Terraform via HashiCorp's official apt repo (or pacman's `terraform` package on Arch), and Ansible via apt/pacman. Also adds you to the `docker` group. Idempotent — skips anything already installed. Works on both apt and pacman. `--dry-run` supported. |
+| `dotfiles-install-browser` | Installs Google Chrome (official `.deb` on apt, which self-registers Google's repo for future updates; via `yay`/`paru` on Arch since it's AUR-only) and sets it as the default browser (`xdg-settings` + `xdg-mime` for http/https/html). Bound to `Mod+Shift+B`. Idempotent. `--dry-run` supported. |
 
 ## Theming
 

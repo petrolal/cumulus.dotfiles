@@ -179,6 +179,7 @@ assign [class="TelegramDesktop"] $ws8
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec $launcher
+bindsym $mod+Shift+b exec google-chrome-stable
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
@@ -247,7 +248,10 @@ bindsym $mod+r mode "resize"
 bindsym $mod+Shift+slash exec ~/.config/sway/scripts/whichkey.sh
 
 # Lock screen (manual — same styling swayidle uses automatically)
-bindsym $mod+Shift+l exec ~/dotfiles/scripts/lock.sh
+# Note: not bound to $mod+Shift+l — that collides with $mod+Shift+$right
+# (vim-style "l" = right, see `set $right l` above), which silently wins
+# and made sway show a "there are errors in your config" banner.
+bindsym $mod+Escape exec ~/dotfiles/scripts/lock.sh
 
 # Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
 bindsym Print exec ~/dotfiles/scripts/screenshot.sh full

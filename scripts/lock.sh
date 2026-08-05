@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # lock.sh — swaylock wrapper with styling that follows the active
-# dotfiles theme (see scripts/theme.sh). Bind this to Mod+Shift+L (or
+# dotfiles theme (see scripts/theme.sh). Bind this to Mod+Escape (or
 # call from idle.sh) instead of raw swaylock, so the look stays defined
 # in one place and updates automatically when you switch flavors.
 #
