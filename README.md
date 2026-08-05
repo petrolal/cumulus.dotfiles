@@ -127,6 +127,8 @@ up in `zsh/.zshrc`).
 | `dotfiles-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
 | `dotfiles-lock` | swaylock wrapper with the repo's Catppuccin Mocha styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Shift+L`. |
 | `dotfiles-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
+| `dotfiles-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram via snap, and `spotify_player` via cargo. `--dry-run` supported. |
+| `dotfiles-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
 
 ## Updating
 
