@@ -7,11 +7,17 @@
 #   2. Symlinks every config file into place under $HOME.
 #   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
+#   5. (Optionally) runs one or more of the scripts/install-*.sh installers.
 #
 # Usage:
-#   ./install.sh            # symlink configs only
-#   ./install.sh --packages # also apt-install required packages first
-#   ./install.sh --dry-run  # show what would happen, change nothing
+#   ./install.sh              # symlink configs only
+#   ./install.sh --packages   # also apt-install required packages first
+#   ./install.sh --zsh        # also run scripts/install-zsh.sh
+#   ./install.sh --nvim       # also run scripts/install-nvim-deps.sh
+#   ./install.sh --apps       # also run scripts/install-apps.sh
+#   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
+#   ./install.sh --all-tools  # auto-discover and run every scripts/install-*.sh
+#   ./install.sh --dry-run    # show what would happen, change nothing (forwarded to installers too)
 #
 set -euo pipefail
 
@@ -19,11 +25,21 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.dotfiles_backup/$(date +%Y%m%d_%H%M%S)"
 DRY_RUN=false
 DO_PACKAGES=false
+DO_ZSH=false
+DO_NVIM=false
+DO_APPS=false
+DO_DEVOPS=false
+DO_ALL_TOOLS=false
 
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=true ;;
     --packages) DO_PACKAGES=true ;;
+    --zsh) DO_ZSH=true ;;
+    --nvim) DO_NVIM=true ;;
+    --apps) DO_APPS=true ;;
+    --devops) DO_DEVOPS=true ;;
+    --all-tools) DO_ALL_TOOLS=true ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^#//'
       exit 0
@@ -127,6 +143,19 @@ link_scripts() {
   done
 }
 
+run_installer() {
+  local script="$DOTFILES_DIR/scripts/$1"
+  local extra_args=()
+  $DRY_RUN && extra_args+=(--dry-run)
+
+  log "Running $1 ${extra_args[*]:-}"
+  if $DRY_RUN; then
+    echo "+ '$script' ${extra_args[*]:-}"
+  else
+    "$script" "${extra_args[@]}"
+  fi
+}
+
 main() {
   log "Dotfiles repo: $DOTFILES_DIR"
   $DRY_RUN && log "DRY RUN — no changes will be made"
@@ -140,6 +169,19 @@ main() {
   done
 
   link_scripts
+
+  if $DO_ALL_TOOLS; then
+    local installer
+    for installer in "$DOTFILES_DIR"/scripts/install-*.sh; do
+      [ -e "$installer" ] || continue
+      run_installer "$(basename "$installer")"
+    done
+  else
+    $DO_ZSH    && run_installer install-zsh.sh
+    $DO_NVIM   && run_installer install-nvim-deps.sh
+    $DO_APPS   && run_installer install-apps.sh
+    $DO_DEVOPS && run_installer install-devops.sh
+  fi
 
   log "Done. Backups (if any) saved under: $BACKUP_DIR"
   log "Reload sway with: swaymsg reload  (or Mod+Shift+C)"

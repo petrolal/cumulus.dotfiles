@@ -54,6 +54,21 @@ cd ~/dotfiles
 ./install.sh --dry-run     # preview what would happen, no changes made
 ```
 
+Once configs are symlinked, you can also run any of the `scripts/install-*.sh`
+tool installers straight from `install.sh` — no need to invoke them by hand:
+
+```bash
+./install.sh --zsh        # zsh + oh-my-zsh + Nerd Font + nvim as default editor
+./install.sh --nvim       # latest Neovim + full plugin toolchain
+./install.sh --apps       # default desktop applications (browsers, IDEs, chat, etc.)
+./install.sh --devops     # Docker + Terraform + Ansible
+./install.sh --all-tools  # auto-discovers and runs every scripts/install-*.sh
+```
+
+`--dry-run` is forwarded to whichever installer(s) you select, so
+`./install.sh --dry-run --all-tools` previews everything end-to-end with no
+changes made.
+
 `--packages` auto-detects your package manager:
 
 - **Debian/Ubuntu (apt)** — installs:
@@ -164,6 +179,7 @@ up in `zsh_config/40-environment.zsh`).
 | `dotfiles-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram via snap, and `spotify_player` via cargo. `--dry-run` supported. |
 | `dotfiles-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
 | `dotfiles-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
+| `dotfiles-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin) via Docker's official apt/pacman repo, Terraform via HashiCorp's official apt repo (or pacman's `terraform` package on Arch), and Ansible via apt/pacman. Also adds you to the `docker` group. Idempotent — skips anything already installed. Works on both apt and pacman. `--dry-run` supported. |
 
 ## Updating
 
