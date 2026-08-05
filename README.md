@@ -16,6 +16,7 @@ config/sway/scripts/whichkey.sh   # parses config live, shows a searchable keybi
 config/wofi/                      # app launcher (Mod+D) look & behavior
 config/waybar/                    # status bar config/style
 config/kitty/                     # terminal emulator config
+scripts/                          # standalone automations, symlinked onto $PATH (see below)
 ```
 
 ## How it works
@@ -102,9 +103,30 @@ the which-key cheatsheet below — this is just a quick reference.
 | `Mod+A` | Focus parent container |
 | `Mod+Minus` / `Mod+Shift+Minus` | Show / send to scratchpad |
 | `Mod+R` | Enter resize mode (then h/j/k/l or arrows to resize, Return/Escape to exit) |
+| `Mod+Shift+L` | Lock screen now (`scripts/lock.sh`) |
+| `Print` | Screenshot — full screen |
+| `Mod+Print` | Screenshot — select a region |
+| `Mod+Shift+Print` | Screenshot — focused window |
 
 These are the stock Sway default bindings (reset from an earlier
-ML4W-inspired custom set) with one addition: the which-key cheatsheet.
+ML4W-inspired custom set) with a few additions: the which-key cheatsheet,
+manual lock, and screenshots.
+
+## Scripts & automation
+
+Everything in `scripts/` is symlinked by `install.sh` into
+`~/.local/bin/dotfiles-<name>` (stripping the `.sh`), so each is callable as
+a plain command from anywhere once `~/.local/bin` is on `$PATH` (already set
+up in `zsh/.zshrc`).
+
+| Command | What it does |
+|---|---|
+| `dotfiles-update` | `git pull --ff-only` + re-run `install.sh` in this repo. Refuses to run if you have uncommitted local changes. Pass `--packages` to also refresh packages. |
+| `dotfiles-backup` | Tars up all dotfiles-managed files/dirs from `$HOME` into `~/dotfiles-backups/<timestamp>.tar.gz` — a snapshot independent of git history. `--list` shows existing snapshots. |
+| `dotfiles-restore [archive]` | Restores a `dotfiles-backup` snapshot (defaults to the most recent). Asks for confirmation and saves whatever's currently in place to `~/.dotfiles_backup/pre-restore_<timestamp>/` first. |
+| `dotfiles-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
+| `dotfiles-lock` | swaylock wrapper with the repo's Catppuccin Mocha styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Shift+L`. |
+| `dotfiles-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
 
 ## Updating
 

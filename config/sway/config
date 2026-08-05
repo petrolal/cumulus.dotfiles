@@ -47,13 +47,8 @@ exec nm-applet --indicator
 # 1Password — starts minimized to tray, unlocks against the already-running gnome-keyring/PAM session.
 exec 1password --silent
 
-# Idle management (lock -> screen off -> suspend). See swayidle config comments below.
-exec swayidle -w \
-  timeout 300 'swaylock -f -c 1e1e2e' \
-  timeout 600 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
-  timeout 900 'systemctl suspend' \
-  before-sleep 'swaylock -f -c 1e1e2e'
+# Idle management (lock -> screen off -> suspend). See scripts/idle.sh.
+exec ~/dotfiles/scripts/idle.sh
 
 # Polkit authentication agent — required for GUI privilege prompts (Intune, NetworkManager, disk mounts).
 # GNOME's polkit agent is reused since it is desktop-agnostic; no separate install needed.
@@ -252,6 +247,14 @@ bindsym $mod+r mode "resize"
 
 # which-key style cheatsheet — shows all bindings from this config in wofi
 bindsym $mod+Shift+slash exec ~/.config/sway/scripts/whichkey.sh
+
+# Lock screen (manual — same styling swayidle uses automatically)
+bindsym $mod+Shift+l exec ~/dotfiles/scripts/lock.sh
+
+# Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
+bindsym Print exec ~/dotfiles/scripts/screenshot.sh full
+bindsym $mod+Print exec ~/dotfiles/scripts/screenshot.sh region
+bindsym $mod+Shift+Print exec ~/dotfiles/scripts/screenshot.sh window
 
 ### ────────────────────────────────────────────────────────────────
 ### Modes

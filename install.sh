@@ -3,9 +3,10 @@
 # install.sh — deploy this dotfiles repo onto a fresh machine.
 #
 # What it does:
-#   1. (Optionally) installs required packages via apt.
+#   1. (Optionally) installs required packages via apt/pacman.
 #   2. Symlinks every config file into place under $HOME.
-#   3. Backs up any pre-existing real file/dir before symlinking over it.
+#   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
+#   4. Backs up any pre-existing real file/dir before symlinking over it.
 #
 # Usage:
 #   ./install.sh            # symlink configs only
@@ -45,9 +46,10 @@ declare -A LINKS=(
 )
 
 # swaynag ships as part of the "sway" package on both Ubuntu and Arch, so it's
-# not listed as a separate dependency here.
-APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle)
-PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle)
+# not listed as a separate dependency here. jq/libnotify are needed by the
+# scripts/ helpers (window screenshots, desktop notifications).
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle jq libnotify-bin)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle jq libnotify)
 # Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
 AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
 
@@ -104,6 +106,27 @@ link_one() {
   run "ln -s '$src' '$dst'"
 }
 
+link_scripts() {
+  local bin_dir="$HOME/.local/bin"
+  run "mkdir -p '$bin_dir'"
+  run "chmod +x '$DOTFILES_DIR'/scripts/*.sh"
+
+  local script name cmd
+  for script in "$DOTFILES_DIR"/scripts/*.sh; do
+    [ -e "$script" ] || continue
+    name="$(basename "$script" .sh)"
+    cmd="$bin_dir/dotfiles-$name"
+
+    if [ -L "$cmd" ] && [ "$(readlink -f "$cmd")" = "$(readlink -f "$script")" ]; then
+      log "OK (already linked): $cmd"
+      continue
+    fi
+    run "rm -f '$cmd'"
+    log "Linking $cmd -> $script"
+    run "ln -s '$script' '$cmd'"
+  done
+}
+
 main() {
   log "Dotfiles repo: $DOTFILES_DIR"
   $DRY_RUN && log "DRY RUN — no changes will be made"
@@ -115,6 +138,8 @@ main() {
   for src in "${!LINKS[@]}"; do
     link_one "$src" "${LINKS[$src]}"
   done
+
+  link_scripts
 
   log "Done. Backups (if any) saved under: $BACKUP_DIR"
   log "Reload sway with: swaymsg reload  (or Mod+Shift+C)"
