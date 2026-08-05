@@ -8,6 +8,8 @@
 #   3. Symlinks every scripts/*.sh into ~/.local/bin/dotfiles-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
 #   5. (Optionally) runs one or more of the scripts/install-*.sh installers.
+#   6. Runs scripts/validate.sh at the end to confirm everything is correctly
+#      in place (skipped in --dry-run, or with --no-validate).
 #
 # Usage:
 #   ./install.sh              # symlink configs only
@@ -17,6 +19,7 @@
 #   ./install.sh --apps       # also run scripts/install-apps.sh
 #   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
 #   ./install.sh --all-tools  # auto-discover and run every scripts/install-*.sh
+#   ./install.sh --no-validate # skip the final scripts/validate.sh run
 #   ./install.sh --dry-run    # show what would happen, change nothing (forwarded to installers too)
 #
 set -euo pipefail
@@ -30,6 +33,7 @@ DO_NVIM=false
 DO_APPS=false
 DO_DEVOPS=false
 DO_ALL_TOOLS=false
+DO_VALIDATE=true
 
 for arg in "$@"; do
   case "$arg" in
@@ -40,6 +44,7 @@ for arg in "$@"; do
     --apps) DO_APPS=true ;;
     --devops) DO_DEVOPS=true ;;
     --all-tools) DO_ALL_TOOLS=true ;;
+    --no-validate) DO_VALIDATE=false ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^#//'
       exit 0
@@ -186,6 +191,12 @@ main() {
   log "Done. Backups (if any) saved under: $BACKUP_DIR"
   log "Reload sway with: swaymsg reload  (or Mod+Shift+C)"
   log "Reload zsh with:  source ~/.zshrc"
+
+  if ! $DRY_RUN && $DO_VALIDATE; then
+    log "Running validation checks..."
+    echo
+    "$DOTFILES_DIR/scripts/validate.sh" || log "Validation reported issues — see FAIL lines above."
+  fi
 }
 
 main "$@"

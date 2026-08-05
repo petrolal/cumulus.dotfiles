@@ -54,6 +54,10 @@ cd ~/dotfiles
 ./install.sh --dry-run     # preview what would happen, no changes made
 ```
 
+Every run finishes with `scripts/validate.sh` (skip with `--no-validate`), so you
+immediately see OK/WARN/FAIL for the whole setup instead of finding out something's
+broken later.
+
 Once configs are symlinked, you can also run any of the `scripts/install-*.sh`
 tool installers straight from `install.sh` — no need to invoke them by hand:
 
@@ -171,6 +175,7 @@ up in `zsh_config/40-environment.zsh`).
 | Command | What it does |
 |---|---|
 | `dotfiles-update` | `git pull --ff-only` + re-run `install.sh` in this repo. Refuses to run if you have uncommitted local changes. Pass `--packages` to also refresh packages. |
+| `dotfiles-validate` | Read-only sanity check of the whole setup: symlinks, `dotfiles-*` commands on `$PATH`, sway config validity, zsh/oh-my-zsh/Nerd Font, Neovim toolchain, and DevOps tools. Prints OK/WARN/FAIL per check and exits non-zero on any FAIL. Runs automatically at the end of `./install.sh` (skip with `--no-validate`); also safe to run anytime by hand. |
 | `dotfiles-backup` | Tars up all dotfiles-managed files/dirs from `$HOME` into `~/dotfiles-backups/<timestamp>.tar.gz` — a snapshot independent of git history. `--list` shows existing snapshots. |
 | `dotfiles-restore [archive]` | Restores a `dotfiles-backup` snapshot (defaults to the most recent). Asks for confirmation and saves whatever's currently in place to `~/.dotfiles_backup/pre-restore_<timestamp>/` first. |
 | `dotfiles-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
