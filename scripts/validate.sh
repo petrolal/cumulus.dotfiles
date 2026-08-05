@@ -92,10 +92,12 @@ if command -v sway >/dev/null 2>&1; then
   ok "sway: $(sway --version)"
   if timeout 10 sway --validate -c "$HOME/.config/sway/config" >/tmp/sway-validate.$$ 2>&1; then
     ok "sway config validates"
+    rm -f "/tmp/sway-validate.$$"
   else
-    fail "sway config failed validation (see: cat /tmp/sway-validate.$$)"
+    fail "sway config failed validation:"
+    sed 's/^/         /' "/tmp/sway-validate.$$"
+    rm -f "/tmp/sway-validate.$$"
   fi
-  rm -f "/tmp/sway-validate.$$"
 else
   warn "sway not found — run ./install.sh --packages"
 fi
@@ -121,10 +123,12 @@ if command -v zsh >/dev/null 2>&1; then
   if [ $zsh_rc -eq 0 ]; then
     theme="${zsh_out%%|*}"; editor="${zsh_out##*|}"
     ok "interactive zsh loads with no errors (ZSH_THEME=$theme, EDITOR=$editor)"
+    rm -f "/tmp/zsh-validate.$$"
   else
-    fail "interactive zsh startup produced an error (see: cat /tmp/zsh-validate.$$)"
+    fail "interactive zsh startup produced an error (exit $zsh_rc):"
+    sed 's/^/         /' "/tmp/zsh-validate.$$"
+    rm -f "/tmp/zsh-validate.$$"
   fi
-  rm -f "/tmp/zsh-validate.$$"
 else
   warn "zsh not found — run dotfiles-install-zsh"
 fi
