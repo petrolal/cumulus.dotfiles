@@ -248,6 +248,9 @@ bindsym $mod+r mode "resize"
 # which-key style cheatsheet — shows all bindings from this config in wofi
 bindsym $mod+Shift+slash exec ~/.config/sway/scripts/whichkey.sh
 
+# Display configuration — wdisplays GUI for multi-monitor setup
+bindsym $mod+Shift+d exec wdisplays
+
 # Theme picker — wofi GUI to pick a Catppuccin flavor + background mode
 # (flat color / wallpaper / rotate), front-end for cumulus-theme.
 bindsym $mod+Shift+t exec ~/.config/sway/scripts/theme-picker.sh

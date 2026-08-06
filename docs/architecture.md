@@ -39,9 +39,9 @@ repo. Consequences of this choice (all deliberate):
 
 `install.sh` runs, in order:
 
-1. **`install_packages`** (only with `--packages`) — detects `apt` vs
+1. **`install_packages`** (default enabled; skip with `--no-packages` or `--links-only`) — detects `apt` vs
    `pacman` and installs the base package list (`sway wofi waybar kitty grim
-   slurp wl-clipboard brightnessctl playerctl swaylock swayidle jq
+   slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq
    libnotify-bin`). The Nerd Font is *not* in this list — see step 4.
 2. **Symlink every entry in the `LINKS` associative array** (`src → dest`
    pairs, e.g. `config/sway → .config/sway`) via `link_one()`, which
@@ -64,12 +64,7 @@ repo. Consequences of this choice (all deliberate):
    `--dry-run` equivalent), so the Catppuccin flavor/background mode chosen
    previously (or the `mocha`/flat default on a fresh machine) is always in
    effect after installing.
-6. **Optionally run tool installers** — `--zsh` / `--nvim` / `--apps` /
-   `--devops` / `--browser` each call a corresponding
-   `scripts/install-<name>.sh`; `--all-tools` auto-discovers and runs every
-   `scripts/install-*.sh` present, so adding a new installer script needs no
-   `install.sh` changes to be picked up by `--all-tools` (explicit flags
-   still need one line added, for discoverability/help-text purposes).
+6. **Run Neovim & Tool Installers** — Neovim deployment (`install-nvim-deps.sh` and `install-nvim.sh`) runs by default (skip with `--no-nvim` or `--links-only`). Additional tool installers (`--zsh` / `--apps` / `--devops` / `--browser`) call their corresponding `scripts/install-<name>.sh`; `--all-tools` auto-discovers and runs every `scripts/install-*.sh` present.
 7. **`scripts/validate.sh`** — runs automatically at the end of every
    non-dry-run invocation (skip with `--no-validate`) to catch regressions
    immediately rather than at the next reboot/reload.

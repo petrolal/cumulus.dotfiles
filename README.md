@@ -78,8 +78,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/ma
 ```bash
 git clone <this-repo-url> ~/cumulus.dotfiles
 cd ~/cumulus.dotfiles
-./install.sh              # symlink configs into $HOME (existing files are backed up)
-./install.sh --packages    # also install sway, wofi, waybar, kitty, etc. first
+./install.sh              # default setup: install packages + symlink configs + deploy Cumulus Neovim
+./install.sh --links-only # symlink configs only (skip package & tool installations)
 ./install.sh --dry-run     # preview what would happen, no changes made
 ```
 
@@ -87,16 +87,17 @@ Every run finishes with `scripts/validate.sh` (skip with `--no-validate`), so yo
 immediately see OK/WARN/FAIL for the whole setup instead of finding out something's
 broken later.
 
-Once configs are symlinked, you can also run any of the `scripts/install-*.sh`
-tool installers straight from `install.sh` — no need to invoke them by hand:
+`./install.sh` installs required desktop packages and Cumulus Neovim by default. You can also run any of the additional `scripts/install-*.sh`
+tool installers straight from `install.sh`:
 
 ```bash
-./install.sh --zsh        # zsh + oh-my-zsh + Nerd Font + nvim as default editor
-./install.sh --nvim       # Neovim + full plugin toolchain + Cumulus Neovim config
-./install.sh --apps       # default desktop applications (browsers, IDEs, chat, etc.)
-./install.sh --devops     # Docker + Terraform + Ansible
-./install.sh --browser    # Google Chrome + set as default browser
-./install.sh --all-tools  # auto-discovers and runs every scripts/install-*.sh
+./install.sh --zsh         # zsh + oh-my-zsh + Nerd Font + nvim as default editor
+./install.sh --no-packages # skip system apt/pacman package installation
+./install.sh --no-nvim     # skip Neovim & cumulus.nvim deployment
+./install.sh --apps        # default desktop applications (browsers, IDEs, chat, etc.)
+./install.sh --devops      # Docker + Terraform + Ansible
+./install.sh --browser     # Google Chrome + set as default browser
+./install.sh --all-tools   # auto-discovers and runs every scripts/install-*.sh
 ```
 
 `--dry-run` is forwarded to whichever installer(s) you select, so
@@ -106,7 +107,7 @@ changes made.
 `--packages` auto-detects your package manager:
 
 - **Debian/Ubuntu (apt)** — installs:
-  `sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle`
+  `sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays`
 - **Arch (pacman)** — installs the same list via `pacman -S --needed`, plus
   the Nerd Font (`ttf-jetbrains-mono-nerd`, used by wofi/waybar/kitty
   styling) via an AUR helper (`yay` or `paru`) if one is found on `$PATH`.

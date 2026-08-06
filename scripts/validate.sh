@@ -108,17 +108,22 @@ check_cmd "kitty" kitty
 section "Zsh"
 if command -v zsh >/dev/null 2>&1; then
   ok "zsh: $(zsh --version)"
-  if [ "$SHELL" = "$(command -v zsh)" ]; then
-    ok "zsh is the default login shell"
+  user_shell="$(getent passwd "${LOGNAME:-$USER}" 2>/dev/null | cut -d: -f7 || echo "${SHELL:-}")"
+  zsh_path="$(command -v zsh || true)"
+  real_user_shell="$(readlink -f "$user_shell" 2>/dev/null || echo "$user_shell")"
+  real_zsh_path="$(readlink -f "$zsh_path" 2>/dev/null || echo "$zsh_path")"
+
+  if [ -n "$real_user_shell" ] && [ -n "$real_zsh_path" ] && [ "$real_user_shell" = "$real_zsh_path" ]; then
+    ok "zsh is the default login shell ($user_shell)"
   else
-    warn "default login shell is \$SHELL=$SHELL, not zsh — run cumulus-install-zsh (falls back to usermod on AD/LDAP accounts where chsh fails)"
+    warn "default login shell is ${user_shell:-$SHELL}, not zsh — run cumulus-install-zsh (falls back to usermod on AD/LDAP accounts where chsh fails)"
   fi
   if [ -d "$HOME/.oh-my-zsh" ]; then
     ok "oh-my-zsh installed"
   else
     warn "oh-my-zsh not installed — run cumulus-install-zsh"
   fi
-  zsh_out="$(timeout 10 zsh -i -c 'echo "$ZSH_THEME|$EDITOR"' 2>/tmp/zsh-validate.$$)"
+  zsh_out="$(timeout 10 zsh +m -i -c 'echo "$ZSH_THEME|$EDITOR"' 2>/tmp/zsh-validate.$$)"
   zsh_rc=$?
   if [ $zsh_rc -eq 0 ]; then
     theme="${zsh_out%%|*}"; editor="${zsh_out##*|}"

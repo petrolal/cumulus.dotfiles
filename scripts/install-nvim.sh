@@ -41,7 +41,13 @@ run_cmd() {
 }
 
 normalize_url() {
-  printf '%s' "${1%.git}"
+  local url="$1"
+  url="${url%.git}"
+  url="${url#https://}"
+  url="${url#http://}"
+  url="${url#git@}"
+  url="${url/:/\/}"
+  printf '%s' "$url"
 }
 
 clone_or_update() {
@@ -66,15 +72,11 @@ clone_or_update() {
   fi
 
   if [ -n "$(git -C "$NVIM_REPO_DIR" status --porcelain)" ]; then
-    if $DRY_RUN; then
-      log "DRY RUN: would refuse update because checkout has local changes"
-      return
-    fi
-    die "Cumulus Neovim checkout has local changes; refusing to update: $NVIM_REPO_DIR"
+    log "WARN: Cumulus Neovim checkout has local changes; skipping git pull."
+  else
+    log "Updating Cumulus Neovim with fast-forward-only pull"
+    run_cmd git -C "$NVIM_REPO_DIR" pull --ff-only
   fi
-
-  log "Updating Cumulus Neovim with fast-forward-only pull"
-  run_cmd git -C "$NVIM_REPO_DIR" pull --ff-only
 }
 
 deploy_config() {

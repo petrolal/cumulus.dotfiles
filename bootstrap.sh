@@ -13,9 +13,9 @@
 # itself wouldn't — this is purely "get the repo, then hand off" glue.
 #
 # Usage (flags are forwarded verbatim to install.sh):
-#   bash <(curl -fsSL .../bootstrap.sh)                          # symlink configs only
-#   bash <(curl -fsSL .../bootstrap.sh) --packages --all-tools   # full fresh-machine setup
-#   bash <(curl -fsSL .../bootstrap.sh) --dry-run --all-tools    # preview everything first
+#   bash <(curl -fsSL .../bootstrap.sh)                          # full default setup (packages + configs + fonts + theme + cumulus.nvim)
+#   bash <(curl -fsSL .../bootstrap.sh) --all-tools              # full fresh-machine setup including all extra tools
+#   bash <(curl -fsSL .../bootstrap.sh) --dry-run               # preview everything first
 #
 # Env overrides:
 #   CUMULUS_REPO  git URL to clone (default: https://github.com/petrolal/cumulus.dotfiles.git)

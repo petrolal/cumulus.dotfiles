@@ -59,12 +59,16 @@ install_oh_my_zsh() {
 }
 
 set_default_shell() {
-  local zsh_path
+  local zsh_path user_shell real_user_shell real_zsh_path
   zsh_path="$(command -v zsh || true)"
   [ -n "$zsh_path" ] || { log "zsh not found on PATH — skipping default shell change"; return; }
 
-  if [ "${SHELL:-}" = "$zsh_path" ]; then
-    log "OK (already default shell): zsh"
+  user_shell="$(getent passwd "${LOGNAME:-$USER}" 2>/dev/null | cut -d: -f7 || echo "${SHELL:-}")"
+  real_user_shell="$(readlink -f "$user_shell" 2>/dev/null || echo "$user_shell")"
+  real_zsh_path="$(readlink -f "$zsh_path" 2>/dev/null || echo "$zsh_path")"
+
+  if [ -n "$real_user_shell" ] && [ -n "$real_zsh_path" ] && [ "$real_user_shell" = "$real_zsh_path" ]; then
+    log "OK (already default shell): zsh ($user_shell)"
     return
   fi
 

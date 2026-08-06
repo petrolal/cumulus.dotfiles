@@ -3,7 +3,7 @@
 # install.sh — deploy cumulus.dotfiles onto a fresh machine.
 #
 # What it does:
-#   1. (Optionally) installs required packages via apt/pacman.
+#   1. Installs required packages via apt/pacman (default enabled; skip with --no-packages or --links-only).
 #   2. Symlinks every config file into place under $HOME.
 #   3. Symlinks every scripts/*.sh into ~/.local/bin/cumulus-<name> (on PATH).
 #   4. Backs up any pre-existing real file/dir before symlinking over it.
@@ -13,15 +13,17 @@
 #   6. Applies the saved theme (Catppuccin flavor + flat color/wallpaper/
 #      rotation), or the default (mocha / flat) on first run — see
 #      scripts/theme.sh.
-#   7. (Optionally) runs one or more of the scripts/install-*.sh installers.
-#   8. Runs scripts/validate.sh at the end to confirm everything is correctly
+#   7. Deploys Cumulus Neovim & deps (default enabled; skip with --no-nvim or --links-only).
+#   8. (Optionally) runs additional tool installers (--zsh, --apps, --devops, --browser, --all-tools).
+#   9. Runs scripts/validate.sh at the end to confirm everything is correctly
 #      in place (skipped in --dry-run, or with --no-validate).
 #
 # Usage:
-#   ./install.sh              # symlink configs only
-#   ./install.sh --packages   # also apt-install required packages first
+#   ./install.sh              # full default setup (packages + configs + fonts + theme + cumulus.nvim)
+#   ./install.sh --links-only # symlink configs only (no package or tool installations)
+#   ./install.sh --no-packages # skip apt/pacman package installation
+#   ./install.sh --no-nvim     # skip Neovim & cumulus.nvim deployment
 #   ./install.sh --zsh        # also run scripts/install-zsh.sh
-#   ./install.sh --nvim       # install Neovim deps + deploy Cumulus Neovim
 #   ./install.sh --apps       # also run scripts/install-apps.sh
 #   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
 #   ./install.sh --browser    # also run scripts/install-browser.sh (Google Chrome + default browser)
@@ -34,9 +36,9 @@ set -euo pipefail
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.cumulus_backup/$(date +%Y%m%d_%H%M%S)"
 DRY_RUN=false
-DO_PACKAGES=false
+DO_PACKAGES=true
 DO_ZSH=false
-DO_NVIM=false
+DO_NVIM=true
 DO_APPS=false
 DO_DEVOPS=false
 DO_BROWSER=false
@@ -47,8 +49,19 @@ for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=true ;;
     --packages) DO_PACKAGES=true ;;
-    --zsh) DO_ZSH=true ;;
+    --no-packages) DO_PACKAGES=false ;;
     --nvim) DO_NVIM=true ;;
+    --no-nvim) DO_NVIM=false ;;
+    --links-only)
+      DO_PACKAGES=false
+      DO_NVIM=false
+      DO_ZSH=false
+      DO_APPS=false
+      DO_DEVOPS=false
+      DO_BROWSER=false
+      DO_ALL_TOOLS=false
+      ;;
+    --zsh) DO_ZSH=true ;;
     --apps) DO_APPS=true ;;
     --devops) DO_DEVOPS=true ;;
     --browser) DO_BROWSER=true ;;
@@ -78,8 +91,8 @@ declare -A LINKS=(
 # swaynag ships as part of the "sway" package on both Ubuntu and Arch, so it's
 # not listed as a separate dependency here. jq/libnotify are needed by the
 # scripts/ helpers (window screenshots, desktop notifications).
-APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle jq libnotify-bin)
-PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle jq libnotify)
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify)
 # Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
 AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
 
