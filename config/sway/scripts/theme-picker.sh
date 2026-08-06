@@ -22,15 +22,37 @@ STATE_FILE="$HOME/.config/cumulus/theme/state"
 
 current_flavor=""
 current_source="flat"
+current_mode="flat"
 if [ -f "$STATE_FILE" ]; then
-  # shellcheck disable=SC1090
-  source "$STATE_FILE"
+  load_state() {
+    local key value
+    unset FLAVOR MODE WALLPAPER WALLPAPER_SOURCE INTERVAL NVIM_COLORSCHEME
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+      case "$key" in
+        FLAVOR|MODE|WALLPAPER|WALLPAPER_SOURCE|INTERVAL|NVIM_COLORSCHEME)
+          printf -v "$key" '%s' "$value"
+          ;;
+      esac
+    done < "$STATE_FILE"
+  }
+  load_state
   current_flavor="${FLAVOR:-}"
+  current_mode="${MODE:-flat}"
   current_source="${WALLPAPER_SOURCE:-legacy}"
 fi
 
 notify() {
   command -v notify-send >/dev/null 2>&1 && notify-send "Theme" "$1" || true
+}
+
+source_label() {
+  case "$1" in
+    user) printf 'custom wallpaper (preserved)\n' ;;
+    theme-default) printf 'theme default wallpaper\n' ;;
+    rotate) printf 'rotating wallpapers\n' ;;
+    flat) printf 'flat color\n' ;;
+    *) printf 'legacy/unknown wallpaper source\n' ;;
+  esac
 }
 
 pick() {
@@ -49,7 +71,9 @@ for f in "$PALETTES_DIR"/*.sh; do
   flavor_lines+="$marker$name — $label"$'\n'
 done
 
-flavor_choice="$(printf '%s' "$flavor_lines" | pick "Theme flavor")"
+current_source_label="$(source_label "$current_source")"
+flavor_choice="$(printf '%s' "$flavor_lines" | pick \
+  "Theme flavor (current: ${current_flavor:-none}; wallpaper: $current_source_label)")"
 [ -n "$flavor_choice" ] || exit 0
 flavor="${flavor_choice%% —*}"
 flavor="${flavor#✓ }"
@@ -59,7 +83,21 @@ if [ "$current_source" = "user" ]; then
 fi
 
 # ── 2. Background mode ───────────────────────────────────────────────────
-mode_choice="$(printf 'Flat color\nTheme default wallpaper\nCustom wallpaper (pick an image)\nRotate wallpapers (timer)' | pick "Background mode")"
+current_mode_label="$current_mode"
+case "$current_mode" in
+  flat) current_mode_label=flat ;;
+  rotate) current_mode_label=rotate ;;
+  wallpaper)
+    case "$current_source" in
+      user|theme-default) current_mode_label="$current_source" ;;
+      *) current_mode_label=legacy ;;
+    esac
+    ;;
+  *) current_mode_label=legacy ;;
+esac
+current_mode_label="$(source_label "$current_mode_label")"
+mode_choice="$(printf 'Flat color\nTheme default wallpaper\nCustom wallpaper (pick an image)\nRotate wallpapers (timer)' | pick \
+  "Background mode (current: $current_mode_label)")"
 [ -n "$mode_choice" ] || exit 0
 
 case "$mode_choice" in
@@ -88,6 +126,13 @@ case "$mode_choice" in
     ;;
 
   "Rotate"*)
+    shopt -s nullglob
+    images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
+    shopt -u nullglob
+    if [ "${#images[@]}" -eq 0 ]; then
+      notify "No wallpapers found in $WALLPAPERS_DIR — add images before enabling rotation"
+      exit 1
+    fi
     interval="$(printf '30m\n15m\n1h\n2h' | pick "Rotate interval (type a custom value, e.g. 45m)")"
     [ -n "$interval" ] || exit 0
     "$THEME_SH" set "$flavor" --rotate --interval "$interval"

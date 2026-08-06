@@ -86,8 +86,6 @@ refresh_nvim() {
 
 main() {
   [ -f "$STATE_FILE" ] || { log "No theme state; nothing to refresh."; exit 0; }
-  # shellcheck disable=SC1090
-  source "$STATE_FILE"
   run_adapter "sway" refresh_sway
   run_adapter "waybar" refresh_waybar
   run_adapter "kitty" refresh_kitty

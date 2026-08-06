@@ -22,9 +22,9 @@ main() {
 
   local flavor="mocha" scheme="prefer-dark"
   if [ -f "$STATE_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$STATE_FILE"
-    flavor="${FLAVOR:-mocha}"
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+      [ "$key" = FLAVOR ] && flavor="$value"
+    done < "$STATE_FILE"
   fi
   [ "$flavor" = "latte" ] && scheme="prefer-light"
   gsettings set org.gnome.desktop.interface color-scheme "$scheme" >/dev/null

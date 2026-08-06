@@ -60,6 +60,18 @@ write_state() {
   mv -f "$tmp_state" "$STATE_FILE"
 }
 
+load_state() {
+  local key value
+  unset FLAVOR MODE WALLPAPER WALLPAPER_SOURCE INTERVAL NVIM_COLORSCHEME
+  while IFS='=' read -r key value || [ -n "$key" ]; do
+    case "$key" in
+      FLAVOR|MODE|WALLPAPER|WALLPAPER_SOURCE|INTERVAL|NVIM_COLORSCHEME)
+        printf -v "$key" '%s' "$value"
+        ;;
+    esac
+  done < "$STATE_FILE"
+}
+
 valid_flavors() { basename -s .sh -a "$PALETTES_DIR"/*.sh; }
 
 is_valid_flavor() {
@@ -100,6 +112,19 @@ validate_templates() {
         die "theme template is missing placeholder $placeholder: $template"
     done
   done
+}
+
+normalize_mode() {
+  case "${1:-flat}" in
+    flat|wallpaper|rotate) printf '%s\n' "$1" ;;
+    *) printf 'flat\n' ;;
+  esac
+}
+
+validate_interval() {
+  local interval="$1"
+  [[ "$interval" =~ ^[1-9][0-9]*(ms|us|s|m|h|d|w)$ ]] ||
+    die "invalid rotation interval: $interval (use values such as 30m or 1h)"
 }
 
 # ── Generate colors.conf/colors.css for each app from a palette file ────────
@@ -247,10 +272,11 @@ cmd_set() {
 
   local mode="flat" wallpaper="" interval="30m" wallpaper_source="flat"
   local preserve_background=false mode_explicit=false wallpaper_explicit=false
+  local theme_default_explicit=false
   while [ $# -gt 0 ]; do
     case "$1" in
       --wallpaper) mode="wallpaper"; mode_explicit=true; wallpaper_explicit=true; wallpaper="$2"; shift 2 ;;
-      --theme-default) mode="wallpaper"; wallpaper_source="theme-default"; mode_explicit=true; shift ;;
+      --theme-default) mode="wallpaper"; wallpaper_source="theme-default"; theme_default_explicit=true; mode_explicit=true; shift ;;
       --rotate) mode="rotate"; mode_explicit=true; shift ;;
       --interval) interval="$2"; shift 2 ;;
       --flat) mode="flat"; mode_explicit=true; shift ;;
@@ -260,13 +286,15 @@ cmd_set() {
   done
 
   if $preserve_background && ! $mode_explicit && [ -f "$STATE_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$STATE_FILE"
+    load_state
     mode="${MODE:-flat}"
     wallpaper="${WALLPAPER:-}"
     interval="${INTERVAL:-30m}"
     wallpaper_source="${WALLPAPER_SOURCE:-}"
   fi
+
+  mode="$(normalize_mode "$mode")"
+  validate_interval "$interval"
 
   if [ "$mode" = "flat" ]; then
     wallpaper=""
@@ -284,8 +312,12 @@ cmd_set() {
     if ! $wallpaper_explicit && [ -n "$wallpaper" ] && [ ! -f "$wallpaper" ] && [ -n "$(default_wallpaper "$flavor")" ]; then
       wallpaper="$(default_wallpaper "$flavor")"
       wallpaper_source="theme-default"
+    elif ! $wallpaper_explicit && [ -n "$wallpaper" ] && [ ! -f "$wallpaper" ]; then
+      mode="flat"
+      wallpaper=""
+      wallpaper_source="flat"
     fi
-    [ -n "$wallpaper" ] || die "wallpaper path is empty"
+    [ "$mode" != "wallpaper" ] || [ -n "$wallpaper" ] || die "wallpaper path is empty"
   fi
 
   if [ "$mode" = "wallpaper" ]; then
@@ -296,10 +328,18 @@ cmd_set() {
     fi
     [ -f "$wallpaper" ] || die "wallpaper not found: $wallpaper (put images in themes/wallpapers/ or pass a full path)"
     wallpaper="$(cd "$(dirname "$wallpaper")" && pwd)/$(basename "$wallpaper")"
-    case "$wallpaper" in
-      "$WALLPAPERS_DIR"/*.svg) wallpaper_source="theme-default" ;;
-      *) wallpaper_source="user" ;;
-    esac
+    if $theme_default_explicit; then
+      wallpaper_source="theme-default"
+    elif $wallpaper_explicit || [ "$wallpaper_source" = user ]; then
+      wallpaper_source="user"
+    elif [ "$wallpaper_source" = theme-default ]; then
+      wallpaper_source="theme-default"
+    else
+      case "$wallpaper" in
+        "$WALLPAPERS_DIR"/*.svg) wallpaper_source="theme-default" ;;
+        *) wallpaper_source="user" ;;
+      esac
+    fi
   fi
 
   if [ "$mode" = "rotate" ]; then
@@ -331,34 +371,55 @@ cmd_set() {
 
 cmd_apply() {
   [ -f "$STATE_FILE" ] || { log "No saved theme state — applying default (mocha / flat)."; cmd_set mocha; return; }
-  # shellcheck disable=SC1090
-  source "$STATE_FILE"
-  if [ "${MODE:-flat}" = "wallpaper" ] && [ ! -f "${WALLPAPER:-}" ]; then
+  load_state
+  local fallback
+  is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
+  MODE="$(normalize_mode "${MODE:-flat}")"
+  INTERVAL="${INTERVAL:-30m}"
+  validate_interval "$INTERVAL"
+  if [ "$MODE" = "wallpaper" ] && [ ! -f "${WALLPAPER:-}" ]; then
     fallback="$(default_wallpaper "$FLAVOR")"
     if [ -n "$fallback" ]; then
       WALLPAPER="$fallback"
       WALLPAPER_SOURCE="theme-default"
       write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "${INTERVAL:-30m}" "${NVIM_COLORSCHEME:-}"
+        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     else
       MODE="flat"
       WALLPAPER=""
       WALLPAPER_SOURCE="flat"
       write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "${INTERVAL:-30m}" "${NVIM_COLORSCHEME:-}"
+        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
+    fi
+  elif [ "$MODE" = "rotate" ]; then
+    shopt -s nullglob
+    local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
+    shopt -u nullglob
+    if [ "${#images[@]}" -eq 0 ]; then
+      MODE="flat"
+      WALLPAPER=""
+      WALLPAPER_SOURCE="flat"
+      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
+        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
+    elif [ ! -f "${WALLPAPER:-}" ]; then
+      WALLPAPER="${images[0]}"
+      WALLPAPER_SOURCE="rotate"
+      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
+        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     fi
   fi
   generate_configs "$FLAVOR" "$MODE" "${WALLPAPER:-}"
-  [ "$MODE" = "rotate" ] && write_rotate_units "${INTERVAL:-30m}"
+  [ "$MODE" = "rotate" ] && write_rotate_units "$INTERVAL"
   reload_apps
   log "Re-applied saved theme: $FLAVOR / $MODE"
 }
 
 cmd_next() {
   [ -f "$STATE_FILE" ] || die "no theme set yet — run 'theme.sh set <flavor> --rotate' first"
-  # shellcheck disable=SC1090
-  source "$STATE_FILE"
+  load_state
+  is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
   [ "$MODE" = "rotate" ] || die "current mode is '$MODE', not rotate — nothing to advance"
+  validate_interval "${INTERVAL:-30m}"
 
   shopt -s nullglob
   local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
@@ -374,11 +435,8 @@ cmd_next() {
   done
   local next_wallpaper="${images[$next_idx]}"
 
-  local next_state
-  next_state="$(mktemp "$STATE_DIR/state.XXXXXX")"
-  sed "s|^WALLPAPER=.*|WALLPAPER=$next_wallpaper|" "$STATE_FILE" > "$next_state"
-  chmod 600 "$next_state"
-  mv -f "$next_state" "$STATE_FILE"
+  write_state "$FLAVOR" rotate "$next_wallpaper" rotate \
+    "${INTERVAL:-30m}" "${NVIM_COLORSCHEME:-}"
   generate_configs "$FLAVOR" "rotate" "$next_wallpaper"
   reload_apps
   log "Advanced wallpaper -> $(basename "$next_wallpaper")"
@@ -407,8 +465,7 @@ cmd_list() {
 
 cmd_current() {
   if [ -f "$STATE_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$STATE_FILE"
+    load_state
     echo "Flavor:  $FLAVOR"
     echo "Mode:    $MODE"
     echo "Source:  ${WALLPAPER_SOURCE:-legacy}"
