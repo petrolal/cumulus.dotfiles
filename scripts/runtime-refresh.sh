@@ -59,7 +59,7 @@ refresh_nvim_socket() {
   local socket="$1"
   [ -S "$socket" ] || return 1
   [ "$(stat -c '%U' "$socket" 2>/dev/null || true)" = "$CURRENT_USER" ] || return 1
-  nvim --headless --server "$socket" \
+  timeout 5s nvim --headless --server "$socket" \
     --remote-send '<Cmd>lua require("cumulus.theme").load_saved_theme()<CR>' \
     >/dev/null 2>&1
 }

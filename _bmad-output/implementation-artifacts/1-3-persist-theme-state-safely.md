@@ -3,7 +3,7 @@ story_key: 1-3-persist-theme-state-safely
 epic: 1
 story: 1.3
 title: Persist Theme State Safely
-status: review
+status: done
 ---
 
 # Story 1.3: Persist Theme State Safely
@@ -55,6 +55,44 @@ so that a partial write cannot create an invalid desktop configuration.
   - [x] Test interrupted/failed publication using temporary repositories and
     command stubs without mutating the host desktop.
 - [x] Run syntax checks, all theme/state tests, and `git diff --check`.
+
+### Review Findings
+
+- [x] [Review][Patch] Restrict persisted and requested flavor names before
+  palette sourcing [scripts/theme.sh:77-80, 136, 376] — path traversal can
+  select and execute an arbitrary local shell file.
+- [x] [Review][Patch] Escape or reject wallpaper paths before embedding them
+  in Sway commands [scripts/theme.sh:143-150] — quotes, command substitutions,
+  or newlines can alter the generated shell command.
+- [x] [Review][Patch] Publish rotation state only after successful rendering
+  [scripts/theme.sh:444-447] — `next` can persist a new wallpaper while
+  generated configuration still reflects the old one.
+- [x] [Review][Patch] Roll back generated fragments if publication fails
+  midway [scripts/theme.sh:212-216] — independent `mv` operations can leave
+  Sway, kitty, Waybar, and Wofi on mixed generations.
+- [x] [Review][Patch] Reject control characters in serialized state values
+  [scripts/theme.sh:46-60] — line-delimited records cannot represent newline
+  paths without corrupting the state file.
+- [x] [Review][Patch] Validate or normalize `WALLPAPER_SOURCE`
+  [scripts/theme.sh:383-390, 416-417] — unsupported values are republished
+  as if they were valid state.
+- [x] [Review][Patch] Diagnose malformed saved modes before safe fallback
+  [scripts/theme.sh:117-121, 377] — invalid modes currently become flat
+  silently.
+- [x] [Review][Patch] Reject or define precedence for conflicting wallpaper
+  options [scripts/theme.sh:264-267] — supplying both `--theme-default` and
+  `--wallpaper` can select the wrong source.
+- [x] [Review][Patch] Disable stale rotation timers after `apply` falls back
+  from rotate to flat [scripts/theme.sh:402-418] — the old timer can continue
+  invoking `next` against non-rotate state.
+- [x] [Review][Patch] Add rotation reload and malformed-state coverage
+  [tests/state-safety.sh:27-65] — `set --rotate`, `next`, invalid sources,
+  invalid modes, and missing fields are not fully exercised.
+- [x] [Review][Patch] Add failure-injection tests for interrupted publication
+  [tests/state-safety.sh:18-65] — renderer or publication failures are not
+  tested against preservation of the previous complete record.
+- [x] [Review][Patch] Bound Neovim adapter RPC time [scripts/runtime-refresh.sh:62-64]
+  — an unresponsive local socket can hang a valid theme change indefinitely.
 
 ## Dev Notes
 
@@ -112,6 +150,11 @@ GPT-5.6 Luna
   runtime and OS/GTK adapters no longer execute state-file values.
 - Added isolated coverage for complete records, legacy migration, shell
   metacharacters, ampersands, apply, rotation, and malformed state.
+- Review fixes added safe palette/path handling, transactional generated-config
+  publication with rollback, source/mode validation, rotation timer cleanup,
+  and bounded Neovim refresh.
+- Failure-injection tests verify generated fragments remain unchanged when
+  publication fails midway.
 
 ### Completion Notes List
 
@@ -131,3 +174,5 @@ GPT-5.6 Luna
 - 2026-08-05: Implemented safe state migration and complete-record
   republishing, with full state-safety regression coverage. Story ready for
   review.
+- 2026-08-05: Addressed all code-review findings and verified the complete
+  regression suite. Story complete.

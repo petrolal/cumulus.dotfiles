@@ -46,6 +46,12 @@ die() { printf '\033[1;31m[theme] error:\033[0m %s\n' "$*" >&2; exit 1; }
 write_state() {
   local flavor="$1" mode="$2" wallpaper="$3" wallpaper_source="$4"
   local interval="$5" nvim_colorscheme="$6" tmp_state
+  local value
+  for value in "$flavor" "$mode" "$wallpaper" "$wallpaper_source" "$interval" "$nvim_colorscheme"; do
+    case "$value" in
+      *$'\n'*|*$'\r'*) die "theme state values cannot contain newlines" ;;
+    esac
+  done
   mkdir -p "$STATE_DIR"
   tmp_state="$(mktemp "$STATE_DIR/state.XXXXXX")"
   {
@@ -76,7 +82,8 @@ valid_flavors() { basename -s .sh -a "$PALETTES_DIR"/*.sh; }
 
 is_valid_flavor() {
   local f="$1"
-  [ -f "$PALETTES_DIR/$f.sh" ]
+  [[ "$f" =~ ^[A-Za-z0-9_-]+$ ]] &&
+    [ -f "$PALETTES_DIR/$f.sh" ]
 }
 
 default_wallpaper() {
@@ -121,10 +128,64 @@ normalize_mode() {
   esac
 }
 
+validate_wallpaper_source() {
+  local mode="$1" source="$2"
+  case "$mode:$source" in
+    flat:flat|wallpaper:user|wallpaper:theme-default|rotate:rotate) ;;
+    *) die "invalid wallpaper source '$source' for mode '$mode'" ;;
+  esac
+}
+
 validate_interval() {
   local interval="$1"
   [[ "$interval" =~ ^[1-9][0-9]*(ms|us|s|m|h|d|w)$ ]] ||
     die "invalid rotation interval: $interval (use values such as 30m or 1h)"
+}
+
+sway_shell_arg() {
+  local value="$1" escaped
+  case "$value" in
+    *$'\n'*|*$'\r'*) die "wallpaper paths cannot contain newlines" ;;
+  esac
+  escaped="$(printf '%s' "$value" | sed "s/'/'\\\\''/g")"
+  printf "'%s'" "$escaped"
+}
+
+publish_configs() {
+  local render_dir="$1" backup_dir name destination
+  local -a names=(sway waybar wofi kitty)
+  local -a rendered=(sway.colors.conf waybar.style.css wofi.style.css kitty.colors.conf)
+  local -a destinations=(
+    "$DOTFILES_DIR/config/sway/colors.conf"
+    "$DOTFILES_DIR/config/waybar/style.css"
+    "$DOTFILES_DIR/config/wofi/style.css"
+    "$DOTFILES_DIR/config/kitty/colors.conf"
+  )
+  backup_dir="$(mktemp -d "$STATE_DIR/publish.XXXXXX")"
+
+  rollback() {
+    local i
+    for destination in "${destinations[@]}"; do
+      rm -f "$destination"
+    done
+    for i in "${!destinations[@]}"; do
+      [ -e "$backup_dir/${names[$i]}" ] &&
+        mv -f "$backup_dir/${names[$i]}" "${destinations[$i]}" || true
+    done
+    rm -rf "$backup_dir" "$render_dir"
+    die "could not publish generated theme configuration; previous files restored"
+  }
+
+  for i in "${!destinations[@]}"; do
+    destination="${destinations[$i]}"
+    if [ -e "$destination" ] || [ -L "$destination" ]; then
+      mv -f "$destination" "$backup_dir/${names[$i]}" || rollback
+    fi
+  done
+  for i in "${!destinations[@]}"; do
+    mv -f "$render_dir/${rendered[$i]}" "${destinations[$i]}" || rollback
+  done
+  rm -rf "$backup_dir" "$render_dir"
 }
 
 # ── Generate colors.conf/colors.css for each app from a palette file ────────
@@ -146,7 +207,7 @@ generate_configs() {
     if [ "$mode" = "flat" ]; then
       echo "exec_always swaybg -c \"$BASE\""
     else
-      echo "exec_always swaybg -i \"$wallpaper\" -m fill"
+      printf 'exec_always swaybg -i %s -m fill\n' "$(sway_shell_arg "$wallpaper")"
     fi
     echo
     echo "# class                 border      bg          text        indicator   child_border"
@@ -209,11 +270,7 @@ generate_configs() {
     echo "color15 $SUBTEXT0"
   } > "$render_dir/kitty.colors.conf"
 
-  mv -f "$render_dir/sway.colors.conf" "$DOTFILES_DIR/config/sway/colors.conf"
-  mv -f "$render_dir/waybar.style.css" "$DOTFILES_DIR/config/waybar/style.css"
-  mv -f "$render_dir/wofi.style.css" "$DOTFILES_DIR/config/wofi/style.css"
-  mv -f "$render_dir/kitty.colors.conf" "$DOTFILES_DIR/config/kitty/colors.conf"
-  rmdir "$render_dir"
+  publish_configs "$render_dir"
 }
 
 # ── Reload the running apps to pick up the new colors ───────────────────────
@@ -275,8 +332,8 @@ cmd_set() {
   local theme_default_explicit=false
   while [ $# -gt 0 ]; do
     case "$1" in
-      --wallpaper) mode="wallpaper"; mode_explicit=true; wallpaper_explicit=true; wallpaper="$2"; shift 2 ;;
-      --theme-default) mode="wallpaper"; wallpaper_source="theme-default"; theme_default_explicit=true; mode_explicit=true; shift ;;
+      --wallpaper) mode="wallpaper"; mode_explicit=true; wallpaper_explicit=true; theme_default_explicit=false; wallpaper="$2"; shift 2 ;;
+      --theme-default) mode="wallpaper"; wallpaper_source="theme-default"; theme_default_explicit=true; wallpaper_explicit=false; mode_explicit=true; shift ;;
       --rotate) mode="rotate"; mode_explicit=true; shift ;;
       --interval) interval="$2"; shift 2 ;;
       --flat) mode="flat"; mode_explicit=true; shift ;;
@@ -350,6 +407,7 @@ cmd_set() {
     wallpaper="${images[0]}"
   fi
 
+  validate_wallpaper_source "$mode" "$wallpaper_source"
   # Load and validate metadata before persisting shared state.
   unset THEME_NAME THEME_LABEL NVIM_COLORSCHEME
   # shellcheck disable=SC1090
@@ -374,7 +432,13 @@ cmd_apply() {
   load_state
   local fallback
   is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
-  MODE="$(normalize_mode "${MODE:-flat}")"
+  local saved_mode="${MODE:-flat}"
+  MODE="$(normalize_mode "$saved_mode")"
+  if [ "$saved_mode" != "$MODE" ]; then
+    log "warning: invalid saved mode '$saved_mode'; using flat"
+    WALLPAPER=""
+    WALLPAPER_SOURCE="flat"
+  fi
   INTERVAL="${INTERVAL:-30m}"
   validate_interval "$INTERVAL"
   case "$MODE" in
@@ -412,10 +476,15 @@ cmd_apply() {
       WALLPAPER_SOURCE="rotate"
     fi
   fi
+  validate_wallpaper_source "$MODE" "${WALLPAPER_SOURCE:-}"
   generate_configs "$FLAVOR" "$MODE" "${WALLPAPER:-}"
   write_state "$FLAVOR" "$MODE" "${WALLPAPER:-}" "${WALLPAPER_SOURCE:-}" \
     "$INTERVAL" "${NVIM_COLORSCHEME:-}"
-  [ "$MODE" = "rotate" ] && write_rotate_units "$INTERVAL"
+  if [ "$MODE" = "rotate" ]; then
+    write_rotate_units "$INTERVAL"
+  else
+    disable_rotate_units
+  fi
   reload_apps
   log "Re-applied saved theme: $FLAVOR / $MODE"
 }
@@ -424,7 +493,7 @@ cmd_next() {
   [ -f "$STATE_FILE" ] || die "no theme set yet — run 'theme.sh set <flavor> --rotate' first"
   load_state
   is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
-  [ "$MODE" = "rotate" ] || die "current mode is '$MODE', not rotate — nothing to advance"
+  [ "${MODE:-}" = "rotate" ] || die "current mode is '${MODE:-<missing>}', not rotate — nothing to advance"
   validate_interval "${INTERVAL:-30m}"
 
   shopt -s nullglob
@@ -441,9 +510,9 @@ cmd_next() {
   done
   local next_wallpaper="${images[$next_idx]}"
 
+  generate_configs "$FLAVOR" "rotate" "$next_wallpaper"
   write_state "$FLAVOR" rotate "$next_wallpaper" rotate \
     "${INTERVAL:-30m}" "${NVIM_COLORSCHEME:-}"
-  generate_configs "$FLAVOR" "rotate" "$next_wallpaper"
   reload_apps
   log "Advanced wallpaper -> $(basename "$next_wallpaper")"
 }
