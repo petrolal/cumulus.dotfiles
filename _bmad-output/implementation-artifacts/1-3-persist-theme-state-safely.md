@@ -3,7 +3,7 @@ story_key: 1-3-persist-theme-state-safely
 epic: 1
 story: 1.3
 title: Persist Theme State Safely
-status: ready-for-dev
+status: review
 ---
 
 # Story 1.3: Persist Theme State Safely
@@ -33,28 +33,28 @@ so that a partial write cannot create an invalid desktop configuration.
 
 ## Tasks / Subtasks
 
-- [ ] Audit all state writers and readers (AC: 1–5)
-  - [ ] Confirm every successful write publishes all six state fields.
-  - [ ] Replace any state-file shell sourcing with a data-only parser.
-  - [ ] Validate flavor, mode, interval, and required values before apply,
+- [x] Audit all state writers and readers (AC: 1–5)
+  - [x] Confirm every successful write publishes all six state fields.
+  - [x] Replace any state-file shell sourcing with a data-only parser.
+  - [x] Validate flavor, mode, interval, and required values before apply,
     rotation, or adapter use.
-  - [ ] Preserve legacy state compatibility with documented defaults.
-- [ ] Harden atomic persistence and failure behavior (AC: 1, 3, 5)
-  - [ ] Keep temporary-file creation in the state directory with restrictive
+  - [x] Preserve legacy state compatibility with documented defaults.
+- [x] Harden atomic persistence and failure behavior (AC: 1, 3, 5)
+  - [x] Keep temporary-file creation in the state directory with restrictive
     permissions.
-  - [ ] Publish state through atomic replacement only after validation.
-  - [ ] Ensure failed rendering or adapter setup cannot publish an incomplete
+  - [x] Publish state through atomic replacement only after validation.
+  - [x] Ensure failed rendering or adapter setup cannot publish an incomplete
     state record.
-  - [ ] Keep runtime and OS/GTK adapters best-effort after persistence.
-- [ ] Add isolated state safety tests (AC: 1–5)
-  - [ ] Assert the complete six-field record after theme changes.
-  - [ ] Use spaces, shell metacharacters, and ampersands in wallpaper paths and
+  - [x] Keep runtime and OS/GTK adapters best-effort after persistence.
+- [x] Add isolated state safety tests (AC: 1–5)
+  - [x] Assert the complete six-field record after theme changes.
+  - [x] Use spaces, shell metacharacters, and ampersands in wallpaper paths and
     assert no command executes.
-  - [ ] Test legacy and malformed state handling.
-  - [ ] Exercise apply and rotation state reload paths.
-  - [ ] Test interrupted/failed publication using temporary repositories and
+  - [x] Test legacy and malformed state handling.
+  - [x] Exercise apply and rotation state reload paths.
+  - [x] Test interrupted/failed publication using temporary repositories and
     command stubs without mutating the host desktop.
-- [ ] Run syntax checks, all theme/state tests, and `git diff --check`.
+- [x] Run syntax checks, all theme/state tests, and `git diff --check`.
 
 ## Dev Notes
 
@@ -106,6 +106,12 @@ GPT-5.6 Luna
 
 - Existing implementation uses atomic state replacement, but state consumers
   require a complete data-only reader and broader malformed-state coverage.
+- `cmd_apply` now normalizes legacy state and republishes a complete six-field
+  record only after successful rendering.
+- Saved flavor, mode, and interval values are validated before apply/rotation;
+  runtime and OS/GTK adapters no longer execute state-file values.
+- Added isolated coverage for complete records, legacy migration, shell
+  metacharacters, ampersands, apply, rotation, and malformed state.
 
 ### Completion Notes List
 
@@ -115,3 +121,13 @@ GPT-5.6 Luna
 ### File List
 
 - `_bmad-output/implementation-artifacts/1-3-persist-theme-state-safely.md`
+- `scripts/theme.sh`
+- `scripts/runtime-refresh.sh`
+- `scripts/os-colorscheme.sh`
+- `tests/state-safety.sh`
+
+## Change Log
+
+- 2026-08-05: Implemented safe state migration and complete-record
+  republishing, with full state-safety regression coverage. Story ready for
+  review.

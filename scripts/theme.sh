@@ -377,19 +377,27 @@ cmd_apply() {
   MODE="$(normalize_mode "${MODE:-flat}")"
   INTERVAL="${INTERVAL:-30m}"
   validate_interval "$INTERVAL"
+  case "$MODE" in
+    flat) WALLPAPER=""; WALLPAPER_SOURCE="flat" ;;
+    rotate) WALLPAPER_SOURCE="rotate" ;;
+    wallpaper)
+      if [ -z "${WALLPAPER_SOURCE:-}" ]; then
+        case "${WALLPAPER:-}" in
+          "$WALLPAPERS_DIR"/*.svg) WALLPAPER_SOURCE="theme-default" ;;
+          *) WALLPAPER_SOURCE="user" ;;
+        esac
+      fi
+      ;;
+  esac
   if [ "$MODE" = "wallpaper" ] && [ ! -f "${WALLPAPER:-}" ]; then
     fallback="$(default_wallpaper "$FLAVOR")"
     if [ -n "$fallback" ]; then
       WALLPAPER="$fallback"
       WALLPAPER_SOURCE="theme-default"
-      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     else
       MODE="flat"
       WALLPAPER=""
       WALLPAPER_SOURCE="flat"
-      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     fi
   elif [ "$MODE" = "rotate" ]; then
     shopt -s nullglob
@@ -399,16 +407,14 @@ cmd_apply() {
       MODE="flat"
       WALLPAPER=""
       WALLPAPER_SOURCE="flat"
-      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     elif [ ! -f "${WALLPAPER:-}" ]; then
       WALLPAPER="${images[0]}"
       WALLPAPER_SOURCE="rotate"
-      write_state "$FLAVOR" "$MODE" "$WALLPAPER" "$WALLPAPER_SOURCE" \
-        "$INTERVAL" "${NVIM_COLORSCHEME:-}"
     fi
   fi
   generate_configs "$FLAVOR" "$MODE" "${WALLPAPER:-}"
+  write_state "$FLAVOR" "$MODE" "${WALLPAPER:-}" "${WALLPAPER_SOURCE:-}" \
+    "$INTERVAL" "${NVIM_COLORSCHEME:-}"
   [ "$MODE" = "rotate" ] && write_rotate_units "$INTERVAL"
   reload_apps
   log "Re-applied saved theme: $FLAVOR / $MODE"

@@ -41,7 +41,7 @@ development_status:
   epic-1: in-progress
   1-1-add-cloud-palette-definitions: review
   1-2-render-cloud-themes-across-the-desktop: review
-  1-3-persist-theme-state-safely: ready-for-dev
+  1-3-persist-theme-state-safely: review
   epic-1-retrospective: optional
   epic-2: in-progress
   2-1-read-shared-theme-state-in-neovim: backlog
