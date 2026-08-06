@@ -52,6 +52,9 @@ exec 1password --silent
 # Idle management (lock -> screen off -> suspend). See scripts/idle.sh.
 exec ~/cumulus.dotfiles/scripts/idle.sh
 
+# Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
+exec_always ~/cumulus.dotfiles/scripts/autotiling.py
+
 # Polkit authentication agent — required for GUI privilege prompts (Intune, NetworkManager, disk mounts).
 # GNOME's polkit agent is reused since it is desktop-agnostic; no separate install needed.
 exec /usr/libexec/polkit-gnome-authentication-agent-1

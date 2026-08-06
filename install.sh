@@ -152,12 +152,16 @@ link_one() {
 link_scripts() {
   local bin_dir="$HOME/.local/bin"
   run "mkdir -p '$bin_dir'"
-  run "chmod +x '$DOTFILES_DIR'/scripts/*.sh"
+  run "chmod +x '$DOTFILES_DIR'/scripts/*.sh '$DOTFILES_DIR'/scripts/*.py 2>/dev/null || true"
 
-  local script name cmd
-  for script in "$DOTFILES_DIR"/scripts/*.sh; do
-    [ -e "$script" ] || continue
-    name="$(basename "$script" .sh)"
+  local script name ext cmd
+  for script in "$DOTFILES_DIR"/scripts/*; do
+    [ -f "$script" ] || continue
+    ext="${script##*.}"
+    if [ "$ext" != "sh" ] && [ "$ext" != "py" ]; then
+      continue
+    fi
+    name="$(basename "$script" ".$ext")"
     cmd="$bin_dir/cumulus-$name"
 
     if [ -L "$cmd" ] && [ "$(readlink -f "$cmd")" = "$(readlink -f "$script")" ]; then
