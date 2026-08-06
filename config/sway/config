@@ -77,14 +77,11 @@ set $NIXOS_OZONE_WL 1
 ### ────────────────────────────────────────────────────────────────
 ### Output (monitor) configuration — auto-detect + sane fallback
 ### ────────────────────────────────────────────────────────────────
-# Sway auto-detects and enables all connected outputs at their preferred resolution by default.
-# The wildcard line below is an explicit safety net so behavior is documented, not implicit.
-# output * resolution auto position auto
+# Default display layout: built-in screen on left, HDMI monitor on right
+output eDP-1 position 0 0
+output HDMI-A-1 position 1920 0
+output HDMI-* position 1920 0
 
-# If you use a fixed docking setup, override with explicit lines, e.g.:
-# output eDP-1 resolution 1920x1080 position 0,0
-# output DP-1  resolution 2560x1440 position 1920,0
-#
 # Discover exact output names any time with: swaymsg -t get_outputs
 
 ### ────────────────────────────────────────────────────────────────
