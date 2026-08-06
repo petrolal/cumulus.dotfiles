@@ -257,11 +257,13 @@ bindsym $mod+Shift+d exec wdisplays
 # (flat color / wallpaper / rotate), front-end for cumulus-theme.
 bindsym $mod+Shift+t exec ~/.config/sway/scripts/theme-picker.sh
 
-# Lock screen (manual — same styling swayidle uses automatically)
-# Note: not bound to $mod+Shift+l — that collides with $mod+Shift+$right
+# Lock screen, suspend, and shutdown
+# Note: lock is bound to $mod+Escape (not $mod+Shift+l — that collides with $mod+Shift+$right
 # (vim-style "l" = right, see `set $right l` above), which silently wins
-# and made sway show a "there are errors in your config" banner.
+# and made sway show a "there are errors in your config" banner).
 bindsym $mod+Escape exec ~/cumulus.dotfiles/scripts/lock.sh
+bindsym $mod+Shift+Escape exec systemctl suspend
+bindsym $mod+Control+Escape exec systemctl poweroff
 
 # Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
 bindsym Print exec ~/cumulus.dotfiles/scripts/screenshot.sh full

@@ -157,6 +157,8 @@ the which-key cheatsheet below — this is just a quick reference.
 | `Mod+Minus` / `Mod+Shift+Minus` | Show / send to scratchpad |
 | `Mod+R` | Enter resize mode (then h/j/k/l or arrows to resize, Return/Escape to exit) |
 | `Mod+Escape` | Lock screen now (`scripts/lock.sh`) |
+| `Mod+Shift+Escape` | Suspend system (`systemctl suspend`) |
+| `Mod+Ctrl+Escape` | Shutdown system (`systemctl poweroff`) |
 | `Print` | Screenshot — full screen |
 | `Mod+Print` | Screenshot — select a region |
 | `Mod+Shift+Print` | Screenshot — focused window |
