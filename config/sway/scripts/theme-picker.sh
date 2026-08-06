@@ -21,10 +21,12 @@ WALLPAPERS_DIR="$DOTFILES_DIR/themes/wallpapers"
 STATE_FILE="$HOME/.config/cumulus/theme/state"
 
 current_flavor=""
+current_source="flat"
 if [ -f "$STATE_FILE" ]; then
   # shellcheck disable=SC1090
   source "$STATE_FILE"
   current_flavor="${FLAVOR:-}"
+  current_source="${WALLPAPER_SOURCE:-legacy}"
 fi
 
 notify() {
@@ -52,8 +54,12 @@ flavor_choice="$(printf '%s' "$flavor_lines" | pick "Theme flavor")"
 flavor="${flavor_choice%% —*}"
 flavor="${flavor#✓ }"
 
+if [ "$current_source" = "user" ]; then
+  notify "Custom wallpaper will be preserved unless you choose the theme default or flat color."
+fi
+
 # ── 2. Background mode ───────────────────────────────────────────────────
-mode_choice="$(printf 'Flat color\nWallpaper (pick an image)\nRotate wallpapers (timer)' | pick "Background mode")"
+mode_choice="$(printf 'Flat color\nTheme default wallpaper\nCustom wallpaper (pick an image)\nRotate wallpapers (timer)' | pick "Background mode")"
 [ -n "$mode_choice" ] || exit 0
 
 case "$mode_choice" in
@@ -62,7 +68,12 @@ case "$mode_choice" in
     notify "Set to $flavor / flat color"
     ;;
 
-  "Wallpaper"*)
+  "Theme default wallpaper")
+    "$THEME_SH" set "$flavor" --theme-default
+    notify "Set to $flavor / tracked theme wallpaper"
+    ;;
+
+  "Custom wallpaper"*)
     shopt -s nullglob
     images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
     shopt -u nullglob

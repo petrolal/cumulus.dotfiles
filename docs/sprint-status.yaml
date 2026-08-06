@@ -1,0 +1,61 @@
+# generated: 2026-08-05
+# last_updated: 2026-08-05
+# project: cumulus.dotfiles
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: docs
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in the epic file
+#   - ready-for-dev: Dedicated story file created
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but is not required
+#   - done: Finished
+#
+# WORKFLOW NOTES:
+# ===============
+# - Stories are tracked at implementation status; dedicated story files may be
+#   added later when the story workflow requires review artifacts.
+# - Create a story file before moving a story to ready-for-dev.
+# - Stories should pass through review before done.
+
+generated: 2026-08-05
+last_updated: 2026-08-05
+project: cumulus.dotfiles
+project_key: NOKEY
+tracking_system: file-system
+story_location: docs
+
+development_status:
+  epic-1: in-progress
+  epic-1-retrospective: optional
+  epic-2: in-progress
+  epic-2-retrospective: optional
+  epic-3: in-progress
+  3-1-install-or-update-cumulus-neovim: review
+  3-2-deploy-the-neovim-configuration-safely: review
+  3-3-integrate-neovim-installation-with-validation: review
+  epic-3-retrospective: optional
+  epic-4: in-progress
+  4-1-add-tracked-theme-wallpaper-assets: review
+  4-2-preserve-user-wallpaper-overrides: ready-for-dev
+  4-3-expose-wallpaper-choice-clearly: in-progress
+  epic-4-retrospective: optional
+  epic-5: in-progress
+  5-1-define-the-runtime-refresh-coordinator: review
+  5-2-refresh-desktop-runtime-components: in-progress
+  5-3-refresh-neovim-through-restricted-rpc: in-progress
+  5-4-validate-immediate-refresh-and-failure-reporting: in-progress
+  5-5-synchronize-os-color-scheme-and-system-surfaces: in-progress
+  epic-5-retrospective: optional

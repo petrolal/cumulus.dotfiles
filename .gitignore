@@ -17,3 +17,8 @@ config/sway/colors.conf
 config/kitty/colors.conf
 config/waybar/style.css
 config/wofi/style.css
+
+# Tracked SVG defaults are kept; personal raster wallpapers remain ignored.
+themes/wallpapers/*
+!themes/wallpapers/*.svg
+!themes/wallpapers/ATTRIBUTION.md

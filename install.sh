@@ -21,7 +21,7 @@
 #   ./install.sh              # symlink configs only
 #   ./install.sh --packages   # also apt-install required packages first
 #   ./install.sh --zsh        # also run scripts/install-zsh.sh
-#   ./install.sh --nvim       # also run scripts/install-nvim-deps.sh
+#   ./install.sh --nvim       # install Neovim deps + deploy Cumulus Neovim
 #   ./install.sh --apps       # also run scripts/install-apps.sh
 #   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
 #   ./install.sh --browser    # also run scripts/install-browser.sh (Google Chrome + default browser)
@@ -161,6 +161,9 @@ run_installer() {
   local script="$DOTFILES_DIR/scripts/$1"
   local extra_args=()
   $DRY_RUN && extra_args+=(--dry-run)
+  if [ "$1" = "install-nvim.sh" ] && ! $DO_VALIDATE; then
+    extra_args+=(--no-validate)
+  fi
 
   log "Running $1 ${extra_args[*]:-}"
   if $DRY_RUN; then
@@ -206,7 +209,10 @@ main() {
     done
   else
     $DO_ZSH    && run_installer install-zsh.sh
-    $DO_NVIM   && run_installer install-nvim-deps.sh
+    if $DO_NVIM; then
+      run_installer install-nvim-deps.sh
+      run_installer install-nvim.sh
+    fi
     $DO_APPS   && run_installer install-apps.sh
     $DO_DEVOPS && run_installer install-devops.sh
     $DO_BROWSER && run_installer install-browser.sh

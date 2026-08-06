@@ -118,13 +118,31 @@ shows up as a spurious diff against the template.
 ### State & subcommands
 
 Theme choice persists at `~/.config/cumulus/theme/state` (`FLAVOR=`,
-`MODE=`, `WALLPAPER=`, `INTERVAL=`, and `NVIM_COLORSCHEME=` — plain
+`MODE=`, `WALLPAPER=`, `WALLPAPER_SOURCE=`, `INTERVAL=`, and
+`NVIM_COLORSCHEME=` — plain
 `KEY=VALUE` lines, directly `source`-able):
 
-- `theme.sh set <flavor> [--flat | --wallpaper <path> | --rotate [--interval N] | --preserve-background]` — validates the flavor against `themes/palettes/*.sh`, resolves the wallpaper path (bare filename resolved against `themes/wallpapers/`, or an absolute/relative path), regenerates all four config fragments, reloads sway (`swaymsg reload`), and updates the state file. `--preserve-background` is used by Neovim synchronization to retain the current wallpaper/rotation mode.
+- `theme.sh set <flavor> [--flat | --theme-default | --wallpaper <path> | --rotate [--interval N] | --preserve-background]` — validates the flavor against `themes/palettes/*.sh`, follows the selected flavor's tracked SVG when `--theme-default` is used, preserves `WALLPAPER_SOURCE=user` overrides during theme changes, regenerates all four config fragments, reloads sway (`swaymsg reload`), and updates the state file. `--preserve-background` is used by Neovim synchronization to retain the current wallpaper/rotation mode.
 - `theme.sh apply` — re-applies whatever's in the state file; this is what `install.sh` calls on every run, and what you'd wire into a login hook.
 - `theme.sh next` — advances rotation by one wallpaper; called by the systemd timer, but safe to run manually too.
 - `theme.sh list` / `theme.sh current` — introspection, no side effects.
+
+### Runtime refresh coordination
+
+After state and generated files are persisted, `theme.sh` invokes
+`scripts/runtime-refresh.sh` in deterministic order: Sway, Waybar, Kitty,
+Wofi, Neovim, and the optional GNOME/GTK color-scheme adapter. Each adapter is
+best-effort and reports `refreshed` or `deferred or unavailable`; a missing
+runtime endpoint never rolls back the saved theme. Kitty uses the restricted
+socket configured through `CUMULUS_KITTY_SOCKET`, and Neovim refresh only
+connects to per-user Unix sockets before sending
+`cumulus.theme.load_saved_theme()`.
+
+`scripts/lock.sh` reads the canonical state and palette at invocation time, so
+new lock-screen sessions always use the active theme even though an existing
+locked session is not live-reloaded. The state writer uses a temporary file and
+atomic rename, preventing an interrupted theme change from leaving partial
+`KEY=VALUE` state.
 
 ### Wallpaper rotation via systemd `--user` timer
 
@@ -238,6 +256,6 @@ security-sensitive, user-judgment step).
   (read-only checks against the live system) plus manual `bash -n` /
   `sway --validate` / `--dry-run` runs before every commit, documented in
   [development-guide.md](./development-guide.md).
-- `themes/wallpapers/` is gitignored by design — wallpapers are a personal,
-  often large/non-redistributable asset; only the mechanism to use them is
-  tracked.
+- `themes/wallpapers/` ignores personal raster/non-redistributable assets by
+  design, while the small original SVG theme defaults and attribution record
+  are tracked.

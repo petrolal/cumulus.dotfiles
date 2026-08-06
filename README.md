@@ -92,7 +92,7 @@ tool installers straight from `install.sh` — no need to invoke them by hand:
 
 ```bash
 ./install.sh --zsh        # zsh + oh-my-zsh + Nerd Font + nvim as default editor
-./install.sh --nvim       # latest Neovim + full plugin toolchain
+./install.sh --nvim       # Neovim + full plugin toolchain + Cumulus Neovim config
 ./install.sh --apps       # default desktop applications (browsers, IDEs, chat, etc.)
 ./install.sh --devops     # Docker + Terraform + Ansible
 ./install.sh --browser    # Google Chrome + set as default browser
