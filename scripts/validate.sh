@@ -104,6 +104,8 @@ fi
 check_cmd "wofi" wofi
 check_cmd "waybar" waybar -v
 check_cmd "kitty" kitty
+check_cmd "blueman-applet" blueman-applet -h
+check_cmd "yazi" yazi --version
 
 section "Zsh"
 if command -v zsh >/dev/null 2>&1; then

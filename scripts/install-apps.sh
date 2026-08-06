@@ -45,13 +45,14 @@ APT_PACKAGES=(
   docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   thunderbird             # transitional package -> installs the thunderbird snap
   network-manager-gnome   # nm-applet, network tray indicator
+  blueman                 # blueman-applet, bluetooth tray indicator
   sway-notification-center # swaync
   policykit-1             # polkit auth agent (pkexec)
 )
 
 # Apps only distributed as snaps (or best installed that way on Ubuntu).
 SNAP_PACKAGES=(firefox telegram-desktop)
-SNAP_CLASSIC_PACKAGES=(1password intellij-idea obsidian)
+SNAP_CLASSIC_PACKAGES=(1password intellij-idea obsidian yazi)
 
 install_apt() {
   log "Installing apt packages: ${APT_PACKAGES[*]}"

@@ -45,6 +45,7 @@ exec waybar
 # System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
 # connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
 exec nm-applet --indicator
+exec blueman-applet
 
 # 1Password — starts minimized to tray, unlocks against the already-running gnome-keyring/PAM session.
 exec 1password --silent
@@ -184,6 +185,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec $launcher
 bindsym $mod+Shift+b exec google-chrome-stable
+bindsym $mod+Shift+f exec $term -e yazi
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'

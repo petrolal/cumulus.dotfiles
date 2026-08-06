@@ -91,8 +91,8 @@ declare -A LINKS=(
 # swaynag ships as part of the "sway" package on both Ubuntu and Arch, so it's
 # not listed as a separate dependency here. jq/libnotify are needed by the
 # scripts/ helpers (window screenshots, desktop notifications).
-APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin)
-PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify)
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin blueman)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify blueman yazi)
 # Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
 AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
 
