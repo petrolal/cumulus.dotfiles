@@ -66,16 +66,31 @@ install_system_packages() {
 }
 
 install_neovim() {
-  local arch latest_url
+  local arch nvim_tag latest_url
   arch="$(uname -m)"
   if [ "$arch" != "x86_64" ]; then
     log "Unsupported arch for the prebuilt Neovim tarball ($arch) — install Neovim manually for your platform."
     return
   fi
 
-  latest_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+  # Resolve the tag explicitly via the GitHub API instead of trusting the
+  # /releases/latest redirect, which can be ambiguous (neovim also publishes
+  # a floating "stable" tag/release alongside versioned tags like vX.Y.Z).
+  # The API's "latest" release is defined as the most recent non-prerelease,
+  # non-draft release, so this always resolves to the true latest stable
+  # version tag (e.g. v0.12.4), never the nightly/prerelease build.
+  nvim_tag="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest \
+    | grep -Po '"tag_name": *"\K[^"]+' || true)"
 
-  log "Downloading latest Neovim release..."
+  if [ -n "$nvim_tag" ]; then
+    log "Latest stable Neovim release: $nvim_tag"
+    latest_url="https://github.com/neovim/neovim/releases/download/$nvim_tag/nvim-linux-x86_64.tar.gz"
+  else
+    log "WARN: could not resolve latest stable tag via GitHub API; falling back to the /releases/latest redirect."
+    latest_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+  fi
+
+  log "Downloading latest stable Neovim release..."
   run "curl -fL '$latest_url' -o /tmp/nvim-linux-x86_64.tar.gz"
   run "sudo rm -rf '$NVIM_INSTALL_DIR'"
   run "sudo tar -C /opt -xzf /tmp/nvim-linux-x86_64.tar.gz"
