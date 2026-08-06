@@ -3,7 +3,7 @@ story_key: 2-1-read-shared-theme-state-in-neovim
 epic: 2
 story: 2.1
 title: Read Shared Theme State in Neovim
-status: review
+status: done
 ---
 
 # Story 2.1: Read Shared Theme State in Neovim
@@ -47,6 +47,34 @@ so that editor startup follows the active desktop flavor.
   - [x] Test unavailable colorscheme fallback without startup failure.
 - [x] Run the Neovim headless validation available in the configuration
   repository and `git diff --check`.
+
+### Review Findings
+
+- [x] [Review][Patch] Treat `FLAVOR` as the required shared selection field and
+  validate optional desktop fields only when present
+  [lua/cumulus/theme/init.lua:41-70] — valid partial shared state currently
+  falls back to stale local state.
+- [x] [Review][Patch] Reject unknown shared-state keys
+  [lua/cumulus/theme/init.lua:23-39] — arbitrary uppercase keys are accepted
+  instead of marking the record malformed.
+- [x] [Review][Patch] Make shared-state reads race-safe
+  [lua/cumulus/theme/init.lua:25-27] — a file disappearing after
+  `filereadable()` can abort startup.
+- [x] [Review][Patch] Reject empty wallpaper values for non-flat modes
+  [lua/cumulus/theme/init.lua:52-65] — malformed wallpaper/rotation records
+  can be treated as valid.
+- [x] [Review][Patch] Protect local fallback persistence errors
+  [lua/cumulus/theme/init.lua:80-94] — an unwritable local state directory can
+  turn a successful colorscheme load into a startup failure.
+- [x] [Review][Patch] Resolve theme IDs to colorscheme names in health checks
+  [lua/cumulus/health.lua:55-57] — health currently constructs `colorscheme
+  azure` instead of `azure-theme`.
+- [x] [Review][Patch] Test actual shared flavor-to-colorscheme application
+  [scripts/test-theme-state.sh:58-60] — current coverage checks only the
+  returned theme ID.
+- [x] [Review][Patch] Cover missing, malformed, Catppuccin, and unavailable
+  colorscheme states [scripts/test-theme-state.sh:62-78] — required fallback
+  and failure paths are not fully exercised.
 
 ## Dev Notes
 
@@ -99,6 +127,11 @@ GPT-5.6 Luna
   malicious wallpaper data, and unavailable colorscheme fallback.
 - Neovim validation passed: Lazy check, core options, all themes, healthcheck,
   and required modules.
+- Review fixes added allowlisted/race-safe state parsing, optional desktop
+  field compatibility, non-flat wallpaper validation, protected local-state
+  writes, and correct healthcheck colorscheme resolution.
+- Expanded tests cover missing state, Catppuccin mapping, actual colorscheme
+  application, malformed records, and unavailable colorscheme fallback.
 
 ### Completion Notes List
 
@@ -115,3 +148,5 @@ GPT-5.6 Luna
 
 - 2026-08-05: Hardened shared-state validation and fallback ordering; added
   isolated headless tests. Story ready for review.
+- 2026-08-05: Addressed all code-review findings and reran the full Neovim
+  validation suite. Story complete.

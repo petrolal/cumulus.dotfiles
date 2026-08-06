@@ -44,8 +44,8 @@ development_status:
   1-3-persist-theme-state-safely: done
   epic-1-retrospective: optional
   epic-2: in-progress
-  2-1-read-shared-theme-state-in-neovim: review
-  2-2-synchronize-theme-changes-bidirectionally: backlog
+  2-1-read-shared-theme-state-in-neovim: done
+  2-2-synchronize-theme-changes-bidirectionally: ready-for-dev
   2-3-align-active-theme-picker-ux: backlog
   2-4-preserve-neovim-semantic-highlight-engines: backlog
   2-5-validate-cross-environment-theme-availability: backlog
