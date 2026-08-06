@@ -1,6 +1,7 @@
 # Catppuccin Macchiato (dark, warmer/softer than Mocha)
 THEME_NAME="macchiato"
 THEME_LABEL="Macchiato (dark, soft)"
+NVIM_COLORSCHEME="catppuccin-macchiato"
 BASE="#24273a"
 MANTLE="#1e2030"
 CRUST="#181926"

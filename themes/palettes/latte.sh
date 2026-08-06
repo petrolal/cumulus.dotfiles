@@ -1,6 +1,7 @@
 # Catppuccin Latte (light)
 THEME_NAME="latte"
 THEME_LABEL="Latte (light)"
+NVIM_COLORSCHEME="catppuccin-latte"
 BASE="#eff1f5"
 MANTLE="#e6e9ef"
 CRUST="#dce0e8"

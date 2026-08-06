@@ -158,6 +158,19 @@ and report a deferred result without failing theme persistence.
 NFR14: Flat-mode color propagation must use palette tokens rather than
 hardcoded per-application colors.
 
+NFR15: Shared theme state must be serialized safely; wallpaper paths and other
+user-controlled values must not become executable shell input when read back.
+State updates must use atomic replacement and preserve either a complete old
+record or a complete new record.
+
+NFR16: Validation and test commands must not mutate the host desktop session,
+including its OS/GTK color-scheme preference, unless the test explicitly uses
+an isolated adapter stub.
+
+NFR17: Runtime IPC endpoints must be explicitly configured or discoverable,
+restricted to the current user, and report unsupported or unavailable
+endpoints without terminating a valid theme change.
+
 UX-DR6: Installation must report desktop and Neovim setup as one coherent
 workflow.
 
@@ -199,7 +212,8 @@ NFR6-NFR8: Epic 2 - Neovim independence, contrast, and migration safety
 NFR9: Epic 3 - Canonical Neovim source
 NFR10: Epic 4 - Wallpaper distribution and licensing
 NFR11-NFR12: Epic 5 - Restricted, failure-tolerant runtime refresh
-NFR13-NFR14: Epic 5 - OS integration and semantic flat-mode propagation
+NFR13-NFR17: Epics 1 and 5 - OS integration, safe state serialization,
+testing isolation, and runtime endpoint handling
 
 ## Epic List
 
@@ -214,6 +228,64 @@ wallpaper modes, and safe persistence behavior.
 **Implementation notes:** Extend the existing shell palette contract and
 `scripts/theme.sh`; keep generated files derived; preserve the current
 `~/.config/cumulus/theme/state` format and migration behavior.
+
+### Story 1.1: Add Cloud Palette Definitions
+
+As a desktop user,
+I want AWS, Azure, GCP, and OCI palettes registered beside Catppuccin,
+so that every supported flavor uses the existing rendering contract.
+
+**Acceptance Criteria:**
+
+**Given** a cloud flavor is listed
+**When** its palette is loaded
+**Then** it defines all 26 required color variables, a stable label, and its
+Neovim colorscheme metadata.
+
+**Given** an invalid or incomplete palette is encountered
+**When** validation runs
+**Then** it fails with the flavor and missing variable identified.
+
+### Story 1.2: Render Cloud Themes Across the Desktop
+
+As a Sway user,
+I want a selected cloud flavor rendered into Sway, kitty, Waybar, and Wofi,
+so that all managed desktop surfaces share one palette.
+
+**Acceptance Criteria:**
+
+**Given** a valid cloud flavor is selected
+**When** `theme.sh set <flavor>` runs
+**Then** all four generated config fragments are rendered from palette tokens.
+
+**Given** Sway is unavailable
+**When** the flavor is selected
+**Then** state and generated files still update for the next session.
+
+**Given** flat mode is selected
+**When** styles are generated
+**Then** Sway and Waybar backgrounds use the exact same `BASE` token.
+
+### Story 1.3: Persist Theme State Safely
+
+As a user switching themes,
+I want the shared state to survive repeated changes and interruptions,
+so that a partial write cannot create an invalid desktop configuration.
+
+**Acceptance Criteria:**
+
+**Given** a theme change succeeds
+**When** the state file is read
+**Then** it contains the complete `FLAVOR`, `MODE`, `WALLPAPER`,
+`WALLPAPER_SOURCE`, `INTERVAL`, and `NVIM_COLORSCHEME` record.
+
+**Given** a wallpaper path contains spaces or shell metacharacters
+**When** the state is persisted and reloaded
+**Then** it remains data, never executable shell input.
+
+**Given** persistence is interrupted
+**When** the state file is inspected
+**Then** it contains either the complete previous record or complete new record.
 
 ### Epic 2: Synchronized Cloud Theme Experience
 
@@ -231,6 +303,95 @@ palette completeness, generated output, and readable contrast.
 
 **Natural dependency:** Epic 2 consumes the shared palette metadata and state
 contract delivered by Epic 1. Epic 1 remains fully usable without Neovim.
+
+### Story 2.1: Read Shared Theme State in Neovim
+
+As a Neovim user,
+I want Neovim to read the canonical desktop theme state,
+so that editor startup follows the active desktop flavor.
+
+**Acceptance Criteria:**
+
+**Given** a valid shared state exists
+**When** Neovim starts
+**Then** the shared flavor maps to the configured Neovim colorscheme.
+
+**Given** shared state is missing, malformed, or unavailable
+**When** Neovim starts
+**Then** it uses its local fallback state without failing startup.
+
+### Story 2.2: Synchronize Theme Changes Bidirectionally
+
+As a user changing themes,
+I want desktop and Neovim changes to converge on one state,
+so that the two environments do not silently diverge.
+
+**Acceptance Criteria:**
+
+**Given** a theme is selected in Neovim
+**When** the desktop command is available
+**Then** the desktop state updates once without recursive updates.
+
+**Given** the desktop command is unavailable
+**When** a Neovim theme is selected
+**Then** Neovim applies the theme locally and reports desktop synchronization
+as deferred.
+
+**Given** wallpaper or rotation state exists
+**When** Neovim changes only the flavor
+**Then** the existing background mode and path remain preserved.
+
+### Story 2.3: Align Active-Theme Picker UX
+
+As a user choosing a theme,
+I want desktop and Neovim pickers to use matching labels and markers,
+so that the current shared choice is obvious.
+
+**Acceptance Criteria:**
+
+**Given** a current flavor is persisted
+**When** either picker opens
+**Then** that flavor has a visible active marker and all supported flavors use
+consistent names.
+
+**Given** either picker is canceled
+**When** it exits
+**Then** no state, generated config, or colorscheme changes occur.
+
+### Story 2.4: Preserve Neovim Semantic Highlight Engines
+
+As a Neovim user,
+I want theme changes to affect presentation without replacing semantic plugins,
+so that diagnostics, Telescope, dashboard, statusline, and bufferline behavior
+remain intact.
+
+**Acceptance Criteria:**
+
+**Given** a supported theme is applied
+**When** Neovim loads the colorscheme
+**Then** existing semantic highlight engines and plugin ownership remain
+unchanged.
+
+**Given** a cloud colorscheme is unavailable
+**When** the theme is selected
+**Then** Neovim reports the failure and applies its safe fallback.
+
+### Story 2.5: Validate Cross-Environment Theme Availability
+
+As a maintainer,
+I want automated checks for shared state, palette metadata, and colorschemes,
+so that synchronization failures are caught before use.
+
+**Acceptance Criteria:**
+
+**Given** all supported flavors are registered
+**When** validation runs
+**Then** every desktop palette metadata mapping and Neovim colorscheme entry is
+checked.
+
+**Given** a state record contains user-controlled wallpaper data
+**When** validation parses it
+**Then** values are treated as data and no shell commands execute.
 
 ### Epic 3: Cumulus Neovim Installation
 
@@ -336,6 +497,14 @@ so that switching colors does not overwrite my personalization.
 **When** the theme changes
 **Then** the new theme default is used, with flat color as the final fallback.
 
+**Given** a wallpaper path contains spaces or shell metacharacters
+**When** the state is persisted and reloaded
+**Then** the path remains data and cannot execute shell input.
+
+**Given** rotation mode is active
+**When** the theme changes
+**Then** the rotation mode, interval, and next-image behavior remain valid.
+
 ### Story 4.3: Expose Wallpaper Choice Clearly
 
 As a user choosing a theme,
@@ -373,11 +542,18 @@ so that every supported component receives the same update.
 
 **Given** a valid theme is selected
 **When** state and generated files are updated
-**Then** refresh adapters run in deterministic order.
+**Then** refresh adapters run in this order: Sway, Waybar, Kitty, Wofi,
+Neovim, and OS/GTK.
 
 **Given** an optional adapter is unavailable
 **When** the refresh completes
-**Then** the state remains persisted and the result identifies the partial failure.
+**Then** the state remains persisted and the result identifies the partial
+failure with refreshed and deferred adapter counts.
+
+**Given** an adapter fails
+**When** refresh continues
+**Then** later independent adapters still run and the coordinator exits
+successfully after reporting a partial result.
 
 ### Story 5.2: Refresh Desktop Runtime Components
 
@@ -394,6 +570,11 @@ so that I do not need to log out or manually restart applications.
 **Given** Kitty's restricted remote-control socket is unavailable
 **When** the theme changes
 **Then** Kitty is reported as deferred while the persisted theme remains successful.
+
+**Given** a Kitty socket is configured
+**When** the theme changes
+**Then** the socket is explicitly enabled, local-user-owned, and used only for
+the color refresh command.
 
 **Given** no runtime is available
 **When** the theme changes
@@ -434,6 +615,11 @@ to the current user, and reports any stale or unreachable socket individually.
 **When** the desktop theme changes
 **Then** the state remains valid and Neovim applies it on next launch.
 
+**Given** multiple Neovim sockets exist
+**When** the desktop theme changes
+**Then** duplicate socket paths are removed, stale sockets are reported
+individually, and only current-user-owned sockets are contacted.
+
 **Given** an RPC endpoint is configured
 **When** refresh occurs
 **Then** access is restricted to the local user/socket.
@@ -458,6 +644,11 @@ an incomplete set of `KEY=VALUE` entries.
 **Given** Kitty, Waybar, or Neovim is unavailable
 **When** the validation suite runs
 **Then** it reports a clear deferred/partial result without failing state validation.
+
+**Given** runtime validation exercises OS/GTK integration
+**When** the tests run
+**Then** they use isolated adapter stubs and do not mutate the host desktop
+preference.
 
 **Given** a custom wallpaper is active
 **When** runtime refresh is tested

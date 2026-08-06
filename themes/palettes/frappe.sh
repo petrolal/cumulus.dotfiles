@@ -1,6 +1,7 @@
 # Catppuccin Frappe (dark, muted/pastel)
 THEME_NAME="frappe"
 THEME_LABEL="Frappe (dark, muted)"
+NVIM_COLORSCHEME="catppuccin-frappe"
 BASE="#303446"
 MANTLE="#292c3c"
 CRUST="#232634"

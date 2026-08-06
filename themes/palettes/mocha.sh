@@ -1,6 +1,7 @@
 # Catppuccin Mocha (dark) — https://github.com/catppuccin/catppuccin
 THEME_NAME="mocha"
 THEME_LABEL="Mocha (dark)"
+NVIM_COLORSCHEME="catppuccin-mocha"
 BASE="#1e1e2e"
 MANTLE="#181825"
 CRUST="#11111b"

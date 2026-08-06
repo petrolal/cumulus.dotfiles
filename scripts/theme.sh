@@ -74,22 +74,46 @@ default_wallpaper() {
 
 validate_palette() {
   local flavor="$1" var
+  for var in THEME_NAME THEME_LABEL NVIM_COLORSCHEME; do
+    [ -n "${!var:-}" ] || die "palette '$flavor' is missing metadata: $var"
+  done
+  [[ "$THEME_NAME" = "$flavor" ]] ||
+    die "palette '$flavor' has mismatched THEME_NAME: $THEME_NAME"
+  [[ "$NVIM_COLORSCHEME" =~ ^[A-Za-z0-9_.-]+$ ]] ||
+    die "palette '$flavor' has invalid NVIM_COLORSCHEME: $NVIM_COLORSCHEME"
   for var in BASE MANTLE CRUST TEXT SUBTEXT1 SUBTEXT0 SURFACE0 SURFACE1 \
              SURFACE2 OVERLAY0 BLUE LAVENDER SAPPHIRE SKY TEAL GREEN YELLOW \
              PEACH MAROON RED MAUVE PINK FLAMINGO ROSEWATER; do
     [ -n "${!var:-}" ] || die "palette '$flavor' is missing required variable: $var"
+    [[ "${!var}" =~ ^#[[:xdigit:]]{6}$ ]] ||
+      die "palette '$flavor' has invalid hex color for $var: ${!var}"
+  done
+}
+
+validate_templates() {
+  local template placeholder
+  for template in "$DOTFILES_DIR/config/waybar/style.css.tmpl" \
+                  "$DOTFILES_DIR/config/wofi/style.css.tmpl"; do
+    [ -f "$template" ] || die "missing theme template: $template"
+    for placeholder in @@BASE@@ @@TEXT@@ @@SURFACE0@@ @@BLUE@@; do
+      grep -Fq "$placeholder" "$template" ||
+        die "theme template is missing placeholder $placeholder: $template"
+    done
   done
 }
 
 # ── Generate colors.conf/colors.css for each app from a palette file ────────
 generate_configs() {
   local flavor="$1" mode="$2" wallpaper="${3:-}"
-  unset NVIM_COLORSCHEME
+  local render_dir
+  unset THEME_NAME THEME_LABEL NVIM_COLORSCHEME
   # shellcheck disable=SC1090
   source "$PALETTES_DIR/$flavor.sh"
   validate_palette "$flavor"
+  validate_templates
 
   mkdir -p "$STATE_DIR"
+  render_dir="$(mktemp -d "$STATE_DIR/render.XXXXXX")"
 
   # sway: wallpaper exec + client colors
   {
@@ -105,7 +129,7 @@ generate_configs() {
     echo "client.focused_inactive $SURFACE1   $BASE       $TEXT       $SURFACE1   $SURFACE1"
     echo "client.unfocused        $SURFACE0   $BASE       $SUBTEXT0   $SURFACE0   $SURFACE0"
     echo "client.urgent           $RED        $BASE       $RED        $RED        $RED"
-  } > "$DOTFILES_DIR/config/sway/colors.conf"
+  } > "$render_dir/sway.colors.conf"
 
   # waybar: render style.css from style.css.tmpl (@@PLACEHOLDER@@ substitution).
   # Rendered directly rather than via GTK CSS @import, since @import in GTK
@@ -115,13 +139,13 @@ generate_configs() {
     -e "s/@@BASE@@/$BASE/g" -e "s/@@TEXT@@/$TEXT/g" -e "s/@@SUBTEXT0@@/$SUBTEXT0/g" \
     -e "s/@@SURFACE0@@/$SURFACE0/g" -e "s/@@BLUE@@/$BLUE/g" -e "s/@@RED@@/$RED/g" \
     -e "s/@@YELLOW@@/$YELLOW/g" \
-    "$DOTFILES_DIR/config/waybar/style.css.tmpl" > "$DOTFILES_DIR/config/waybar/style.css"
+    "$DOTFILES_DIR/config/waybar/style.css.tmpl" > "$render_dir/waybar.style.css"
 
   # wofi: same template-rendering approach.
   sed \
     -e "s/@@BASE@@/$BASE/g" -e "s/@@TEXT@@/$TEXT/g" \
     -e "s/@@SURFACE0@@/$SURFACE0/g" -e "s/@@BLUE@@/$BLUE/g" \
-    "$DOTFILES_DIR/config/wofi/style.css.tmpl" > "$DOTFILES_DIR/config/wofi/style.css"
+    "$DOTFILES_DIR/config/wofi/style.css.tmpl" > "$render_dir/wofi.style.css"
 
   # kitty: native kitty.conf syntax
   {
@@ -158,7 +182,13 @@ generate_configs() {
     echo "color14 $TEAL"
     echo "color7 $SUBTEXT1"
     echo "color15 $SUBTEXT0"
-  } > "$DOTFILES_DIR/config/kitty/colors.conf"
+  } > "$render_dir/kitty.colors.conf"
+
+  mv -f "$render_dir/sway.colors.conf" "$DOTFILES_DIR/config/sway/colors.conf"
+  mv -f "$render_dir/waybar.style.css" "$DOTFILES_DIR/config/waybar/style.css"
+  mv -f "$render_dir/wofi.style.css" "$DOTFILES_DIR/config/wofi/style.css"
+  mv -f "$render_dir/kitty.colors.conf" "$DOTFILES_DIR/config/kitty/colors.conf"
+  rmdir "$render_dir"
 }
 
 # ── Reload the running apps to pick up the new colors ───────────────────────
@@ -281,14 +311,13 @@ cmd_set() {
   fi
 
   # Load and validate metadata before persisting shared state.
-  unset NVIM_COLORSCHEME
+  unset THEME_NAME THEME_LABEL NVIM_COLORSCHEME
   # shellcheck disable=SC1090
   source "$PALETTES_DIR/$flavor.sh"
   validate_palette "$flavor"
 
-  write_state "$flavor" "$mode" "${wallpaper:-}" "$wallpaper_source" "$interval" "${NVIM_COLORSCHEME:-}"
-
   generate_configs "$flavor" "$mode" "$wallpaper"
+  write_state "$flavor" "$mode" "${wallpaper:-}" "$wallpaper_source" "$interval" "${NVIM_COLORSCHEME:-}"
 
   if [ "$mode" = "rotate" ]; then
     write_rotate_units "$interval"
@@ -359,6 +388,7 @@ cmd_list() {
   echo "Flavors:"
   local f
   for f in $(valid_flavors); do
+    unset THEME_NAME THEME_LABEL NVIM_COLORSCHEME
     # shellcheck disable=SC1090
     source "$PALETTES_DIR/$f.sh"
     printf '  %-10s %s\n' "$f" "$THEME_LABEL"
