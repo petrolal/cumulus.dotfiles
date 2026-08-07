@@ -265,6 +265,7 @@ bindsym $mod+Shift+t exec ~/.config/sway/scripts/theme-picker.sh
 bindsym $mod+Escape exec ~/cumulus.dotfiles/scripts/lock.sh # Lock screen
 bindsym $mod+Shift+Escape exec systemctl suspend # Suspend system
 bindsym $mod+Control+Escape exec systemctl poweroff # Shutdown system
+bindsym $mod+Control+Shift+Escape exec systemctl reboot # Reboot system
 
 # Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
 bindsym Print exec ~/cumulus.dotfiles/scripts/screenshot.sh full
