@@ -87,10 +87,9 @@ done
 assert test "$file_backup_found" = true
 
 printf 'dirty\n' > "$checkout/local.txt"
-if run_installer "$home" "$checkout" >/dev/null 2>&1; then
-  printf 'FAIL: dirty checkout was accepted\n' >&2
-  exit 1
-fi
+run_installer "$home" "$checkout" >"$TMP_DIR/dirty.log" 2>&1
+assert rg -q 'local changes; skipping git pull' "$TMP_DIR/dirty.log"
+assert test -f "$checkout/local.txt"
 rm "$checkout/local.txt"
 
 non_git="$TMP_DIR/non-git"
