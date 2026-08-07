@@ -90,9 +90,12 @@ declare -A LINKS=(
 
 # swaynag ships as part of the "sway" package on both Ubuntu and Arch, so it's
 # not listed as a separate dependency here. jq/libnotify are needed by the
-# scripts/ helpers (window screenshots, desktop notifications).
-APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin blueman)
-PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify blueman yazi)
+# scripts/ helpers (window screenshots, desktop notifications). xkb-data /
+# xkeyboard-config ships the "altgr-intl" keyboard variant used as the
+# default input layout in config/sway/config; it's usually pulled in
+# transitively, but is listed explicitly so minimal installs still get it.
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin blueman xkb-data)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify blueman yazi xkeyboard-config)
 # Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
 AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
 
