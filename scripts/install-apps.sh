@@ -4,13 +4,8 @@
 # relies on, as referenced throughout config/sway/config (workspace
 # assigns, tray helpers, launchers).
 #
-# NOTE: unlike install.sh, this script currently targets Ubuntu (apt + snap)
-# only, since most entries here come from third-party apt repos already
-# configured on this machine (Microsoft Edge, VS Code, Docker, GitHub CLI)
-# or Canonical's snap store (Firefox, 1Password, IntelliJ IDEA, Obsidian,
-# Telegram, Thunderbird). On Arch, install the closest AUR equivalents
-# instead (e.g. `microsoft-edge-stable-bin`, `visual-studio-code-bin`,
-# `obsidian`, `telegram-desktop`, `1password`, `intellij-idea-ultimate-edition`).
+# Supports Ubuntu/Debian (apt + snap) and Arch (pacman + AUR via
+# yay/paru).
 #
 # Usage:
 #   ./install-apps.sh            # install everything below
@@ -30,12 +25,7 @@ done
 log() { printf '\033[1;34m[apps]\033[0m %s\n' "$*"; }
 run() { if $DRY_RUN; then echo "+ $*"; else eval "$@"; fi }
 
-if ! command -v apt >/dev/null 2>&1; then
-  log "apt not found — this script only supports Ubuntu/Debian right now."
-  log "See the header comment for Arch/AUR equivalents."
-  exit 1
-fi
-
+# ── Ubuntu/Debian (apt) ─────────────────────────────────────────────────
 # Packages available directly via apt (some need the third-party repos this
 # machine already has configured under /etc/apt/sources.list.d/).
 APT_PACKAGES=(
@@ -53,6 +43,30 @@ APT_PACKAGES=(
 # Apps only distributed as snaps (or best installed that way on Ubuntu).
 SNAP_PACKAGES=(firefox telegram-desktop)
 SNAP_CLASSIC_PACKAGES=(1password intellij-idea obsidian yazi)
+
+# ── Arch (pacman + AUR) ──────────────────────────────────────────────────
+# Packages available directly in the official repos.
+PACMAN_PACKAGES=(
+  github-cli              # gh
+  docker docker-buildx docker-compose
+  thunderbird
+  network-manager-applet  # nm-applet, network tray indicator
+  blueman                 # blueman-applet, bluetooth tray indicator
+  polkit                  # polkit auth agent (pkexec)
+  firefox
+  telegram-desktop
+  yazi
+)
+
+# Packages that only exist in the AUR (installed via yay/paru if available).
+AUR_PACKAGES=(
+  microsoft-edge-stable-bin
+  visual-studio-code-bin
+  sway-notification-center
+  1password
+  intellij-idea-ultimate-edition
+  obsidian
+)
 
 install_apt() {
   log "Installing apt packages: ${APT_PACKAGES[*]}"
@@ -73,9 +87,31 @@ install_snaps() {
   done
 }
 
+install_pacman() {
+  log "Installing pacman packages: ${PACMAN_PACKAGES[*]}"
+  run "sudo pacman -Syu --needed --noconfirm ${PACMAN_PACKAGES[*]}"
+}
+
+install_aur() {
+  local helper=""
+  if command -v yay >/dev/null 2>&1; then
+    helper=yay
+  elif command -v paru >/dev/null 2>&1; then
+    helper=paru
+  fi
+  if [ -z "$helper" ]; then
+    log "No AUR helper (yay/paru) found — skipping: ${AUR_PACKAGES[*]}"
+    log "Install an AUR helper (e.g. https://github.com/Jguer/yay), then run:"
+    log "  yay -S ${AUR_PACKAGES[*]}"
+    return
+  fi
+  log "Installing AUR packages via $helper: ${AUR_PACKAGES[*]}"
+  run "$helper -S --needed --noconfirm ${AUR_PACKAGES[*]}"
+}
+
 install_spotify_player() {
   # spotify-player / spotify-tui TUI clients referenced by ~/.config/spotify-player
-  # and ~/.config/spotify-tui — installed via cargo, not apt/snap.
+  # and ~/.config/spotify-tui — installed via cargo, not apt/pacman/snap.
   if ! command -v cargo >/dev/null 2>&1; then
     log "cargo not found — skipping spotify_player (install Rust first: https://rustup.rs)"
     return
@@ -90,8 +126,19 @@ install_spotify_player() {
 
 main() {
   $DRY_RUN && log "DRY RUN — no changes will be made"
-  install_apt
-  install_snaps
+
+  if command -v apt >/dev/null 2>&1; then
+    install_apt
+    install_snaps
+  elif command -v pacman >/dev/null 2>&1; then
+    install_pacman
+    install_aur
+  else
+    log "No supported package manager found (apt/pacman) — install manually:"
+    log "  ${APT_PACKAGES[*]}"
+    exit 1
+  fi
+
   install_spotify_player
   log "Done. Add yourself to the docker group if needed: sudo usermod -aG docker \$USER (then re-login)"
 }
