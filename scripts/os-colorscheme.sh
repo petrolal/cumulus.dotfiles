@@ -20,13 +20,8 @@ main() {
     return 0
   }
 
-  local flavor="mocha" scheme="prefer-dark"
-  if [ -f "$STATE_FILE" ]; then
-    while IFS='=' read -r key value || [ -n "$key" ]; do
-      [ "$key" = FLAVOR ] && flavor="$value"
-    done < "$STATE_FILE"
-  fi
-  [ "$flavor" = "latte" ] && scheme="prefer-light"
+  # All remaining flavors (aws/azure/gcp/oci) are dark palettes.
+  local scheme="prefer-dark"
   gsettings set org.gnome.desktop.interface color-scheme "$scheme" >/dev/null
   log "set color scheme: $scheme"
 }

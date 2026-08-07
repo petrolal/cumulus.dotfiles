@@ -10,8 +10,8 @@
 #   5. Installs the JetBrainsMono Nerd Font (unconditionally — kitty/waybar/
 #      wofi/sway configs hardcode it, so icons render as boxes without it)
 #      — see scripts/install-fonts.sh.
-#   6. Applies the saved theme (Catppuccin flavor + flat color/wallpaper/
-#      rotation), or the default (mocha / flat) on first run — see
+#   6. Applies the saved theme (AWS/Azure/GCP/OCI cloud flavor + flat color/wallpaper/
+#      rotation), or the default (aws / flat) on first run — see
 #      scripts/theme.sh.
 #   7. Deploys Cumulus Neovim & deps (default enabled; skip with --no-nvim or --links-only).
 #   8. (Optionally) runs additional tool installers (--zsh, --apps, --devops, --browser, --all-tools).

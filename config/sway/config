@@ -88,7 +88,7 @@ output HDMI-* position 1920 0
 ### Input configuration
 ### ────────────────────────────────────────────────────────────────
 input type:keyboard {
-    xkb_layout br
+    xkb_layout us
     repeat_delay 300
     repeat_rate 40
 }

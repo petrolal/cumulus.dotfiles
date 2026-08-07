@@ -13,7 +13,7 @@ required=(
   OVERLAY0 BLUE LAVENDER SAPPHIRE SKY TEAL GREEN YELLOW PEACH MAROON RED
   MAUVE PINK FLAMINGO ROSEWATER
 )
-flavors=(aws azure gcp oci mocha macchiato frappe latte)
+flavors=(aws azure gcp oci)
 
 for flavor in "${flavors[@]}"; do
   palette="$REPO_ROOT/themes/palettes/$flavor.sh"

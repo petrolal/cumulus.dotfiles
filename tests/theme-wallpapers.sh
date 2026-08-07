@@ -20,7 +20,7 @@ assert() {
   fi
 }
 
-flavors=(mocha macchiato frappe latte aws azure gcp oci)
+flavors=(aws azure gcp oci)
 for flavor in "${flavors[@]}"; do
   asset="$REPO_ROOT/themes/wallpapers/$flavor.svg"
   assert test -s "$asset"

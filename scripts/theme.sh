@@ -5,7 +5,7 @@
 #
 # Concepts:
 #   - Flavor: one of the palettes in themes/palettes/*.sh, including the four
-#       Catppuccin flavors and the AWS/Azure/GCP/OCI cloud themes.
+#       the AWS/Azure/GCP/OCI cloud themes.
 #   - Background mode:
 #       flat      — solid color using the flavor's "base" swatch (default,
 #                   no wallpaper image at all).
@@ -428,7 +428,7 @@ cmd_set() {
 }
 
 cmd_apply() {
-  [ -f "$STATE_FILE" ] || { log "No saved theme state — applying default (mocha / flat)."; cmd_set mocha; return; }
+  [ -f "$STATE_FILE" ] || { log "No saved theme state — applying default (aws / flat)."; cmd_set aws; return; }
   load_state
   local fallback
   is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
@@ -549,7 +549,7 @@ cmd_current() {
       echo "Interval: ${INTERVAL:-30m}"
     fi
   else
-    echo "No theme set yet (default is mocha / flat)."
+    echo "No theme set yet (default is aws / flat)."
   fi
 }
 

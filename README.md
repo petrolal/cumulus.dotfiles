@@ -1,6 +1,6 @@
 # cumulus.dotfiles
 
-Personal Sway/Wayland desktop configuration — Catppuccin Mocha theme, native
+Personal Sway/Wayland desktop configuration — AWS Cloud theme, native
 Sway keybindings, wofi launcher, waybar status bar, kitty terminal, and zsh
 shell config. Built to be cloned onto a fresh Ubuntu or Arch machine and
 fully working within a couple of commands.
@@ -140,7 +140,7 @@ the which-key cheatsheet below — this is just a quick reference.
 | `Mod+Shift+B` | Open Google Chrome |
 | `Mod+Shift+F` | Open terminal file manager (yazi) |
 | `Mod+Shift+/` | **Which-key cheatsheet** — searchable popup of every binding, parsed live from `config/sway/config` |
-| `Mod+Shift+T` | **Theme picker** — wofi GUI to pick a Catppuccin flavor + background mode (flat/wallpaper/rotate), front-end for `cumulus-theme` |
+| `Mod+Shift+T` | **Theme picker** — wofi GUI to pick a cloud flavor + background mode (flat/wallpaper/rotate), front-end for `cumulus-theme` |
 | `Mod+Shift+Q` | Kill focused window |
 | `Mod+Shift+C` | Reload Sway config |
 | `Mod+Shift+E` | Exit Sway session (with confirmation) |
@@ -215,7 +215,7 @@ up in `zsh_config/40-environment.zsh`).
 | `cumulus-backup` | Tars up all cumulus.dotfiles-managed files/dirs from `$HOME` into `~/cumulus-backups/<timestamp>.tar.gz` — a snapshot independent of git history. `--list` shows existing snapshots. |
 | `cumulus-restore [archive]` | Restores a `cumulus-backup` snapshot (defaults to the most recent). Asks for confirmation and saves whatever's currently in place to `~/.cumulus_backup/pre-restore_<timestamp>/` first. |
 | `cumulus-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
-| `cumulus-lock` | swaylock wrapper with the repo's Catppuccin Mocha styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Escape`. |
+| `cumulus-lock` | swaylock wrapper with the repo's AWS Cloud styling baked in, so idle/manual/sleep locks always look the same. Bound to `Mod+Escape`. |
 | `cumulus-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
 | `cumulus-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, blueman-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram/Yazi via snap, and `spotify_player` via cargo. `--dry-run` supported. |
 | `cumulus-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
@@ -226,22 +226,21 @@ up in `zsh_config/40-environment.zsh`).
 ## Theming
 
 Colors and background come from `cumulus-theme` (`scripts/theme.sh`), which
-renders the Catppuccin flavor + background mode you pick into the actual
-sway/kitty/waybar/wofi configs. The default is **mocha, flat color** (no
+renders the cloud flavor + background mode you pick into the actual
+sway/kitty/waybar/wofi configs. The default is **aws, flat color** (no
 wallpaper). State is saved to `~/.config/cumulus/theme/state` and
 re-applied automatically every time you run `./install.sh`.
 
-Flavors: `mocha` (dark), `macchiato` (dark, soft), `frappe` (dark, muted),
-`latte` (light).
+Flavors: `aws` (dark), `azure` (dark), `gcp` (dark), `oci` (dark).
 
 ```sh
 cumulus-theme list                              # show flavors + wallpapers found
 cumulus-theme current                           # show what's active now
 
-cumulus-theme set mocha                         # flat color background (default mode)
-cumulus-theme set latte --wallpaper beach.jpg    # static wallpaper (path or bare filename
+cumulus-theme set aws                           # flat color background (default mode)
+cumulus-theme set azure --wallpaper beach.jpg    # static wallpaper (path or bare filename
                                                    # resolved against themes/wallpapers/)
-cumulus-theme set frappe --rotate --interval 30m # rotate through every image in
+cumulus-theme set gcp --rotate --interval 30m    # rotate through every image in
                                                    # themes/wallpapers/ every 30 minutes
 
 cumulus-theme apply                             # re-apply the saved theme (used by install.sh)
