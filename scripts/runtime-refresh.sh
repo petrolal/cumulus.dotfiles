@@ -92,6 +92,7 @@ main() {
   run_adapter "wofi" refresh_wofi
   run_adapter "neovim" refresh_nvim
   run_adapter "os/gtk" "$DOTFILES_DIR/scripts/os-colorscheme.sh"
+  run_adapter "rgb" "$DOTFILES_DIR/scripts/rgb-theme.sh"
   if [ "$DEFERRED_COUNT" -eq 0 ]; then
     log "Refresh result: complete ($REFRESHED_COUNT adapters refreshed)"
   else

@@ -1,1 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#160b1f"/><stop offset=".56" stop-color="#32133d"/><stop offset="1" stop-color="#f8001f"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#g)"/><circle cx="1510" cy="200" r="430" fill="#ff6b35" opacity=".17"/><circle cx="300" cy="900" r="500" fill="#a855f7" opacity=".14"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16191D" />
+      <stop offset="100%" stop-color="#0F1114" />
+    </linearGradient>
+
+    <linearGradient id="oci-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C74634" />
+      <stop offset="100%" stop-color="#F2994A" />
+    </linearGradient>
+
+    <filter id="subtle-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="30" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#bg-grad)" />
+
+  <g opacity="0.03" stroke="#ECEEF0" stroke-width="1">
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" />
+    </pattern>
+    <rect width="3840" height="2160" fill="url(#grid)" />
+  </g>
+
+  <path d="M 3200 0 L 3840 640" stroke="#C74634" stroke-width="2" opacity="0.3" stroke-dasharray="8 8" />
+  <path d="M 3350 0 L 3840 490" stroke="#F2994A" stroke-width="1.5" opacity="0.2" />
+
+  <g filter="url(#subtle-glow)">
+    <path d="
+      M 3100 2160
+      A 180 180 0 0 1 3280 1900
+      A 260 260 0 0 1 3700 1820
+      A 200 200 0 0 1 3840 1920
+      L 3840 2160 Z"
+      fill="#20242A" opacity="0.8" />
+
+    <path d="
+      M 3250 2160
+      A 140 140 0 0 1 3400 1960
+      A 200 200 0 0 1 3760 1900
+      A 150 150 0 0 1 3840 1980
+      L 3840 2160 Z"
+      fill="#111317" />
+
+    <path d="
+      M 3250 2160
+      A 140 140 0 0 1 3400 1960
+      A 200 200 0 0 1 3760 1900"
+      fill="none" stroke="url(#oci-accent)" stroke-width="6" stroke-linecap="round" />
+
+    <path d="
+      M 3420 2160
+      A 110 110 0 0 1 3540 2010
+      A 150 150 0 0 1 3800 1970"
+      fill="none" stroke="#F2994A" stroke-width="3" stroke-linecap="round" opacity="0.6" />
+  </g>
+
+  <g transform="translate(160, 1960)">
+    <text x="0" y="0"
+          fill="#ECEEF0"
+          font-family="Fira Code, JetBrains Mono, monospace, sans-serif"
+          font-size="42"
+          font-weight="600"
+          letter-spacing="12"
+          opacity="0.85">cumulus</text>
+
+    <circle cx="280" cy="-12" r="4" fill="#C74634" />
+
+    <text x="0" y="36"
+          fill="#9CA3AF"
+          font-family="Fira Code, JetBrains Mono, monospace, sans-serif"
+          font-size="16"
+          letter-spacing="6"
+          opacity="0.5">SWAY // OCI THEME</text>
+  </g>
+</svg>

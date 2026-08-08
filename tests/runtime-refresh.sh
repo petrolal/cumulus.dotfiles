@@ -31,6 +31,7 @@ printf '#!/usr/bin/env bash\nif [[ \"$*\" == *waybar* ]]; then printf \"waybar\\
 printf '#!/usr/bin/env bash\nif [ \"${FAIL_KITTY:-false}\" = true ]; then exit 1; fi\nprintf \"kitty\\\\n\" >> \"$REFRESH_LOG\"\n' > "$TMP_DIR/bin/kitty"
 printf '#!/usr/bin/env bash\nprintf \"neovim\\\\n\" >> \"$REFRESH_LOG\"\n' > "$TMP_DIR/bin/nvim"
 printf '#!/usr/bin/env bash\nif [ \"$1\" = writable ]; then exit 0; fi\nprintf \"os\\\\n\" >> \"$REFRESH_LOG\"\n' > "$TMP_DIR/bin/gsettings"
+printf '#!/usr/bin/env bash\nprintf \"rgb\\\\n\" >> \"$REFRESH_LOG\"\n' > "$TMP_DIR/bin/openrgb"
 chmod +x "$TMP_DIR/bin/"*
 
 python3 - "$TMP_DIR/runtime/cumulus-kitty" <<'PY' &
@@ -72,11 +73,11 @@ export REFRESH_LOG="$TMP_DIR/refresh.log"
 export PATH="$TMP_DIR/bin:/usr/bin:/bin"
 
 "$REPO_ROOT/scripts/runtime-refresh.sh" > "$TMP_DIR/complete.log"
-assert rg -q 'Refresh result: complete \(6 adapters refreshed\)' "$TMP_DIR/complete.log"
+assert rg -q 'Refresh result: complete \(7 adapters refreshed\)' "$TMP_DIR/complete.log"
 assert test "$(wc -l < "$HOME/.config/cumulus/theme/state")" -eq 6
 assert rg -q '^FLAVOR=mocha$' "$HOME/.config/cumulus/theme/state"
 assert rg -q '^NVIM_COLORSCHEME=catppuccin-mocha$' "$HOME/.config/cumulus/theme/state"
-expected=(sway waybar kitty wofi neovim os)
+expected=(sway waybar kitty wofi neovim os rgb)
 previous=0
 for adapter in "${expected[@]}"; do
   line="$(rg -n "^$adapter$" "$REFRESH_LOG" | cut -d: -f1)"
@@ -86,10 +87,11 @@ done
 
 : > "$REFRESH_LOG"
 FAIL_KITTY=true "$REPO_ROOT/scripts/runtime-refresh.sh" > "$TMP_DIR/partial.log"
-assert rg -q 'Refresh result: partial \(5 refreshed, 1 deferred\)' "$TMP_DIR/partial.log"
+assert rg -q 'Refresh result: partial \(6 refreshed, 1 deferred\)' "$TMP_DIR/partial.log"
 assert rg -q 'kitty: deferred or unavailable' "$TMP_DIR/partial.log"
 assert rg -q '^wofi$' "$REFRESH_LOG"
 assert rg -q '^neovim$' "$REFRESH_LOG"
 assert rg -q '^os$' "$REFRESH_LOG"
+assert rg -q '^rgb$' "$REFRESH_LOG"
 
 printf 'PASS: runtime refresh tests\n'

@@ -321,6 +321,36 @@ disable_rotate_units() {
   fi
 }
 
+get_flavor_wallpapers_array() {
+  local flavor="$1"
+  local -n out_ref="$2"
+  out_ref=()
+  local f file
+  shopt -s nullglob
+  for file in "$WALLPAPERS_DIR"/*; do
+    [ -f "$file" ] || continue
+    case "$file" in
+      *.jpg|*.jpeg|*.png|*.webp|*.svg) ;;
+      *) continue ;;
+    esac
+    f="$(basename "$file")"
+    if [[ "$f" =~ ^${flavor}(\.|_|-).* ]]; then
+      out_ref+=("$file")
+    fi
+  done
+  shopt -u nullglob
+  if [ "${#out_ref[@]}" -eq 0 ]; then
+    shopt -s nullglob
+    for file in "$WALLPAPERS_DIR"/*; do
+      [ -f "$file" ] || continue
+      case "$file" in
+        *.jpg|*.jpeg|*.png|*.webp|*.svg) out_ref+=("$file") ;;
+      esac
+    done
+    shopt -u nullglob
+  fi
+}
+
 # ── Subcommands ──────────────────────────────────────────────────────────────
 cmd_set() {
   local flavor="${1:-}"; shift || true
@@ -400,9 +430,8 @@ cmd_set() {
   fi
 
   if [ "$mode" = "rotate" ]; then
-    shopt -s nullglob
-    local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
-    shopt -u nullglob
+    local -a images
+    get_flavor_wallpapers_array "$flavor" images
     [ "${#images[@]}" -gt 0 ] || die "no images found in $WALLPAPERS_DIR — add some first"
     wallpaper="${images[0]}"
   fi
@@ -428,7 +457,7 @@ cmd_set() {
 }
 
 cmd_apply() {
-  [ -f "$STATE_FILE" ] || { log "No saved theme state — applying default (aws / flat)."; cmd_set aws; return; }
+  [ -f "$STATE_FILE" ] || { log "No saved theme state — applying default (oci / rotate)."; cmd_set oci --rotate; return; }
   load_state
   local fallback
   is_valid_flavor "${FLAVOR:-}" || die "invalid saved flavor: ${FLAVOR:-<missing>}"
@@ -464,9 +493,8 @@ cmd_apply() {
       WALLPAPER_SOURCE="flat"
     fi
   elif [ "$MODE" = "rotate" ]; then
-    shopt -s nullglob
-    local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
-    shopt -u nullglob
+    local -a images
+    get_flavor_wallpapers_array "$FLAVOR" images
     if [ "${#images[@]}" -eq 0 ]; then
       MODE="flat"
       WALLPAPER=""
@@ -496,9 +524,8 @@ cmd_next() {
   [ "${MODE:-}" = "rotate" ] || die "current mode is '${MODE:-<missing>}', not rotate — nothing to advance"
   validate_interval "${INTERVAL:-30m}"
 
-  shopt -s nullglob
-  local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
-  shopt -u nullglob
+  local -a images
+  get_flavor_wallpapers_array "$FLAVOR" images
   [ "${#images[@]}" -gt 0 ] || die "no images found in $WALLPAPERS_DIR"
 
   local current="$WALLPAPER" next_idx=0 i
@@ -529,7 +556,7 @@ cmd_list() {
   echo
   echo "Wallpapers ($WALLPAPERS_DIR):"
   shopt -s nullglob
-  local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
+  local images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp,svg})
   shopt -u nullglob
   if [ "${#images[@]}" -eq 0 ]; then
     echo "  (none — drop image files in themes/wallpapers/ to use --wallpaper/--rotate)"
@@ -549,7 +576,7 @@ cmd_current() {
       echo "Interval: ${INTERVAL:-30m}"
     fi
   else
-    echo "No theme set yet (default is aws / flat)."
+    echo "No theme set yet (default is oci / rotate)."
   fi
 }
 

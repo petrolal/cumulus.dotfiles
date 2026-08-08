@@ -75,10 +75,18 @@ source "$home/.config/cumulus/theme/state"
 assert test "$WALLPAPER_SOURCE" = theme-default
 assert test "$WALLPAPER" = "$REPO_ROOT/themes/wallpapers/gcp.svg"
 
+fresh_home="$TMP_DIR/fresh-home"
+env HOME="$fresh_home" "$REPO_ROOT/scripts/theme.sh" apply >/dev/null
+# shellcheck disable=SC1090
+source "$fresh_home/.config/cumulus/theme/state"
+assert test "$FLAVOR" = oci
+assert test "$MODE" = rotate
+assert test "$WALLPAPER_SOURCE" = rotate
+
 rotation_repo="$TMP_DIR/rotation-repo"
 cp -a "$REPO_ROOT" "$rotation_repo"
-printf 'rotation wallpaper\n' > "$rotation_repo/themes/wallpapers/rotation.jpg"
-printf 'ampersand wallpaper\n' > "$rotation_repo/themes/wallpapers/a&b.jpg"
+printf 'rotation wallpaper\n' > "$rotation_repo/themes/wallpapers/aws_2_extra.jpg"
+printf 'ampersand wallpaper\n' > "$rotation_repo/themes/wallpapers/aws_3_extra.jpg"
 rotation_home="$TMP_DIR/rotation-home"
 env HOME="$rotation_home" "$rotation_repo/scripts/theme.sh" set aws --rotate --interval 45m >/dev/null
 env HOME="$rotation_home" "$rotation_repo/scripts/theme.sh" next >/dev/null

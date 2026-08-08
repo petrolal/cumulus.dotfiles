@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160" shape-rendering="crispEdges">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071521" />
+      <stop offset="100%" stop-color="#020A12" />
+    </linearGradient>
+
+    <pattern id="pixel-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="none" stroke="#122232" stroke-width="1" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#bg-grad)" />
+  <rect width="3840" height="2160" fill="url(#pixel-grid)" />
+
+  <g fill="#2E4057" opacity="0.4">
+    <rect x="200" y="1800" width="40" height="40" />
+    <rect x="360" y="1640" width="40" height="40" fill="#FF9900" opacity="0.7" />
+    <rect x="520" y="1480" width="40" height="40" />
+    <rect x="680" y="1320" width="40" height="40" fill="#38BDF8" opacity="0.7" />
+    <rect x="840" y="1160" width="40" height="40" />
+    <rect x="1000" y="1000" width="40" height="40" fill="#10B981" opacity="0.7" />
+    <rect x="1160" y="840" width="40" height="40" />
+    <rect x="1320" y="680" width="40" height="40" fill="#EF4444" opacity="0.7" />
+  </g>
+
+  <g transform="translate(160, 120)">
+    <g fill="#0E1C28">
+      <rect x="0" y="0" width="880" height="120" />
+      <rect x="80" y="120" width="720" height="80" />
+      <rect x="160" y="200" width="560" height="80" />
+    </g>
+
+    <g fill="#040D15">
+      <rect x="40" y="0" width="800" height="60" />
+      <rect x="120" y="60" width="640" height="80" />
+      <rect x="200" y="140" width="480" height="80" />
+    </g>
+
+    <g fill="#FF9900">
+      <rect x="40" y="40" width="160" height="20" />
+      <rect x="280" y="40" width="240" height="20" />
+      <rect x="600" y="40" width="160" height="20" />
+      <rect x="120" y="120" width="120" height="20" />
+      <rect x="520" y="120" width="160" height="20" />
+      <rect x="200" y="200" width="160" height="20" />
+    </g>
+
+    <g fill="#38BDF8">
+      <rect x="200" y="40" width="80" height="20" />
+      <rect x="520" y="40" width="80" height="20" />
+      <rect x="240" y="120" width="120" height="20" />
+      <rect x="360" y="200" width="160" height="20" />
+    </g>
+  </g>
+
+  <g transform="translate(320, 1380)">
+    <rect x="0" y="0" width="240" height="240" fill="#0E1C28" />
+    <rect x="10" y="10" width="220" height="220" fill="#040D15" />
+
+    <g fill="#FF9900">
+      <rect x="30" y="30" width="180" height="30" />
+      <rect x="30" y="60" width="150" height="30" />
+      <rect x="30" y="90" width="120" height="30" />
+      <rect x="30" y="120" width="90" height="30" />
+      <rect x="30" y="150" width="60" height="30" />
+      <rect x="30" y="180" width="30" height="30" />
+    </g>
+
+    <g fill="#38BDF8">
+      <rect x="120" y="60" width="60" height="30" />
+      <rect x="90" y="90" width="60" height="30" />
+      <rect x="60" y="120" width="60" height="30" />
+      <rect x="30" y="150" width="30" height="30" />
+    </g>
+
+    <g fill="#F59E0B">
+      <rect x="30" y="120" width="30" height="30" />
+      <rect x="30" y="150" width="60" height="30" />
+      <rect x="30" y="180" width="180" height="30" />
+      <rect x="60" y="150" width="120" height="30" />
+    </g>
+  </g>
+
+  <g transform="translate(3520, 1880)">
+    <text x="0" y="0"
+          text-anchor="end"
+          fill="#E0E6ED"
+          font-family="'Fira Code', 'Courier New', monospace"
+          font-size="44"
+          font-weight="700"
+          letter-spacing="10">cumulus.px</text>
+
+    <text x="0" y="40"
+          text-anchor="end"
+          fill="#94A3B8"
+          font-family="'Fira Code', 'Courier New', monospace"
+          font-size="16"
+          letter-spacing="4">SWAY // AWS x PIXEL x KOTLIN</text>
+  </g>
+</svg>

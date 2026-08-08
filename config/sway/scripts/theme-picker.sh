@@ -79,7 +79,7 @@ flavor="${flavor_choice%% —*}"
 flavor="${flavor#✓ }"
 
 if [ "$current_source" = "user" ]; then
-  notify "Custom wallpaper will be preserved unless you choose the theme default or flat color."
+  notify "Custom wallpaper will be preserved unless you choose a different background mode."
 fi
 
 # ── 2. Background mode ───────────────────────────────────────────────────
@@ -96,40 +96,47 @@ case "$current_mode" in
   *) current_mode_label=legacy ;;
 esac
 current_mode_label="$(source_label "$current_mode_label")"
-mode_choice="$(printf 'Flat color\nTheme default wallpaper\nCustom wallpaper (pick an image)\nRotate wallpapers (timer)' | pick \
+mode_choice="$(printf 'Plain color\nRotate wallpapers\nSelect wallpaper' | pick \
   "Background mode (current: $current_mode_label)")"
 [ -n "$mode_choice" ] || exit 0
 
-case "$mode_choice" in
-  "Flat color")
-    "$THEME_SH" set "$flavor" --flat
-    notify "Set to $flavor / flat color"
-    ;;
-
-  "Theme default wallpaper")
-    "$THEME_SH" set "$flavor" --theme-default
-    notify "Set to $flavor / tracked theme wallpaper"
-    ;;
-
-  "Custom wallpaper"*)
-    shopt -s nullglob
-    images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
-    shopt -u nullglob
-    if [ "${#images[@]}" -eq 0 ]; then
-      notify "No wallpapers found in $WALLPAPERS_DIR — add images first"
-      exit 1
+get_flavor_images() {
+  local target_flavor="$1"
+  local f file
+  local -a out_images=()
+  shopt -s nullglob
+  for file in "$WALLPAPERS_DIR"/*; do
+    [ -f "$file" ] || continue
+    case "$file" in
+      *.jpg|*.jpeg|*.png|*.webp|*.svg) ;;
+      *) continue ;;
+    esac
+    f="$(basename "$file")"
+    if [[ "$f" =~ ^${target_flavor}(\.|_|-).* ]]; then
+      out_images+=("$file")
     fi
-    wallpaper_choice="$(printf '%s\n' "${images[@]##*/}" | pick "Wallpaper")"
-    [ -n "$wallpaper_choice" ] || exit 0
-    "$THEME_SH" set "$flavor" --wallpaper "$wallpaper_choice"
-    notify "Set to $flavor / $wallpaper_choice"
+  done
+  if [ "${#out_images[@]}" -eq 0 ]; then
+    for file in "$WALLPAPERS_DIR"/*; do
+      [ -f "$file" ] || continue
+      case "$file" in
+        *.jpg|*.jpeg|*.png|*.webp|*.svg) out_images+=("$file") ;;
+      esac
+    done
+  fi
+  shopt -u nullglob
+  printf '%s\n' "${out_images[@]}"
+}
+
+case "$mode_choice" in
+  "Plain color"*)
+    "$THEME_SH" set "$flavor" --flat
+    notify "Set to $flavor / plain color"
     ;;
 
-  "Rotate"*)
-    shopt -s nullglob
-    images=("$WALLPAPERS_DIR"/*.{jpg,jpeg,png,webp})
-    shopt -u nullglob
-    if [ "${#images[@]}" -eq 0 ]; then
+  "Rotate wallpapers"*)
+    mapfile -t images < <(get_flavor_images "$flavor")
+    if [ "${#images[@]}" -eq 0 ] || [ -z "${images[0]:-}" ]; then
       notify "No wallpapers found in $WALLPAPERS_DIR — add images before enabling rotation"
       exit 1
     fi
@@ -137,5 +144,17 @@ case "$mode_choice" in
     [ -n "$interval" ] || exit 0
     "$THEME_SH" set "$flavor" --rotate --interval "$interval"
     notify "Set to $flavor / rotate every $interval"
+    ;;
+
+  "Select wallpaper"*)
+    mapfile -t images < <(get_flavor_images "$flavor")
+    if [ "${#images[@]}" -eq 0 ] || [ -z "${images[0]:-}" ]; then
+      notify "No wallpapers found in $WALLPAPERS_DIR — add images first"
+      exit 1
+    fi
+    wallpaper_choice="$(printf '%s\n' "${images[@]##*/}" | pick "Select wallpaper for $flavor")"
+    [ -n "$wallpaper_choice" ] || exit 0
+    "$THEME_SH" set "$flavor" --wallpaper "$wallpaper_choice"
+    notify "Set to $flavor / $wallpaper_choice"
     ;;
 esac

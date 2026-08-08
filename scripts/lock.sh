@@ -11,15 +11,15 @@ SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
 STATE_FILE="$HOME/.config/cumulus/theme/state"
 
-FLAVOR="aws"
+FLAVOR="oci"
 if [ -f "$STATE_FILE" ]; then
   # shellcheck disable=SC1090
   . "$STATE_FILE"
-  FLAVOR="${FLAVOR:-aws}"
+  FLAVOR="${FLAVOR:-oci}"
 fi
 
 PALETTE="$DOTFILES_DIR/themes/palettes/$FLAVOR.sh"
-[ -f "$PALETTE" ] || PALETTE="$DOTFILES_DIR/themes/palettes/aws.sh"
+[ -f "$PALETTE" ] || PALETTE="$DOTFILES_DIR/themes/palettes/oci.sh"
 # shellcheck disable=SC1090
 . "$PALETTE"
 

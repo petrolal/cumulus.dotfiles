@@ -11,7 +11,7 @@
 #      wofi/sway configs hardcode it, so icons render as boxes without it)
 #      — see scripts/install-fonts.sh.
 #   6. Applies the saved theme (AWS/Azure/GCP/OCI cloud flavor + flat color/wallpaper/
-#      rotation), or the default (aws / flat) on first run — see
+#      rotation), or the default (oci / rotate) on first run — see
 #      scripts/theme.sh.
 #   7. Deploys Cumulus Neovim & deps (default enabled; skip with --no-nvim or --links-only).
 #   8. (Optionally) runs additional tool installers (--zsh, --apps, --devops, --browser, --all-tools).
@@ -94,16 +94,19 @@ declare -A LINKS=(
 # xkeyboard-config ships the "altgr-intl" keyboard variant used as the
 # default input layout in config/sway/config; it's usually pulled in
 # transitively, but is listed explicitly so minimal installs still get it.
-APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin blueman xkb-data)
-PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify blueman yazi xkeyboard-config)
+APT_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify-bin blueman xkb-data openrgb qtwayland5)
+PACMAN_PACKAGES=(sway wofi waybar kitty grim slurp wl-clipboard brightnessctl playerctl swaylock swayidle wdisplays jq libnotify blueman yazi xkeyboard-config openrgb qt5-wayland qt6-wayland)
 # Nerd Font used by wofi/waybar/kitty styling — only packaged in the AUR on Arch.
-AUR_PACKAGES=(ttf-jetbrains-mono-nerd)
+AUR_PACKAGES=(ttf-jetbrains-mono-nerd tuxedo-drivers-dkms)
 
 install_packages() {
   if command -v apt >/dev/null 2>&1; then
     log "Installing required packages via apt (Debian/Ubuntu)..."
     run "sudo apt update"
     run "sudo apt install -y ${APT_PACKAGES[*]}"
+    if command -v udevadm >/dev/null 2>&1; then
+      run "sudo udevadm control --reload-rules && sudo udevadm trigger 2>/dev/null || true"
+    fi
   elif command -v pacman >/dev/null 2>&1; then
     log "Installing required packages via pacman (Arch)..."
     run "sudo pacman -Syu --needed --noconfirm ${PACMAN_PACKAGES[*]}"
@@ -122,6 +125,16 @@ install_packages() {
     log "  ${APT_PACKAGES[*]}"
     exit 1
   fi
+
+  if [ -f "$DOTFILES_DIR/config/udev/60-avell-keyboard.rules" ]; then
+    log "Deploying Avell keyboard RGB udev permissions..."
+    run "sudo cp '$DOTFILES_DIR/config/udev/60-avell-keyboard.rules' /etc/udev/rules.d/60-avell-keyboard.rules"
+  fi
+  if command -v udevadm >/dev/null 2>&1; then
+    run "sudo udevadm control --reload-rules && sudo udevadm trigger 2>/dev/null || true"
+  fi
+  run "sudo modprobe tuxedo_keyboard 2>/dev/null || true"
+  run "sudo modprobe i2c-dev 2>/dev/null || true"
 }
 
 link_one() {
@@ -246,6 +259,24 @@ main() {
     log "Running validation checks..."
     echo
     "$DOTFILES_DIR/scripts/validate.sh" || log "Validation reported issues — see FAIL lines above."
+  fi
+
+  if ! $DRY_RUN; then
+    if [ -t 0 ]; then
+      echo
+      read -rp "Reboot system now to apply kernel modules & device permissions? [y/N] " answer
+      case "$answer" in
+        [Yy]*)
+          log "Rebooting system..."
+          sudo reboot
+          ;;
+        *)
+          log "Reboot skipped. Run 'sudo reboot' when ready."
+          ;;
+      esac
+    else
+      log "Reboot recommended to apply kernel modules & permissions: sudo reboot"
+    fi
   fi
 }
 

@@ -94,26 +94,26 @@ assert_unchanged
 assert test ! -e "$THEME_LOG"
 
 rm -f "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
-printf '%s\n%s\n\n' '✓ aws — AWS Cloud (dark)' 'Rotate wallpapers (timer)' > "$WOFI_RESPONSES"
+printf '%s\n%s\n\n' '✓ aws — AWS Cloud (dark)' 'Rotate wallpapers' > "$WOFI_RESPONSES"
 "$fixture/config/sway/scripts/theme-picker.sh" >/dev/null
 assert_unchanged
 assert test ! -e "$THEME_LOG"
 
 rm -f "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
-printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Custom wallpaper (pick an image)' > "$WOFI_RESPONSES"
+printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Select wallpaper' > "$WOFI_RESPONSES"
 "$fixture/config/sway/scripts/theme-picker.sh" >/dev/null
 assert_unchanged
 assert test ! -e "$THEME_LOG"
 
-rm -f "$fixture/themes/wallpapers/custom.jpg" "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
-printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Rotate wallpapers (timer)' > "$WOFI_RESPONSES"
+rm -rf "$fixture/themes/wallpapers"/* "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
+printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Rotate wallpapers' > "$WOFI_RESPONSES"
 "$fixture/config/sway/scripts/theme-picker.sh" >/dev/null || true
 assert rg -q 'add images before enabling rotation' "$NOTIFY_LOG"
 assert_unchanged
 assert test ! -e "$THEME_LOG"
 
 rm -f "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
-printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Custom wallpaper (pick an image)' > "$WOFI_RESPONSES"
+printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Select wallpaper' > "$WOFI_RESPONSES"
 "$fixture/config/sway/scripts/theme-picker.sh" >/dev/null || true
 assert rg -q 'add images first' "$NOTIFY_LOG"
 assert_unchanged
@@ -125,16 +125,15 @@ printf '%s\n\n' '✓ aws — AWS Cloud (dark)' > "$WOFI_RESPONSES"
 assert test ! -e "$THEME_LOG"
 
 rm -f "$WOFI_CALLS" "$WOFI_PROMPTS" "$NOTIFY_LOG" "$THEME_LOG"
-printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Flat color' > "$WOFI_RESPONSES"
+printf '%s\n%s\n' '✓ aws — AWS Cloud (dark)' 'Plain color' > "$WOFI_RESPONSES"
 "$fixture/config/sway/scripts/theme-picker.sh" >/dev/null
 assert_unchanged
 assert rg -q 'Custom wallpaper will be preserved' "$NOTIFY_LOG"
 assert rg -q 'current: aws' "$WOFI_PROMPTS"
 assert rg -q 'current: custom wallpaper' "$WOFI_PROMPTS"
-assert rg -q 'Flat color' "$WOFI_MENUS/2"
-assert rg -q 'Theme default wallpaper' "$WOFI_MENUS/2"
-assert rg -q 'Custom wallpaper \(pick an image\)' "$WOFI_MENUS/2"
-assert rg -q 'Rotate wallpapers \(timer\)' "$WOFI_MENUS/2"
+assert rg -q 'Plain color' "$WOFI_MENUS/2"
+assert rg -q 'Rotate wallpapers' "$WOFI_MENUS/2"
+assert rg -q 'Select wallpaper' "$WOFI_MENUS/2"
 assert rg -q '^set aws --flat$' "$THEME_LOG"
 
 printf 'PASS: theme picker tests\n'

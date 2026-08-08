@@ -228,8 +228,8 @@ up in `zsh_config/40-environment.zsh`).
 
 Colors and background come from `cumulus-theme` (`scripts/theme.sh`), which
 renders the cloud flavor + background mode you pick into the actual
-sway/kitty/waybar/wofi configs. The default is **aws, flat color** (no
-wallpaper). State is saved to `~/.config/cumulus/theme/state` and
+sway/kitty/waybar/wofi configs. The default is **oci, wallpaper rotation** (`oci`
+flavor with rotating wallpapers). State is saved to `~/.config/cumulus/theme/state` and
 re-applied automatically every time you run `./install.sh`.
 
 Flavors: `aws` (dark), `azure` (dark), `gcp` (dark), `oci` (dark).
@@ -238,11 +238,12 @@ Flavors: `aws` (dark), `azure` (dark), `gcp` (dark), `oci` (dark).
 cumulus-theme list                              # show flavors + wallpapers found
 cumulus-theme current                           # show what's active now
 
-cumulus-theme set aws                           # flat color background (default mode)
+cumulus-theme set oci --rotate                  # default mode: oci with wallpaper rotation
+cumulus-theme set aws                           # plain color background
 cumulus-theme set azure --wallpaper beach.jpg    # static wallpaper (path or bare filename
                                                    # resolved against themes/wallpapers/)
-cumulus-theme set gcp --rotate --interval 30m    # rotate through every image in
-                                                   # themes/wallpapers/ every 30 minutes
+cumulus-theme set gcp --rotate --interval 30m    # rotate through wallpapers for GCP
+                                                   # every 30 minutes
 
 cumulus-theme apply                             # re-apply the saved theme (used by install.sh)
 cumulus-theme next                              # manually advance rotation by one image
