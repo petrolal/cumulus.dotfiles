@@ -54,13 +54,6 @@ if command -v liquidctl >/dev/null 2>&1; then
   fi
 fi
 
-# 4. Avell / Uniwill / Tongfang Laptop Keyboard RGB (UNIW0001 / 093A:0255)
-if [ -x "$DOTFILES_DIR/scripts/avell-rgb.sh" ]; then
-  if "$DOTFILES_DIR/scripts/avell-rgb.sh" "$HEX_COLOR" >/dev/null 2>&1; then
-    UPDATED=true
-  fi
-fi
-
 if $UPDATED; then
   exit 0
 else

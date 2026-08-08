@@ -126,14 +126,6 @@ install_packages() {
     exit 1
   fi
 
-  if [ -f "$DOTFILES_DIR/config/udev/60-avell-keyboard.rules" ]; then
-    log "Deploying Avell keyboard RGB udev permissions..."
-    run "sudo cp '$DOTFILES_DIR/config/udev/60-avell-keyboard.rules' /etc/udev/rules.d/60-avell-keyboard.rules"
-  fi
-  if command -v udevadm >/dev/null 2>&1; then
-    run "sudo udevadm control --reload-rules && sudo udevadm trigger 2>/dev/null || true"
-  fi
-  run "sudo modprobe tuxedo_keyboard 2>/dev/null || true"
   run "sudo modprobe i2c-dev 2>/dev/null || true"
 }
 

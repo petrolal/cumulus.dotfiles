@@ -1,5 +1,0 @@
-# Avell / Uniwill / Tongfang Laptop Keyboard RGB (UNIW0001 / 093A:0255)
-KERNEL=="hidraw*", ATTRS{name}=="UNIW0001:00 093A:0255", MODE="0666", TAG+="uaccess"
-KERNEL=="hidraw*", KERNELS=="UNIW0001:00", MODE="0666", TAG+="uaccess"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="093a", ATTRS{idProduct}=="0255", MODE="0666", TAG+="uaccess"
-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666"
