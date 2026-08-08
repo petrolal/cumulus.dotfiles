@@ -14,15 +14,19 @@
 #      rotation), or the default (oci / rotate) on first run — see
 #      scripts/theme.sh.
 #   7. Deploys Cumulus Neovim & deps (default enabled; skip with --no-nvim or --links-only).
-#   8. (Optionally) runs additional tool installers (--zsh, --apps, --devops, --browser, --all-tools).
-#   9. Runs scripts/validate.sh at the end to confirm everything is correctly
+#   8. Installs SDKMAN + latest Kotlin/Maven/Gradle, prompting for a Java
+#      version (default enabled; skip with --no-sdkman or --links-only) —
+#      see scripts/install-sdkman.sh.
+#   9. (Optionally) runs additional tool installers (--zsh, --apps, --devops, --browser, --all-tools).
+#  10. Runs scripts/validate.sh at the end to confirm everything is correctly
 #      in place (skipped in --dry-run, or with --no-validate).
 #
 # Usage:
-#   ./install.sh              # full default setup (packages + configs + fonts + theme + cumulus.nvim)
+#   ./install.sh              # full default setup (packages + configs + fonts + theme + cumulus.nvim + sdkman)
 #   ./install.sh --links-only # symlink configs only (no package or tool installations)
 #   ./install.sh --no-packages # skip apt/pacman package installation
 #   ./install.sh --no-nvim     # skip Neovim & cumulus.nvim deployment
+#   ./install.sh --no-sdkman   # skip SDKMAN + Kotlin/Maven/Gradle/Java deployment
 #   ./install.sh --zsh        # also run scripts/install-zsh.sh
 #   ./install.sh --apps       # also run scripts/install-apps.sh
 #   ./install.sh --devops     # also run scripts/install-devops.sh (docker/terraform/ansible)
@@ -42,6 +46,7 @@ DO_NVIM=true
 DO_APPS=false
 DO_DEVOPS=false
 DO_BROWSER=false
+DO_SDKMAN=true
 DO_ALL_TOOLS=false
 DO_VALIDATE=true
 
@@ -52,6 +57,8 @@ for arg in "$@"; do
     --no-packages) DO_PACKAGES=false ;;
     --nvim) DO_NVIM=true ;;
     --no-nvim) DO_NVIM=false ;;
+    --sdkman) DO_SDKMAN=true ;;
+    --no-sdkman) DO_SDKMAN=false ;;
     --links-only)
       DO_PACKAGES=false
       DO_NVIM=false
@@ -59,6 +66,7 @@ for arg in "$@"; do
       DO_APPS=false
       DO_DEVOPS=false
       DO_BROWSER=false
+      DO_SDKMAN=false
       DO_ALL_TOOLS=false
       ;;
     --zsh) DO_ZSH=true ;;
@@ -241,6 +249,7 @@ main() {
     $DO_APPS   && run_installer install-apps.sh
     $DO_DEVOPS && run_installer install-devops.sh
     $DO_BROWSER && run_installer install-browser.sh
+    $DO_SDKMAN && run_installer install-sdkman.sh
   fi
 
   log "Done. Backups (if any) saved under: $BACKUP_DIR"

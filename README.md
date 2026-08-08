@@ -87,8 +87,9 @@ Every run finishes with `scripts/validate.sh` (skip with `--no-validate`), so yo
 immediately see OK/WARN/FAIL for the whole setup instead of finding out something's
 broken later.
 
-`./install.sh` installs required desktop packages and Cumulus Neovim by default. You can also run any of the additional `scripts/install-*.sh`
-tool installers straight from `install.sh`:
+`./install.sh` installs required desktop packages, Cumulus Neovim, and
+SDKMAN + Kotlin/Maven/Gradle/Java by default. You can also run any of the
+additional `scripts/install-*.sh` tool installers straight from `install.sh`:
 
 ```bash
 ./install.sh --zsh         # zsh + oh-my-zsh + Nerd Font + nvim as default editor
@@ -97,6 +98,7 @@ tool installers straight from `install.sh`:
 ./install.sh --apps        # default desktop applications (browsers, IDEs, chat, etc.)
 ./install.sh --devops      # Docker + Terraform + Ansible
 ./install.sh --browser     # Google Chrome + set as default browser
+./install.sh --no-sdkman   # skip sdkman + Kotlin/Maven/Gradle/Java (installed by default)
 ./install.sh --all-tools   # auto-discovers and runs every scripts/install-*.sh
 ```
 
@@ -220,6 +222,7 @@ up in `zsh_config/40-environment.zsh`).
 | `cumulus-idle` | swayidle daemon (lock after 5 min, screens off after 10 min, suspend after 15 min, lock before sleep). Auto-started by `config/sway/config` on login — not usually run manually. |
 | `cumulus-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, blueman-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram/Yazi via snap, and `spotify_player` via cargo. `--dry-run` supported. |
 | `cumulus-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
+| `cumulus-install-sdkman` | Runs by default from `./install.sh` (skip with `--no-sdkman`). Installs [SDKMAN](https://sdkman.io) plus the latest stable Kotlin, Maven, and Gradle. For Java — which has multiple vendors/LTS lines, so there's no single "latest" — it lists `sdk list java` and prompts you for which identifier to install (skips if not a TTY; set `JAVA_VERSION=<identifier>` to install non-interactively). `zsh_config/99-sdkman-cargo.zsh` already sources sdkman on shell startup. Idempotent. `--dry-run` supported. |
 | `cumulus-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
 | `cumulus-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin) via Docker's official apt/pacman repo, Terraform via HashiCorp's official apt repo (or pacman's `terraform` package on Arch), and Ansible via apt/pacman. Also adds you to the `docker` group. Idempotent — skips anything already installed. Works on both apt and pacman. `--dry-run` supported. |
 | `cumulus-install-browser` | Installs Google Chrome (official `.deb` on apt, which self-registers Google's repo for future updates; via `yay`/`paru` on Arch since it's AUR-only) and sets it as the default browser (`xdg-settings` + `xdg-mime` for http/https/html). Bound to `Mod+Shift+B`. Idempotent. `--dry-run` supported. |

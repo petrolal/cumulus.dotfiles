@@ -175,6 +175,23 @@ fi
 check_cmd "terraform" terraform version
 check_cmd "ansible" ansible --version
 
+section "SDKMAN toolchain"
+if [ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+  ok "sdkman: installed ($HOME/.sdkman)"
+else
+  warn "sdkman not found — install with cumulus-install-sdkman if you need Java/Kotlin/Maven/Gradle"
+fi
+check_cmd "java" java -version
+check_cmd "kotlin" kotlin -version
+check_cmd "maven" mvn -version
+if command -v gradle >/dev/null 2>&1; then
+  # gradle -version's first output line is blank (daemon startup status),
+  # so check_cmd's `head -1` misses the actual "Gradle X.Y.Z" line.
+  ok "gradle: $(timeout 5 gradle -version 2>&1 | grep '^Gradle ')"
+else
+  warn "gradle not found (gradle) — install with the matching scripts/install-*.sh if you need it"
+fi
+
 section "Summary"
 if [ "$FAIL_COUNT" -eq 0 ] && [ "$WARN_COUNT" -eq 0 ]; then
   echo "Everything checks out. ✅"
