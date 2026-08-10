@@ -8,6 +8,7 @@
 pub mod collate;
 pub mod context;
 pub mod error;
+pub mod install;
 pub mod maintenance;
 pub mod refresh;
 pub mod sysutils;
@@ -35,8 +36,16 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "backup" => maintenance::run_backup(&ctx, args),
         "restore" => maintenance::run_restore(&ctx, args),
         "update" => maintenance::run_update(&ctx, args),
+        "install-fonts" => install::fonts::run(&ctx, args),
+        "install-apps" => install::apps::run(&ctx, args),
+        "install-browser" => install::browser::run(&ctx, args),
+        "install-devops" => install::devops::run(&ctx, args),
+        "install-zsh" => install::zsh::run(&ctx, args),
+        "install-sdkman" => install::sdkman::run(&ctx, args),
+        "install-nvim" => install::nvim::run(&ctx, args),
+        "install-nvim-deps" => install::nvim_deps::run(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps)"
         ))),
     }
 }
@@ -100,6 +109,14 @@ Commands:
   backup           snapshot managed configs to a timestamped tarball
   restore          restore a snapshot created by backup
   update           git pull the dotfiles and re-run the installer
+  install-fonts    install the JetBrainsMono Nerd Font
+  install-apps     install core desktop apps (sway/waybar/kitty/etc.)
+  install-browser  install a web browser (brave/chromium)
+  install-devops   install devops tooling (docker/terraform/kubectl/etc.)
+  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
+  install-sdkman   install SDKMAN! and JVM tooling
+  install-nvim     install the Neovim config dependencies (deploy)
+  install-nvim-deps install Neovim + its plugin ecosystem dependencies
 
 Run `cumulus <command> --help` for command-specific usage.
 ";

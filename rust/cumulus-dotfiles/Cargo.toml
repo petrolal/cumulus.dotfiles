@@ -68,6 +68,38 @@ path = "src/bin/cumulus-restore.rs"
 name = "cumulus-update"
 path = "src/bin/cumulus-update.rs"
 
+[[bin]]
+name = "cumulus-install-fonts"
+path = "src/bin/cumulus-install-fonts.rs"
+
+[[bin]]
+name = "cumulus-install-apps"
+path = "src/bin/cumulus-install-apps.rs"
+
+[[bin]]
+name = "cumulus-install-browser"
+path = "src/bin/cumulus-install-browser.rs"
+
+[[bin]]
+name = "cumulus-install-devops"
+path = "src/bin/cumulus-install-devops.rs"
+
+[[bin]]
+name = "cumulus-install-zsh"
+path = "src/bin/cumulus-install-zsh.rs"
+
+[[bin]]
+name = "cumulus-install-sdkman"
+path = "src/bin/cumulus-install-sdkman.rs"
+
+[[bin]]
+name = "cumulus-install-nvim"
+path = "src/bin/cumulus-install-nvim.rs"
+
+[[bin]]
+name = "cumulus-install-nvim-deps"
+path = "src/bin/cumulus-install-nvim-deps.rs"
+
 [profile.release]
 opt-level = "z"
 lto = true
