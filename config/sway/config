@@ -249,9 +249,8 @@ bindsym $mod+minus scratchpad show
 bindsym $mod+r mode "resize"
 
 # which-key style cheatsheet — shows all bindings from this config in wofi
-bindsym $mod+Shift+slash exec cumulus-whichkey
 bindsym $mod+question exec cumulus-whichkey
-bindsym $mod+Shift+question exec cumulus-whichkey
+bindsym $mod+slash exec cumulus-whichkey
 
 
 # Display configuration — wdisplays GUI for multi-monitor setup
