@@ -8,6 +8,7 @@
 pub mod collate;
 pub mod context;
 pub mod error;
+pub mod maintenance;
 pub mod refresh;
 pub mod sysutils;
 pub mod theme;
@@ -31,8 +32,11 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "idle" => sysutils::run_idle(&ctx),
         "screenshot" => sysutils::run_screenshot(&ctx, args),
         "validate" => validate::run(&ctx, args),
+        "backup" => maintenance::run_backup(&ctx, args),
+        "restore" => maintenance::run_restore(&ctx, args),
+        "update" => maintenance::run_update(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update)"
         ))),
     }
 }
@@ -93,6 +97,9 @@ Commands:
   idle             run the swayidle daemon (auto-lock, dpms, suspend)
   screenshot       capture a screenshot (full|region|window)
   validate         read-only health check of the deployed setup
+  backup           snapshot managed configs to a timestamped tarball
+  restore          restore a snapshot created by backup
+  update           git pull the dotfiles and re-run the installer
 
 Run `cumulus <command> --help` for command-specific usage.
 ";

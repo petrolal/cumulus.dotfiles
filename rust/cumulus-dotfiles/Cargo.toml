@@ -56,6 +56,18 @@ path = "src/bin/cumulus-screenshot.rs"
 name = "cumulus-validate"
 path = "src/bin/cumulus-validate.rs"
 
+[[bin]]
+name = "cumulus-backup"
+path = "src/bin/cumulus-backup.rs"
+
+[[bin]]
+name = "cumulus-restore"
+path = "src/bin/cumulus-restore.rs"
+
+[[bin]]
+name = "cumulus-update"
+path = "src/bin/cumulus-update.rs"
+
 [profile.release]
 opt-level = "z"
 lto = true
