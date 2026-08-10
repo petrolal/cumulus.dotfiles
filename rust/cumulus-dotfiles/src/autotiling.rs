@@ -18,6 +18,8 @@ fn get_socket_path() -> Option<String> {
     if let Ok(sock) = env::var("SWAYSOCK") {
         if !sock.is_empty() && Path::new(&sock).exists() {
             return Some(sock);
+        } else {
+            return None;
         }
     }
     if let Ok(out) = Command::new("swaymsg").args(["-t", "get_version"]).output() {

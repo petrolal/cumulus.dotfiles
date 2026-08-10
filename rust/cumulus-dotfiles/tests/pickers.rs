@@ -16,6 +16,7 @@ fn run(exe: &str, args: &[&str]) -> Output {
         .args(args)
         .env("CUMULUS_DOTFILES_DIR", repo_root())
         .env("PATH", "")
+        .env("SWAYSOCK", "/nonexistent_socket")
         .output()
         .expect("run binary")
 }

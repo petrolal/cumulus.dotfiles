@@ -49,8 +49,9 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "install-nvim-deps" => install::nvim_deps::run(&ctx, args),
         "theme-picker" => pickers::run_theme_picker(&ctx, args),
         "whichkey" => pickers::run_whichkey(&ctx, args),
+        "install" | "deploy" => install::deploy::run(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, autotiling, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, autotiling, validate, backup, restore, update, install, deploy, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
         ))),
     }
 }
@@ -103,6 +104,7 @@ Usage:
   cumulus-<command> [args...]      (installed alias)
 
 Commands:
+  install          deploy cumulus.dotfiles onto a machine (full setup)
   theme            select a desktop flavor + background mode and apply it live
   runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os/rgb)
   os-colorscheme   sync the GNOME/GTK color-scheme setting

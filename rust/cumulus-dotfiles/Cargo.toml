@@ -112,6 +112,11 @@ path = "src/bin/cumulus-whichkey.rs"
 name = "cumulus-autotiling"
 path = "src/bin/cumulus-autotiling.rs"
 
+[[bin]]
+name = "cumulus-install"
+path = "src/bin/cumulus-install.rs"
+
+
 
 [profile.release]
 opt-level = "z"

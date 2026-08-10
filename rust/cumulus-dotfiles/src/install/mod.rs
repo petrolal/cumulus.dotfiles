@@ -5,6 +5,7 @@
 
 pub mod apps;
 pub mod browser;
+pub mod deploy;
 pub mod devops;
 pub mod fonts;
 pub mod nvim;
