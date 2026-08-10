@@ -7,7 +7,7 @@ this repo; `docs/architecture.md` has the big-picture overview.
 
 ## Validate changes
 
-- Rust crate tests: `cargo test` in `rust/cumulus-dotfiles`
+- Rust crate tests: `cargo test` (at repo root)
 - Lints & formatting: `cargo clippy --all-targets` and `cargo fmt`
 - Sway config: `sway --validate -c "$HOME/.config/sway/config"`
 - Whole-setup health check: `cumulus validate` (OK/WARN/FAIL, read-only, non-zero exit on any FAIL)

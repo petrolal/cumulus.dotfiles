@@ -15,7 +15,9 @@ config/sway/config                # Sway window manager config
 config/wofi/                      # app launcher (Mod+D) look & behavior
 config/waybar/                    # status bar config/style
 config/kitty/                     # terminal emulator config
-rust/cumulus-dotfiles/            # 100% Rust engine (cumulus CLI suite & multi-call binaries)
+Cargo.toml                        # 100% Rust engine crate (cumulus CLI suite & multi-call binaries)
+src/                              # Rust library & binary modules
+tests/                            # Integration test suite
 ```
 
 ## How it works
@@ -205,7 +207,7 @@ place.
 
 ## Rust Commands & Automation
 
-All desktop automation, installers, maintenance, and sysutils are 100% written in Rust (`rust/cumulus-dotfiles/`) and installed to `~/.local/bin/cumulus-*` on `$PATH` (already set up in `zsh_config/40-environment.zsh`).
+All desktop automation, installers, maintenance, and sysutils are 100% written in Rust (at repository root) and installed to `~/.local/bin/cumulus-*` on `$PATH` (already set up in `zsh_config/40-environment.zsh`).
 
 | Command | What it does |
 |---|---|

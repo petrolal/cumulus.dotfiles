@@ -1,0 +1,31 @@
+[package]
+name = "cumulus-dotfiles"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Rust tooling for the cumulus.dotfiles Sway/Wayland desktop (theme engine, installers, and helpers)."
+authors = ["Lucas Petrola"]
+license = "MIT"
+repository = "https://github.com/petrolal/cumulus.dotfiles"
+homepage = "https://github.com/petrolal/cumulus.dotfiles"
+readme = "README.md"
+keywords = ["sway", "wayland", "dotfiles", "theme", "desktop"]
+categories = ["command-line-utilities"]
+exclude = ["tests/fixtures/*"]
+
+# The library holds all logic; each `cumulus-*` command is a thin multi-call
+# binary that dispatches on its own name. `cargo install cumulus-dotfiles`
+# installs every one of them into ~/.cargo/bin.
+[lib]
+name = "cumulus_dotfiles"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cumulus"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1

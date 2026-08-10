@@ -31,4 +31,4 @@ if ! command -v cargo >/dev/null 2>&1; then
 fi
 
 log "Handing off to cumulus-install in $DIR..."
-exec cargo run --quiet --release --manifest-path "$DIR/rust/cumulus-dotfiles/Cargo.toml" --bin cumulus-install -- "$@"
+exec cargo run --quiet --release --manifest-path "$DIR/Cargo.toml" --bin cumulus-install -- "$@"

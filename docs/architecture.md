@@ -55,5 +55,5 @@ files (`themes/palettes/*.conf`), the `themes/wallpapers/<flavor>(.|_|-)*` pool,
 switching (CLI or `Mod+Shift+T` GUI picker), add flavor/config by drop-in,
 backup/restore, cross-distro (apt/pacman) install.
 
-**Testing & QA** — 100% Cargo integration & unit test suite in `rust/cumulus-dotfiles/tests/` exercising real behavior in temporary sandboxes. Lints & formatting via `cargo clippy --all-targets` and `cargo fmt`. Manual Sway check: `sway --validate -c ~/.config/sway/config`.
+**Testing & QA** — 100% Cargo integration & unit test suite in `tests/` exercising real behavior in temporary sandboxes. Lints & formatting via `cargo clippy --all-targets` and `cargo fmt`. Manual Sway check: `sway --validate -c ~/.config/sway/config`.
 
