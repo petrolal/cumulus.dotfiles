@@ -13,6 +13,7 @@ pub mod install;
 pub mod maintenance;
 pub mod pickers;
 pub mod refresh;
+pub mod sdd;
 pub mod sysutils;
 pub mod theme;
 pub mod util;
@@ -39,6 +40,7 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "backup" => maintenance::run_backup(&ctx, args),
         "restore" => maintenance::run_restore(&ctx, args),
         "update" => maintenance::run_update(&ctx, args),
+        "sdd" => sdd::run(&ctx, args),
         "install-fonts" => install::fonts::run(&ctx, args),
         "install-apps" => install::apps::run(&ctx, args),
         "install-browser" => install::browser::run(&ctx, args),
@@ -51,7 +53,7 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "whichkey" => pickers::run_whichkey(&ctx, args),
         "install" | "deploy" => install::deploy::run(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, autotiling, validate, backup, restore, update, install, deploy, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, autotiling, validate, backup, restore, update, sdd, install, deploy, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
         ))),
     }
 }
@@ -117,7 +119,9 @@ Commands:
   backup           snapshot managed configs to a timestamped tarball
   restore          restore a snapshot created by backup
   update           git pull the dotfiles and re-run the installer
+  sdd              token-efficient spec-driven development for AI workflows
   install-fonts    install the JetBrainsMono Nerd Font
+
   install-apps     install core desktop apps (sway/waybar/kitty/etc.)
   install-browser  install a web browser (brave/chromium)
   install-devops   install devops tooling (docker/terraform/kubectl/etc.)

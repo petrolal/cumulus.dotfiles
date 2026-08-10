@@ -22,12 +22,12 @@ pub fn run_lock(ctx: &Context) -> Result<()> {
     if flavor.is_empty() {
         flavor = "oci".to_string();
     }
-    let palette_path = ctx.palettes_dir().join(format!("{flavor}.sh"));
-    let palette = if palette_path.is_file() {
+    let palette = if crate::theme::wallpaper::is_valid_flavor(ctx, &flavor) {
         Palette::load(ctx, &flavor)
     } else {
         Palette::load(ctx, "oci")
     };
+
     let base = strip_hash(palette.get("BASE"));
     let blue = strip_hash(palette.get("BLUE"));
     let text = strip_hash(palette.get("TEXT"));

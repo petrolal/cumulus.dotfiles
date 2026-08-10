@@ -116,6 +116,11 @@ path = "src/bin/cumulus-autotiling.rs"
 name = "cumulus-install"
 path = "src/bin/cumulus-install.rs"
 
+[[bin]]
+name = "cumulus-sdd"
+path = "src/bin/cumulus-sdd.rs"
+
+
 
 
 [profile.release]

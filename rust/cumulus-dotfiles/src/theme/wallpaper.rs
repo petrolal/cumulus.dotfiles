@@ -14,13 +14,15 @@ pub fn is_flavor_name(v: &str) -> bool {
             .all(|c| c.is_ascii_alphanumeric() || c == b'_' || c == b'-')
 }
 
-/// All flavors (basenames of `themes/palettes/*.sh`), locale-sorted.
+/// All flavors (basenames of `themes/palettes/*.conf`), locale-sorted.
 pub fn valid_flavors(ctx: &Context) -> Vec<String> {
     let mut out = Vec::new();
     if let Ok(entries) = std::fs::read_dir(ctx.palettes_dir()) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if path.extension() == Some(OsStr::new("sh")) {
+            if path.extension() == Some(OsStr::new("conf"))
+                || path.extension() == Some(OsStr::new("sh"))
+            {
                 if let Some(stem) = path.file_stem().and_then(OsStr::to_str) {
                     out.push(stem.to_string());
                 }
@@ -33,7 +35,9 @@ pub fn valid_flavors(ctx: &Context) -> Vec<String> {
 
 /// Whether `flavor` is a well-formed name with an existing palette file.
 pub fn is_valid_flavor(ctx: &Context, flavor: &str) -> bool {
-    is_flavor_name(flavor) && ctx.palettes_dir().join(format!("{flavor}.sh")).is_file()
+    is_flavor_name(flavor)
+        && (ctx.palettes_dir().join(format!("{flavor}.conf")).is_file()
+            || ctx.palettes_dir().join(format!("{flavor}.sh")).is_file())
 }
 
 /// The flavor's tracked default wallpaper (`themes/wallpapers/<flavor>.svg`).

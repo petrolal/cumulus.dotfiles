@@ -129,7 +129,7 @@ fn list_registers_every_flavor() {
 #[test]
 fn incomplete_palette_is_rejected() {
     let sb = Sandbox::new();
-    let palette = sb.repo.join("themes/palettes/aws.sh");
+    let palette = sb.repo.join("themes/palettes/aws.conf");
     let stripped: String = fs::read_to_string(&palette)
         .unwrap()
         .lines()
@@ -152,13 +152,14 @@ fn flat_mode_renders_all_configs() {
         let sb = Sandbox::new();
         assert!(sb.run(&["set", flavor, "--flat"]).status.success());
         let base = sb
-            .read(&format!("themes/palettes/{flavor}.sh"))
+            .read(&format!("themes/palettes/{flavor}.conf"))
             .lines()
             .find_map(|l| {
                 l.strip_prefix("BASE=")
                     .map(|v| v.trim_matches('"').to_string())
             })
             .unwrap();
+
 
         let waybar = sb.read("config/waybar/style.css");
         assert!(waybar.contains("window#waybar {"));

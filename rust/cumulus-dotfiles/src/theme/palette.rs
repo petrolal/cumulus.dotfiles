@@ -53,7 +53,12 @@ impl Palette {
 
     /// Load and parse the palette for `flavor` (no shell evaluation).
     pub fn load(ctx: &Context, flavor: &str) -> Palette {
-        let path = ctx.palettes_dir().join(format!("{flavor}.sh"));
+        let conf_path = ctx.palettes_dir().join(format!("{flavor}.conf"));
+        let path = if conf_path.is_file() {
+            conf_path
+        } else {
+            ctx.palettes_dir().join(format!("{flavor}.sh"))
+        };
         Palette {
             vars: parse_file(&path),
         }
