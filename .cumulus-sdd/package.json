@@ -1,0 +1,35 @@
+{
+  "name": "cumulus-sdd",
+  "version": "0.1.0",
+  "description": "Ultra-lightweight, token-efficient Specification-Driven Development framework for multi-agent AI coding workflows.",
+  "keywords": [
+    "sdd",
+    "spec-driven-development",
+    "ai",
+    "agents",
+    "llm",
+    "codegen"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "cumulus": "bin/cumulus.js"
+  },
+  "files": [
+    "bin/",
+    "agents/",
+    "templates/",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/cumulus.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.12"
+  }
+}
