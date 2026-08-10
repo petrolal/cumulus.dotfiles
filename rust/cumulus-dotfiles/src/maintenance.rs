@@ -282,20 +282,11 @@ pub fn run_update(ctx: &Context, args: &[String]) -> Result<()> {
 
     log(
         "update",
-        &format!("Re-running install.sh {}", args.join(" ")),
+        &format!("Re-running cumulus install {}", args.join(" ")),
     );
-    let installer = dir.join("install.sh");
-    let status = Command::new(&installer)
-        .args(args)
-        .current_dir(dir)
-        .status()?;
-    if !status.success() {
-        return Err(Error::with_code(
-            "install.sh failed",
-            status.code().unwrap_or(1) as u8,
-        ));
-    }
+    crate::install::deploy::run(ctx, args)?;
 
     log("update", "Update complete.");
     Ok(())
 }
+

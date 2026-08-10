@@ -8,16 +8,14 @@ fully working within a couple of commands.
 ## Contents
 
 ```
-bootstrap.sh                      # curl-able one-liner: clones/updates the repo, then runs install.sh
-install.sh                       # deploys everything below via symlinks
+bootstrap.sh                      # curl-able one-liner: clones/updates repo & runs cumulus install
 zsh/.zshrc                        # thin oh-my-zsh bootstrap + modular config loader
-zsh/zsh_config/                   # actual zsh config, one *.zsh file per concern (see below)
-config/sway/config                # Sway window manager config (stock keybindings + which-key)
-config/sway/scripts/whichkey.sh   # parses config live, shows a searchable keybinding cheatsheet
+zsh/zsh_config/                   # actual zsh config, one *.zsh file per concern
+config/sway/config                # Sway window manager config
 config/wofi/                      # app launcher (Mod+D) look & behavior
 config/waybar/                    # status bar config/style
 config/kitty/                     # terminal emulator config
-scripts/                          # standalone automations, symlinked onto $PATH (see below)
+rust/cumulus-dotfiles/            # 100% Rust engine (cumulus CLI suite & multi-call binaries)
 ```
 
 ## How it works
@@ -35,7 +33,7 @@ This repo *is* the source of truth — nothing is copied into `$HOME`, it's
 ```
 
 So editing `~/.config/sway/config` directly *is* editing the file tracked in
-this repo — no sync step needed. `install.sh` handles creating those links
+this repo — no sync step needed. `cumulus install` handles creating those links
 safely:
 
 1. If the target is already a symlink to the right repo file → skip (safe
@@ -49,13 +47,13 @@ safely:
 
 On a brand-new machine, skip the manual clone — this one-liner fetches
 `bootstrap.sh`, clones the repo to `~/cumulus.dotfiles` (or updates it if already
-present), and hands off straight into `install.sh`:
+present), and hands off straight into `cumulus install`:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
 ```
 
-Flags are forwarded verbatim to `install.sh`, so a full fresh-machine setup
+Flags are forwarded verbatim to `cumulus install`, so a full fresh-machine setup
 (packages + every tool installer) is one command:
 
 ```bash
@@ -78,33 +76,34 @@ bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/ma
 ```bash
 git clone <this-repo-url> ~/cumulus.dotfiles
 cd ~/cumulus.dotfiles
-./install.sh              # default setup: install packages + symlink configs + deploy Cumulus Neovim
-./install.sh --links-only # symlink configs only (skip package & tool installations)
-./install.sh --dry-run     # preview what would happen, no changes made
+cargo run --bin cumulus-install               # default setup: install packages + symlink configs + deploy Cumulus Neovim
+cumulus install --links-only                  # symlink configs only (skip package & tool installations)
+cumulus install --dry-run                     # preview what would happen, no changes made
 ```
 
-Every run finishes with `scripts/validate.sh` (skip with `--no-validate`), so you
+Every run finishes with `cumulus validate` (skip with `--no-validate`), so you
 immediately see OK/WARN/FAIL for the whole setup instead of finding out something's
 broken later.
 
-`./install.sh` installs required desktop packages, Cumulus Neovim, and
-SDKMAN + Kotlin/Maven/Gradle/Java by default. You can also run any of the
-additional `scripts/install-*.sh` tool installers straight from `install.sh`:
+`cumulus install` installs required desktop packages, Cumulus Neovim, and
+SDKMAN + Kotlin/Maven/Gradle/Java by default. You can also run tool installer flags straight from `cumulus install`:
 
 ```bash
-./install.sh --zsh         # zsh + oh-my-zsh + Nerd Font + nvim as default editor
-./install.sh --no-packages # skip system apt/pacman package installation
-./install.sh --no-nvim     # skip Neovim & cumulus.nvim deployment
-./install.sh --apps        # default desktop applications (browsers, IDEs, chat, etc.)
-./install.sh --devops      # Docker + Terraform + Ansible
-./install.sh --browser     # Google Chrome + set as default browser
-./install.sh --no-sdkman   # skip sdkman + Kotlin/Maven/Gradle/Java (installed by default)
-./install.sh --all-tools   # auto-discovers and runs every scripts/install-*.sh
+cumulus install --zsh         # zsh + oh-my-zsh + Nerd Font + nvim as default editor
+cumulus install --no-packages # skip system apt/pacman package installation
+cumulus install --no-nvim     # skip Neovim & cumulus.nvim deployment
+cumulus install --apps        # default desktop applications (browsers, IDEs, chat, etc.)
+cumulus install --devops      # Docker + Terraform + Ansible
+cumulus install --browser     # Google Chrome + set as default browser
+
+cumulus install --no-sdkman   # skip sdkman + Kotlin/Maven/Gradle/Java (installed by default)
+cumulus install --all-tools   # runs every tool installer
 ```
 
 `--dry-run` is forwarded to whichever installer(s) you select, so
-`./install.sh --dry-run --all-tools` previews everything end-to-end with no
+`cumulus install --dry-run --all-tools` previews everything end-to-end with no
 changes made.
+
 
 `--packages` auto-detects your package manager:
 
