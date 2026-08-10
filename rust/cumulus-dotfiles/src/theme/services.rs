@@ -13,20 +13,12 @@ fn skip_systemd() -> bool {
     env::var_os("CUMULUS_SKIP_SYSTEMD").is_some()
 }
 
-/// Run the runtime-refresh coordinator (best-effort).
+/// Run the runtime-refresh coordinator (best-effort, in-process).
 pub fn reload_apps(ctx: &Context) {
     if skip_reload() {
         return;
     }
-    let script = ctx.dotfiles_dir.join("scripts/runtime-refresh.sh");
-    if util::is_executable(&script) {
-        let _ = Command::new(&script).status();
-    } else {
-        util::log(
-            "theme",
-            "Runtime refresh coordinator unavailable; colors apply on next launch.",
-        );
-    }
+    let _ = crate::refresh::run_runtime_refresh(ctx);
 }
 
 /// Write and enable the systemd --user rotation timer.
@@ -38,12 +30,11 @@ pub fn write_rotate_units(ctx: &Context, interval: &str) {
     if fs::create_dir_all(&dir).is_err() {
         return;
     }
-    let theme = ctx.dotfiles_dir.join("scripts/theme.sh");
-    let service = format!(
-        "[Unit]\nDescription=cumulus.dotfiles wallpaper rotation (single tick)\n\n\
-[Service]\nType=oneshot\nExecStart={} next\n",
-        theme.display()
-    );
+    // The rotation tick runs the installed cumulus-theme binary. %h expands to
+    // the user's home; cargo installs binaries into ~/.cargo/bin.
+    let service = "[Unit]\nDescription=cumulus.dotfiles wallpaper rotation (single tick)\n\n\
+[Service]\nType=oneshot\nExecStart=%h/.cargo/bin/cumulus-theme next\n"
+        .to_string();
     let timer = format!(
         "[Unit]\nDescription=cumulus.dotfiles wallpaper rotation timer\n\n\
 [Timer]\nOnBootSec={interval}\nOnUnitActiveSec={interval}\nPersistent=true\n\n\

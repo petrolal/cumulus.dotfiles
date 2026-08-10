@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.74"
 description = "Rust tooling for the cumulus.dotfiles Sway/Wayland desktop (theme engine, installers, and helpers)."
-authors = ["cumulus.dotfiles contributors"]
+authors = ["Lucas Petrola"]
 license = "MIT"
 repository = "https://github.com/petrolal/cumulus.dotfiles"
 homepage = "https://github.com/petrolal/cumulus.dotfiles"
@@ -27,6 +27,18 @@ path = "src/main.rs"
 [[bin]]
 name = "cumulus-theme"
 path = "src/bin/cumulus-theme.rs"
+
+[[bin]]
+name = "cumulus-runtime-refresh"
+path = "src/bin/cumulus-runtime-refresh.rs"
+
+[[bin]]
+name = "cumulus-os-colorscheme"
+path = "src/bin/cumulus-os-colorscheme.rs"
+
+[[bin]]
+name = "cumulus-rgb-theme"
+path = "src/bin/cumulus-rgb-theme.rs"
 
 [profile.release]
 opt-level = "z"

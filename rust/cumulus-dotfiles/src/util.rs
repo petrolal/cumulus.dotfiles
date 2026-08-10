@@ -117,3 +117,47 @@ pub fn basename(path: &str) -> String {
         .unwrap_or(path)
         .to_string()
 }
+
+/// Whether `name` resolves to an executable on `PATH` (mirrors
+/// `command -v <name>`).
+pub fn command_exists(name: &str) -> bool {
+    if name.contains('/') {
+        return is_executable(Path::new(name));
+    }
+    let Some(path) = std::env::var_os("PATH") else {
+        return false;
+    };
+    std::env::split_paths(&path).any(|dir| is_executable(&dir.join(name)))
+}
+
+/// The login name of the current user (mirrors `id -un`).
+pub fn current_username() -> Option<String> {
+    let out = std::process::Command::new("id").arg("-un").output().ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    let name = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (!name.is_empty()).then_some(name)
+}
+
+/// The owning username of `path` via `stat -c '%U'` (mirrors the shell check).
+pub fn path_owner(path: &Path) -> Option<String> {
+    let out = std::process::Command::new("stat")
+        .args(["-c", "%U"])
+        .arg(path)
+        .output()
+        .ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    let name = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (!name.is_empty()).then_some(name)
+}
+
+/// Whether `path` is a Unix socket.
+pub fn is_socket(path: &Path) -> bool {
+    use std::os::unix::fs::FileTypeExt;
+    fs::symlink_metadata(path)
+        .map(|m| m.file_type().is_socket())
+        .unwrap_or(false)
+}

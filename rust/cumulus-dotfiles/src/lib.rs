@@ -8,6 +8,7 @@
 pub mod collate;
 pub mod context;
 pub mod error;
+pub mod refresh;
 pub mod theme;
 pub mod util;
 
@@ -21,8 +22,11 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
     let ctx = Context::discover()?;
     match name {
         "theme" => theme::run(&ctx, args),
+        "runtime-refresh" => refresh::run_runtime_refresh(&ctx),
+        "os-colorscheme" => refresh::run_os_colorscheme(&ctx),
+        "rgb-theme" => refresh::run_rgb_theme(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme)"
         ))),
     }
 }
@@ -59,7 +63,9 @@ pub fn dispatch() -> ExitCode {
     match run_command(&name, &rest) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("\x1b[1;31m[cumulus] error:\x1b[0m {e}");
+            if !e.to_string().is_empty() {
+                eprintln!("\x1b[1;31m[cumulus] error:\x1b[0m {e}");
+            }
             ExitCode::from(e.code())
         }
     }
@@ -73,7 +79,10 @@ Usage:
   cumulus-<command> [args...]      (installed alias)
 
 Commands:
-  theme      select a desktop flavor + background mode and apply it live
+  theme            select a desktop flavor + background mode and apply it live
+  runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os/rgb)
+  os-colorscheme   sync the GNOME/GTK color-scheme setting
+  rgb-theme        sync hardware RGB lighting with the active theme color
 
 Run `cumulus <command> --help` for command-specific usage.
 ";
