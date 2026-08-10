@@ -44,8 +44,11 @@ impl Context {
     }
 }
 
-/// Find the repo root. Priority: `CUMULUS_DOTFILES_DIR`, then walk up from the
-/// executable until a directory containing `themes/palettes` is found.
+/// Find the repo root. Priority:
+/// 1. `CUMULUS_DOTFILES_DIR` env var
+/// 2. Current working directory
+/// 3. `$HOME/cumulus.dotfiles` or `$HOME/.cumulus.dotfiles`
+/// 4. Ancestors of executable
 fn locate_dotfiles_dir() -> Result<PathBuf> {
     if let Some(dir) = env::var_os("CUMULUS_DOTFILES_DIR") {
         let p = PathBuf::from(dir);
@@ -56,6 +59,24 @@ fn locate_dotfiles_dir() -> Result<PathBuf> {
             "CUMULUS_DOTFILES_DIR does not point at a cumulus.dotfiles checkout",
         ));
     }
+
+    if let Ok(cwd) = env::current_dir() {
+        if cwd.join("themes/palettes").is_dir() {
+            return Ok(cwd);
+        }
+    }
+
+    if let Some(home) = env::var_os("HOME").map(PathBuf::from) {
+        let candidate1 = home.join("cumulus.dotfiles");
+        if candidate1.join("themes/palettes").is_dir() {
+            return Ok(candidate1);
+        }
+        let candidate2 = home.join(".cumulus.dotfiles");
+        if candidate2.join("themes/palettes").is_dir() {
+            return Ok(candidate2);
+        }
+    }
+
     let exe =
         env::current_exe().map_err(|_| Error::new("cannot resolve current executable path"))?;
     let exe = fs::canonicalize(&exe).unwrap_or(exe);
@@ -68,3 +89,4 @@ fn locate_dotfiles_dir() -> Result<PathBuf> {
         "could not locate the cumulus.dotfiles checkout (set CUMULUS_DOTFILES_DIR)",
     ))
 }
+

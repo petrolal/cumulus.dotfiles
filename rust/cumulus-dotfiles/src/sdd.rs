@@ -6,7 +6,8 @@ use crate::error::{Error, Result};
 use std::env;
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
+
 use std::process::Command;
 
 pub fn run(ctx: &Context, args: &[String]) -> Result<()> {
