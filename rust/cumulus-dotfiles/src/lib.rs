@@ -10,6 +10,7 @@ pub mod context;
 pub mod error;
 pub mod install;
 pub mod maintenance;
+pub mod pickers;
 pub mod refresh;
 pub mod sysutils;
 pub mod theme;
@@ -44,8 +45,10 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "install-sdkman" => install::sdkman::run(&ctx, args),
         "install-nvim" => install::nvim::run(&ctx, args),
         "install-nvim-deps" => install::nvim_deps::run(&ctx, args),
+        "theme-picker" => pickers::run_theme_picker(&ctx, args),
+        "whichkey" => pickers::run_whichkey(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
         ))),
     }
 }
@@ -117,6 +120,8 @@ Commands:
   install-sdkman   install SDKMAN! and JVM tooling
   install-nvim     install the Neovim config dependencies (deploy)
   install-nvim-deps install Neovim + its plugin ecosystem dependencies
+  theme-picker     wofi GUI front-end for the theme command
+  whichkey         wofi cheatsheet of the live sway keybindings
 
 Run `cumulus <command> --help` for command-specific usage.
 ";
