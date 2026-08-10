@@ -52,6 +52,10 @@ path = "src/bin/cumulus-idle.rs"
 name = "cumulus-screenshot"
 path = "src/bin/cumulus-screenshot.rs"
 
+[[bin]]
+name = "cumulus-validate"
+path = "src/bin/cumulus-validate.rs"
+
 [profile.release]
 opt-level = "z"
 lto = true

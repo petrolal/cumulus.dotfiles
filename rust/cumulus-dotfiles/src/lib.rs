@@ -12,6 +12,7 @@ pub mod refresh;
 pub mod sysutils;
 pub mod theme;
 pub mod util;
+pub mod validate;
 
 use context::Context;
 use error::Result;
@@ -29,8 +30,9 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "lock" => sysutils::run_lock(&ctx),
         "idle" => sysutils::run_idle(&ctx),
         "screenshot" => sysutils::run_screenshot(&ctx, args),
+        "validate" => validate::run(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate)"
         ))),
     }
 }
@@ -90,6 +92,7 @@ Commands:
   lock             lock the screen (swaylock) styled to the active theme
   idle             run the swayidle daemon (auto-lock, dpms, suspend)
   screenshot       capture a screenshot (full|region|window)
+  validate         read-only health check of the deployed setup
 
 Run `cumulus <command> --help` for command-specific usage.
 ";
