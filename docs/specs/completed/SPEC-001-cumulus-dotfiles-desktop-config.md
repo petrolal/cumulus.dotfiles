@@ -45,7 +45,7 @@ in use. No new work is proposed here.
   losing existing files. Source: `README.md`, `install.sh` header.
 - **Users:** Single power-user/developer ("Petrolal") on enterprise/dev
   workstations (AD/LDAP/SSSD-aware account handling). Source:
-  `project-context.md` (rule 8), `config/sway/config` header.
+  `.github/copilot-instructions.md` (rule 8), `config/sway/config` header.
 - **Value:** One-command bootstrap on any new machine; consistent theming
   across sway/waybar/wofi/kitty/nvim/RGB.
 
@@ -75,7 +75,7 @@ in use. No new work is proposed here.
 ### 2.4 Technical Constraints
 - Bash `set -euo pipefail` default; documented exceptions
   (`validate.sh` = `-uo`, `install-sdkman.sh` = no `-u`). Source:
-  `project-context.md`, script headers.
+  `.github/copilot-instructions.md`, script headers.
 - GTK CSS `@import` unusable → `sed` placeholder rendering required.
 - Scripts run via `cumulus-*` symlinks → must `readlink -f` before deriving
   `DOTFILES_DIR`.
@@ -119,12 +119,12 @@ in use. No new work is proposed here.
 | ID | Category | Requirement | Source |
 |---|---|---|---|
 | NFR-1 | Reliability | All-or-nothing config publish with rollback on any failure | `theme.sh` `publish_configs()` |
-| NFR-2 | Reliability | Idempotent, safe-to-rerun installers | `install.sh`, `project-context.md` |
+| NFR-2 | Reliability | Idempotent, safe-to-rerun installers | `install.sh`, `.github/copilot-instructions.md` |
 | NFR-3 | Data safety | Atomic state writes (mktemp+`mv -f`), newline rejection, `chmod 600` | `theme.sh` `write_state()` |
 | NFR-4 | Data safety | No destructive deletes; backups before overwrite | `install.sh`, `restore.sh` |
 | NFR-5 | Security | Refuse to run bootstrap as root; scripts avoid privileged copies | `bootstrap.sh` |
 | NFR-6 | Security | Runtime adapters verify socket ownership before use | `runtime-refresh.sh` `refresh_kitty/refresh_nvim_socket` |
-| NFR-7 | Portability | Support apt + pacman/AUR; unpinned upstream versions | `install.sh`, `project-context.md` |
+| NFR-7 | Portability | Support apt + pacman/AUR; unpinned upstream versions | `install.sh`, `.github/copilot-instructions.md` |
 | NFR-8 | Maintainability | Palette contract validated in code + tests (single source of truth) | `theme.sh` `validate_palette()`, `tests/palettes.sh` |
 | NFR-9 | Observability | Per-script colored `[name]` logging; validate.sh summary | all scripts |
 | NFR-10 | Performance | `swaybg` reaped each tick to bound process count | `theme.sh` comment ("50+ observed") |
@@ -135,21 +135,21 @@ in use. No new work is proposed here.
 
 | ID | Rule | Source |
 |---|---|---|
-| BR-1 | Repo files are the source of truth; deploy via symlink only, never copy into `$HOME` | `install.sh`, `project-context.md` |
-| BR-2 | Generated configs are derived artifacts — never hand-edit; edit palette/template then `theme.sh apply` | `.gitignore`, `theme.sh`, `project-context.md` |
+| BR-1 | Repo files are the source of truth; deploy via symlink only, never copy into `$HOME` | `install.sh`, `.github/copilot-instructions.md` |
+| BR-2 | Generated configs are derived artifacts — never hand-edit; edit palette/template then `theme.sh apply` | `.gitignore`, `theme.sh`, `.github/copilot-instructions.md` |
 | BR-3 | Each palette must define `THEME_NAME`(=filename), `THEME_LABEL`, `NVIM_COLORSCHEME`, and 24 `#rrggbb` vars | `theme.sh` `validate_palette()` |
-| BR-4 | Any palette-var change must update 3 places together: `validate_palette()`, `tests/palettes.sh`, all 4 palettes | `project-context.md`, `tests/palettes.sh` |
+| BR-4 | Any palette-var change must update 3 places together: `validate_palette()`, `tests/palettes.sh`, all 4 palettes | `.github/copilot-instructions.md`, `tests/palettes.sh` |
 | BR-5 | Default flavor `oci`, default mode `rotate` when no state exists | `theme.sh` `cmd_apply()` |
 | BR-6 | Theme state written only through `write_state()` (atomic, newline-validated) | `theme.sh` |
 | BR-7 | Wallpaper pool = files matching `themes/wallpapers/<flavor>(.|_|-)*`; falls back to all images | `theme.sh` `get_flavor_wallpapers_array()` |
 | BR-8 | Interval must match `^[1-9][0-9]*(ms|us|s|m|h|d|w)$` | `theme.sh` `validate_interval()` |
 | BR-9 | `wallpaper_source` must be valid for its mode (flat:flat, wallpaper:user|theme-default, rotate:rotate) | `theme.sh` `validate_wallpaper_source()` |
-| BR-10 | Installers detect apt before pacman; AUR via yay then paru; warn if neither | `install.sh`, `project-context.md` |
-| BR-11 | Account ops try normal → NSS-aware sudo → warn (AD/LDAP/SSSD) | `project-context.md` (rule 8) |
+| BR-10 | Installers detect apt before pacman; AUR via yay then paru; warn if neither | `install.sh`, `.github/copilot-instructions.md` |
+| BR-11 | Account ops try normal → NSS-aware sudo → warn (AD/LDAP/SSSD) | `.github/copilot-instructions.md` (rule 8) |
 | BR-12 | `update.sh` refuses to run with uncommitted local changes | `update.sh`, `README.md` |
 | BR-13 | bootstrap must not run as root | `bootstrap.sh` |
-| BR-14 | Waybar/wofi rendered via `sed @@PLACEHOLDER@@`, never GTK `@import` | `theme.sh`, `project-context.md` |
-| BR-15 | Do not reference legacy Catppuccin flavor names in new code | `project-context.md` |
+| BR-14 | Waybar/wofi rendered via `sed @@PLACEHOLDER@@`, never GTK `@import` | `theme.sh`, `.github/copilot-instructions.md` |
+| BR-15 | Do not reference legacy Catppuccin flavor names in new code | `.github/copilot-instructions.md` |
 
 ---
 
@@ -292,15 +292,15 @@ No test framework — each `tests/*.sh` is a standalone executable
 
 | ID | Type | Risk | Mitigation |
 |---|---|---|---|
-| R-1 | Operational | No CI — regressions caught only by manual tests | **[ASSUMPTION]** Add GitHub Actions running `tests/*.sh` + `bash -n`; documented gap in `project-context.md` |
+| R-1 | Operational | No CI — regressions caught only by manual tests | **[ASSUMPTION]** Add GitHub Actions running `tests/*.sh` + `bash -n`; documented gap in `.github/copilot-instructions.md` |
 | R-2 | Technical | Palette var drift across 3 files breaks rendering opaquely | BR-4 enforced by `tests/palettes.sh`; keep in one commit |
 | R-3 | Operational | `swaybg` process leak on rotation | Mitigated: `pkill -x swaybg` each tick (FR-16) |
 | R-4 | Security | Remote `curl | bash` bootstrap executes upstream code | Refuses root (BR-13); pinnable via `CUMULUS_REF`; user must trust repo |
 | R-5 | Security | Runtime adapters send commands to sockets | Ownership check before use (NFR-6) |
 | R-6 | Operational | Non-symlinked real file blocks clean deploy | Auto-backup before link (FR-2); `validate.sh` flags it |
-| R-7 | Business | Unpinned upstream versions may break setup over time | Accepted trade-off (`project-context.md`); validate.sh surfaces breakage |
+| R-7 | Business | Unpinned upstream versions may break setup over time | Accepted trade-off (`.github/copilot-instructions.md`); validate.sh surfaces breakage |
 | R-8 | Technical | AD/LDAP/SSSD account edits may fail | try→sudo→warn fallback (BR-11) |
-| R-9 | Operational | Stale docs referencing deleted `docs/*` paths | Noted in `project-context.md`; this spec + `docs/architecture.md` restore current docs |
+| R-9 | Operational | Stale docs referencing deleted `docs/*` paths | Noted in `.github/copilot-instructions.md`; this spec + `docs/architecture.md` restore current docs |
 
 ---
 
@@ -330,7 +330,7 @@ active use**; this is an as-built specification, not planned work.
 
 **Confidence level: High** — grounded directly in source (`install.sh`,
 `theme.sh`, `runtime-refresh.sh`, `validate.sh`, `bootstrap.sh`, `tests/*`,
-`project-context.md`, `README.md`).
+`.github/copilot-instructions.md`, `README.md`).
 
 **Key assumptions (marked [ASSUMPTION]):**
 - Single-user personal project; no multi-tenant/teams requirement.

@@ -2,8 +2,8 @@
 
 Personal Sway/Wayland desktop dotfiles (cloud-themed: aws/azure/gcp/oci) for
 Ubuntu/Debian (apt) and Arch (pacman/AUR). Bash-first, plus one Python script
-and zsh config. See `project-context.md` for the full rule set — it is
-authoritative; this file is the quick orientation.
+and zsh config. This file is the authoritative rule set for agents working in
+this repo; `docs/architecture.md` has the big-picture overview.
 
 ## Validate changes (no build system, no CI)
 
