@@ -190,6 +190,29 @@ link_scripts() {
   done
 }
 
+build_rust_binaries() {
+  local bin_dir="$HOME/.local/bin"
+  run "mkdir -p '$bin_dir'"
+  if command -v cargo >/dev/null 2>&1; then
+    log "Building & deploying cumulus Rust binaries via cargo..."
+    if ! $DRY_RUN; then
+      cargo build --release --manifest-path "$DOTFILES_DIR/rust/cumulus-dotfiles/Cargo.toml" --quiet
+      for binary in "$DOTFILES_DIR"/rust/cumulus-dotfiles/target/release/cumulus*; do
+        [ -f "$binary" ] && [ -x "$binary" ] || continue
+        case "$binary" in
+          *.d) continue ;;
+          *) cp -f "$binary" "$bin_dir/" ;;
+        esac
+      done
+    else
+      log "+ cargo build --release --manifest-path '$DOTFILES_DIR/rust/cumulus-dotfiles/Cargo.toml'"
+      log "+ cp -f '$DOTFILES_DIR'/rust/cumulus-dotfiles/target/release/cumulus* '$bin_dir/'"
+    fi
+  else
+    log "cargo not found — skipping Rust binary build"
+  fi
+}
+
 run_installer() {
   local script="$DOTFILES_DIR/scripts/$1"
   local extra_args=()
@@ -219,6 +242,7 @@ main() {
   done
 
   link_scripts
+  build_rust_binaries
 
   if ! $DRY_RUN; then
     log "Ensuring Nerd Font is installed (needed by kitty/waybar/wofi/sway configs)..."

@@ -108,6 +108,11 @@ path = "src/bin/cumulus-theme-picker.rs"
 name = "cumulus-whichkey"
 path = "src/bin/cumulus-whichkey.rs"
 
+[[bin]]
+name = "cumulus-autotiling"
+path = "src/bin/cumulus-autotiling.rs"
+
+
 [profile.release]
 opt-level = "z"
 lto = true

@@ -5,6 +5,7 @@
 //! `cargo install cumulus-dotfiles` installs the whole suite into
 //! `~/.cargo/bin`.
 
+pub mod autotiling;
 pub mod collate;
 pub mod context;
 pub mod error;
@@ -33,6 +34,7 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "lock" => sysutils::run_lock(&ctx),
         "idle" => sysutils::run_idle(&ctx),
         "screenshot" => sysutils::run_screenshot(&ctx, args),
+        "autotiling" => autotiling::run(&ctx, args),
         "validate" => validate::run(&ctx, args),
         "backup" => maintenance::run_backup(&ctx, args),
         "restore" => maintenance::run_restore(&ctx, args),
@@ -48,7 +50,7 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "theme-picker" => pickers::run_theme_picker(&ctx, args),
         "whichkey" => pickers::run_whichkey(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot, autotiling, validate, backup, restore, update, install-fonts, install-apps, install-browser, install-devops, install-zsh, install-sdkman, install-nvim, install-nvim-deps, theme-picker, whichkey)"
         ))),
     }
 }
@@ -108,6 +110,7 @@ Commands:
   lock             lock the screen (swaylock) styled to the active theme
   idle             run the swayidle daemon (auto-lock, dpms, suspend)
   screenshot       capture a screenshot (full|region|window)
+  autotiling       Fibonacci spiral autotiling daemon for Sway
   validate         read-only health check of the deployed setup
   backup           snapshot managed configs to a timestamped tarball
   restore          restore a snapshot created by backup
