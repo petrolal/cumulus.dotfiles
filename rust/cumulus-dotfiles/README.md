@@ -1,62 +1,60 @@
 # cumulus-dotfiles
 
-Rust tooling for [cumulus.dotfiles](https://github.com/petrolal/cumulus.dotfiles)
-— a personal Sway/Wayland desktop (cloud-themed: AWS/Azure/GCP/OCI). This crate
-is the ongoing Rust rewrite of the project's shell scripts: one library plus a
-suite of `cumulus-*` commands.
+Rust tooling suite for [cumulus.dotfiles](https://github.com/petrolal/cumulus.dotfiles) — a personal Sway/Wayland desktop (cloud-themed: AWS/Azure/GCP/OCI).
 
-## Install
+100% of the project's automation, theme engine, installers, system utilities, health checks, and SDD framework are implemented in this pure-Rust library and multi-call binary crate.
+
+## Installation
 
 ```sh
-cargo install cumulus-dotfiles
+cargo install --path .
 ```
 
-This installs the `cumulus` umbrella command and every `cumulus-*` alias into
-`~/.cargo/bin` (ensure it is on your `PATH`).
+This compiles and installs the `cumulus` umbrella binary and all 23 multi-call symlinks/aliases (`cumulus-install`, `cumulus-theme`, `cumulus-validate`, `cumulus-sdd`, etc.) into `~/.cargo/bin`.
 
-## Commands
+## Commands & Multi-Call Binaries
 
-Each command works both as an alias and as an umbrella subcommand:
+Each command works both as a direct binary (`cumulus-<name>`) and as an umbrella subcommand (`cumulus <name>`):
 
 ```sh
-cumulus-theme list          # or: cumulus theme list
+cumulus theme set aws --rotate    # or: cumulus-theme set aws --rotate
+cumulus install --links-only     # or: cumulus-install --links-only
+cumulus sdd verify               # or: cumulus-sdd verify
 ```
 
-| Command         | Purpose                                                        |
-| --------------- | -------------------------------------------------------------- |
-| `cumulus-theme` | Select a flavor + background mode (flat/wallpaper/rotate) live. |
+| Command | Subcommand | Purpose |
+|---|---|---|
+| `cumulus-install` | `cumulus install` | Deploy desktop configs via symlinks, install system packages, fonts, & toolchains. |
+| `cumulus-theme` | `cumulus theme` | Theme engine for cloud flavors (AWS, Azure, GCP, OCI) & background modes (flat, wallpaper, rotate). |
+| `cumulus-validate` | `cumulus validate` | Health check verifying symlinks, sway configs, tools, & runtime environment. |
+| `cumulus-backup` | `cumulus backup` | Create timestamped tarball snapshots of managed config directories. |
+| `cumulus-restore` | `cumulus restore` | Restore a saved backup snapshot with automatic safety pre-restoration backups. |
+| `cumulus-update` | `cumulus update` | Pull latest git changes and re-run installation in-process. |
+| `cumulus-sdd` | `cumulus sdd` | Spec-driven development framework CLI (`init`, `new`, `verify`). |
+| `cumulus-autotiling` | `cumulus autotiling` | Sway IPC daemon for Fibonacci window autotiling. |
+| `cumulus-lock` | `cumulus lock` | Cloud-styled swaylock wrapper. |
+| `cumulus-idle` | `cumulus idle` | Swayidle daemon managing idle timeouts, locking, and system suspend. |
+| `cumulus-screenshot` | `cumulus screenshot` | Screen capture tool via `grim` and `slurp` (full, region, window). |
+| `cumulus-theme-picker` | `cumulus theme-picker` | Wofi GUI picker for themes and background modes. |
+| `cumulus-whichkey` | `cumulus whichkey` | Wofi live keybinding cheatsheet parsed directly from Sway config. |
+| `cumulus-install-*` | `cumulus install-*` | Modular toolchain installers (`apps`, `browser`, `devops`, `fonts`, `nvim`, `nvim-deps`, `sdkman`, `zsh`). |
 
-More commands (installers, validate, backup/restore, screenshot, lock, idle,
-runtime-refresh, autotiling, …) are being ported from the original shell
-scripts; see the repository's migration roadmap.
+## Design Principles
 
-## Design
+- **std-only / low dependencies** — builds cleanly offline on fresh Linux installations.
+- **Multi-call dispatch** — single binary architecture (`dispatch()`) checks `argv[0]` or the first positional argument.
+- **Data safety & idempotency** — existing real files are backed up to `~/.cumulus_backup/<ts>/` before linking; re-running skips already valid symlinks.
+- **Atomic state writes** — theme state (`~/.config/cumulus/theme/state`) is updated atomically.
 
-- **std-only** — no third-party dependencies, so it builds offline on a fresh
-  machine.
-- **Multi-call binaries** — all logic lives in the `cumulus_dotfiles` library;
-  each installed binary dispatches on its own `argv[0]` name.
-- **Result-based errors** — fallible operations return `Result`; the process
-  prints one error and exits non-zero (no scattered `exit()` calls).
-- **Behaviour parity** — the theme engine is byte-for-byte compatible with the
-  original `scripts/theme.sh`, including the generated config files, the
-  `~/.config/cumulus/theme/state` format, error messages, and locale-aware
-  wallpaper ordering.
-
-## Repository layout
-
-The command needs to find the dotfiles checkout (palettes, templates,
-wallpapers). It uses `CUMULUS_DOTFILES_DIR` if set, otherwise walks up from the
-executable to the directory containing `themes/palettes`.
-
-## Development
+## Development & Testing
 
 ```sh
-cargo test        # unit + integration tests (mirror the old tests/*.sh)
-cargo clippy --all-targets
-cargo fmt
+cargo test                  # 47 unit & integration tests
+cargo clippy --all-targets  # lints
+cargo fmt                   # code formatting
 ```
 
 ## License
 
 MIT
+

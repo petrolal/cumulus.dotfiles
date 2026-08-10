@@ -198,22 +198,19 @@ that directory is a symlink into this repo, anything you add there is
 already tracked by git. Keep new files numbered below `99-` so SDKMAN still
 loads last (its init script requires that).
 
-Run `cumulus-install-zsh` (see below) to install zsh + oh-my-zsh, the Cloud
+Run `cumulus install --zsh` (see below) to install zsh + oh-my-zsh, the Cloud
 theme's requirements, JetBrainsMono Nerd Font, and set Neovim as the
-default editor — then `./install.sh` to symlink `.zshrc`/`zsh_config/` into
+default editor — then `cumulus install` to symlink `.zshrc`/`zsh_config/` into
 place.
 
-## Scripts & automation
+## Rust Commands & Automation
 
-Everything in `scripts/` is symlinked by `install.sh` into
-`~/.local/bin/cumulus-<name>` (stripping the `.sh`), so each is callable as
-a plain command from anywhere once `~/.local/bin` is on `$PATH` (already set
-up in `zsh_config/40-environment.zsh`).
+All desktop automation, installers, maintenance, and sysutils are 100% written in Rust (`rust/cumulus-dotfiles/`) and installed to `~/.local/bin/cumulus-*` on `$PATH` (already set up in `zsh_config/40-environment.zsh`).
 
 | Command | What it does |
 |---|---|
-| `cumulus-update` | `git pull --ff-only` + re-run `install.sh` in this repo. Refuses to run if you have uncommitted local changes. Pass `--packages` to also refresh packages. |
-| `cumulus-validate` | Read-only sanity check of the whole setup: symlinks, `cumulus-*` commands on `$PATH`, sway config validity, zsh/oh-my-zsh/Nerd Font, Neovim toolchain, and DevOps tools. Prints OK/WARN/FAIL per check and exits non-zero on any FAIL. Runs automatically at the end of `./install.sh` (skip with `--no-validate`); also safe to run anytime by hand. |
+| `cumulus-update` | `git pull --ff-only` + re-runs `cumulus install` in-process. Refuses to run if you have uncommitted local changes. Pass `--packages` to also refresh packages. |
+| `cumulus-validate` | Read-only sanity check of the whole setup: symlinks, `cumulus-*` commands on `$PATH`, sway config validity, zsh/oh-my-zsh/Nerd Font, Neovim toolchain, and DevOps tools. Prints OK/WARN/FAIL per check and exits non-zero on any FAIL. Runs automatically at the end of `cumulus install` (skip with `--no-validate`); also safe to run anytime by hand. |
 | `cumulus-backup` | Tars up all cumulus.dotfiles-managed files/dirs from `$HOME` into `~/cumulus-backups/<timestamp>.tar.gz` — a snapshot independent of git history. `--list` shows existing snapshots. |
 | `cumulus-restore [archive]` | Restores a `cumulus-backup` snapshot (defaults to the most recent). Asks for confirmation and saves whatever's currently in place to `~/.cumulus_backup/pre-restore_<timestamp>/` first. |
 | `cumulus-screenshot {full\|region\|window}` | grim+slurp screenshot helper — saves to `~/Pictures/Screenshots` and copies to clipboard. Bound to `Print` / `Mod+Print` / `Mod+Shift+Print`. |
@@ -222,20 +219,17 @@ up in `zsh_config/40-environment.zsh`).
 | `cumulus-autotiling` | Fibonacci spiral autotiling daemon for Sway — splits focused window along its longer axis automatically. |
 | `cumulus-theme-picker` | wofi GUI front-end for the `cumulus-theme` command. Bound to `Mod+Shift+T`. |
 | `cumulus-whichkey` | wofi cheatsheet displaying live Sway keybindings parsed directly from Sway config. Bound to `Mod+Shift+?`. |
-| `cumulus-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only — see script header for Arch/AUR notes): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, blueman-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram/Yazi via snap, and `spotify_player` via cargo. `--dry-run` supported. |
-| `cumulus-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `telescope.nvim` itself is a plugin managed by the nvim config's lazy.nvim — this script only ensures its runtime deps (ripgrep/fd) are present. `--dry-run` supported. |
-| `cumulus-install-sdkman` | Runs by default from `./install.sh` (skip with `--no-sdkman`). Installs [SDKMAN](https://sdkman.io) plus the latest stable Kotlin, Maven, and Gradle. For Java — which has multiple vendors/LTS lines, so there's no single "latest" — it lists `sdk list java` and prompts you for which identifier to install (skips if not a TTY; set `JAVA_VERSION=<identifier>` to install non-interactively). `zsh_config/99-sdkman-cargo.zsh` already sources sdkman on shell startup. Idempotent. `--dry-run` supported. |
-| `cumulus-install-zsh` | Installs zsh + oh-my-zsh (unattended, `KEEP_ZSHRC=yes` so it never touches this repo's `.zshrc`), sets zsh as the default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as the default editor (`git config --global core.editor`, plus `update-alternatives` on apt systems). Works on both apt and pacman. `--dry-run` supported. |
-| `cumulus-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin) via Docker's official apt/pacman repo, Terraform via HashiCorp's official apt repo (or pacman's `terraform` package on Arch), and Ansible via apt/pacman. Also adds you to the `docker` group. Idempotent — skips anything already installed. Works on both apt and pacman. `--dry-run` supported. |
-| `cumulus-install-browser` | Installs Google Chrome (official `.deb` on apt, which self-registers Google's repo for future updates; via `yay`/`paru` on Arch since it's AUR-only) and sets it as the default browser (`xdg-settings` + `xdg-mime` for http/https/html). Bound to `Mod+Shift+B`. Idempotent. `--dry-run` supported. |
+| `cumulus sdd` | Spec-driven development framework CLI (`init`, `new <story-id>`, `verify`). |
+| `cumulus-install-apps` | Installs the "default applications" this desktop is built around (Ubuntu apt + snap only): Microsoft Edge, VS Code, GitHub CLI, Docker, Thunderbird, nm-applet, blueman-applet, swaync, polkit, plus Firefox/1Password/IntelliJ IDEA/Obsidian/Telegram/Yazi via snap, and `spotify_player` via cargo. `--dry-run` supported. |
+| `cumulus-install-nvim-deps` | Installs the latest Neovim (from upstream release tarball) and its full toolchain: luarocks, ImageMagick, mermaid-cli, Python/pip/pipx, nvm + latest Node/npm, tree-sitter-cli, ripgrep + fd, lazygit, lazydocker. Works on both apt and pacman. `--dry-run` supported. |
+| `cumulus-install-sdkman` | Runs by default from `cumulus install` (skip with `--no-sdkman`). Installs [SDKMAN](https://sdkman.io) plus the latest stable Kotlin, Maven, and Gradle. For Java, it lists `sdk list java` and prompts you for which identifier to install. `--dry-run` supported. |
+| `cumulus-install-zsh` | Installs zsh + oh-my-zsh (unattended), sets zsh as default login shell, installs JetBrainsMono Nerd Font, and sets Neovim as default editor. `--dry-run` supported. |
+| `cumulus-install-devops` | Installs the main DevOps toolchain: Docker (Engine, CLI, containerd, buildx, compose plugin), Terraform, and Ansible. Also adds you to the `docker` group. `--dry-run` supported. |
+| `cumulus-install-browser` | Installs Google Chrome and sets it as default browser. Bound to `Mod+Shift+B`. `--dry-run` supported. |
 
 ## Theming
 
-Colors and background come from `cumulus-theme` (`scripts/theme.sh`), which
-renders the cloud flavor + background mode you pick into the actual
-sway/kitty/waybar/wofi configs. The default is **oci, wallpaper rotation** (`oci`
-flavor with rotating wallpapers). State is saved to `~/.config/cumulus/theme/state` and
-re-applied automatically every time you run `./install.sh`.
+Colors and background come from `cumulus-theme`, which renders the cloud flavor + background mode you pick into the actual sway/kitty/waybar/wofi configs. The default is **oci, wallpaper rotation** (`oci` flavor with rotating wallpapers). State is saved to `~/.config/cumulus/theme/state` and re-applied automatically every time you run `cumulus install`.
 
 Flavors: `aws` (dark), `azure` (dark), `gcp` (dark), `oci` (dark).
 
@@ -245,42 +239,22 @@ cumulus-theme current                           # show what's active now
 
 cumulus-theme set oci --rotate                  # default mode: oci with wallpaper rotation
 cumulus-theme set aws                           # plain color background
-cumulus-theme set azure --wallpaper beach.jpg    # static wallpaper (path or bare filename
-                                                   # resolved against themes/wallpapers/)
-cumulus-theme set gcp --rotate --interval 30m    # rotate through wallpapers for GCP
-                                                   # every 30 minutes
+cumulus-theme set azure --wallpaper beach.jpg    # static wallpaper
+cumulus-theme set gcp --rotate --interval 30m    # rotate wallpapers every 30m
 
-cumulus-theme apply                             # re-apply the saved theme (used by install.sh)
+cumulus-theme apply                             # re-apply the saved theme
 cumulus-theme next                              # manually advance rotation by one image
 ```
 
-Drop any `.jpg`/`.jpeg`/`.png`/`.webp` files into `themes/wallpapers/` (not
-tracked by git — add your own) to make them available to `--wallpaper`/
-`--rotate`. Rotation is driven by a `systemd --user` timer
-(`cumulus-wallpaper-rotate.timer`/`.service`), so it survives reboots and
-is automatically disabled when you switch back to flat/static modes.
+Drop any `.jpg`/`.jpeg`/`.png`/`.webp` files into `themes/wallpapers/` (not tracked by git) to make them available to `--wallpaper`/`--rotate`. Rotation is driven by a `systemd --user` timer (`cumulus-wallpaper-rotate.timer`/`.service`).
 
-Switching themes reloads sway (`swaymsg reload`) so client borders, the
-background, and the waybar/wofi stylesheets pick up the new colors
-immediately — no logout required.
+Prefer a GUI? Press `Mod+Shift+T` to open `cumulus-theme-picker` — a wofi-driven walkthrough (flavor → flat/wallpaper/rotate → wallpaper file or interval) that calls `cumulus-theme set` for you and shows a desktop notification when done.
 
-Prefer a GUI? Press `Mod+Shift+T` to open the **theme picker**
-(`config/sway/scripts/theme-picker.sh`) — a wofi-driven walkthrough
-(flavor → flat/wallpaper/rotate → wallpaper file or interval) that calls
-`cumulus-theme set` for you and shows a desktop notification when done.
-It's a thin front-end only; all validation/state/reload logic still lives
-in `theme.sh`.
+Adding a new flavor: drop a `themes/palettes/<name>.conf` file defining the same ~26 `BASE`/`TEXT`/`SURFACE0`/`BLUE`/... variables as the existing palettes, and it's picked up automatically by `cumulus-theme list`/`set` and by `cumulus-theme-picker`.
 
-Adding a new flavor: drop a `themes/palettes/<name>.sh` file defining the
-same ~26 `BASE`/`TEXT`/`SURFACE0`/`BLUE`/... variables as the existing
-palettes, and it's picked up automatically by `cumulus-theme list`/`set`
-and by the theme picker.
+## Updating & Maintenance
 
-## Updating
-
-Edit files directly under `~/.config/...` or `~/.zshrc*` as usual — since
-they're symlinks into this repo, changes are already tracked here. From
-`~/cumulus.dotfiles`:
+Edit files directly under `~/.config/...` or `~/.zshrc*` as usual — since they're symlinks into this repo, changes are already tracked here. From `~/cumulus.dotfiles`:
 
 ```bash
 git add -A
@@ -288,5 +262,5 @@ git commit -m "describe the change"
 git push
 ```
 
-On another machine, just `git pull` inside `~/cumulus.dotfiles` and re-run
-`./install.sh` (idempotent — only touches links that changed).
+On another machine, run `cumulus update` or `git pull` inside `~/cumulus.dotfiles` and re-run `cumulus install` (idempotent — only touches links that changed).
+
