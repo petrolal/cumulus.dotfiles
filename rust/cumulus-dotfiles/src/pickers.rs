@@ -38,12 +38,11 @@ fn pick(prompt: &str, options: &str) -> String {
             prompt,
             "--width",
             "500",
-            "--height",
-            "400",
             "--lines",
             "8",
             "--insensitive",
         ])
+
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
@@ -233,11 +232,10 @@ pub fn run_whichkey(ctx: &Context, _args: &[String]) -> Result<()> {
             "which-key",
             "--width",
             "700",
-            "--height",
-            "600",
             "--lines",
             "20",
         ])
+
         .stdin(Stdio::piped())
         .stdout(Stdio::null())
         .spawn()
