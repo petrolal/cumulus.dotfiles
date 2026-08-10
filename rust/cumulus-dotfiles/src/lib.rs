@@ -9,6 +9,7 @@ pub mod collate;
 pub mod context;
 pub mod error;
 pub mod refresh;
+pub mod sysutils;
 pub mod theme;
 pub mod util;
 
@@ -25,8 +26,11 @@ fn run_command(name: &str, args: &[String]) -> Result<()> {
         "runtime-refresh" => refresh::run_runtime_refresh(&ctx),
         "os-colorscheme" => refresh::run_os_colorscheme(&ctx),
         "rgb-theme" => refresh::run_rgb_theme(&ctx, args),
+        "lock" => sysutils::run_lock(&ctx),
+        "idle" => sysutils::run_idle(&ctx),
+        "screenshot" => sysutils::run_screenshot(&ctx, args),
         other => Err(error::Error::new(format!(
-            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme)"
+            "unknown command '{other}' (known: theme, runtime-refresh, os-colorscheme, rgb-theme, lock, idle, screenshot)"
         ))),
     }
 }
@@ -83,6 +87,9 @@ Commands:
   runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os/rgb)
   os-colorscheme   sync the GNOME/GTK color-scheme setting
   rgb-theme        sync hardware RGB lighting with the active theme color
+  lock             lock the screen (swaylock) styled to the active theme
+  idle             run the swayidle daemon (auto-lock, dpms, suspend)
+  screenshot       capture a screenshot (full|region|window)
 
 Run `cumulus <command> --help` for command-specific usage.
 ";

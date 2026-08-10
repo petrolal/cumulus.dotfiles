@@ -40,6 +40,18 @@ path = "src/bin/cumulus-os-colorscheme.rs"
 name = "cumulus-rgb-theme"
 path = "src/bin/cumulus-rgb-theme.rs"
 
+[[bin]]
+name = "cumulus-lock"
+path = "src/bin/cumulus-lock.rs"
+
+[[bin]]
+name = "cumulus-idle"
+path = "src/bin/cumulus-idle.rs"
+
+[[bin]]
+name = "cumulus-screenshot"
+path = "src/bin/cumulus-screenshot.rs"
+
 [profile.release]
 opt-level = "z"
 lto = true
