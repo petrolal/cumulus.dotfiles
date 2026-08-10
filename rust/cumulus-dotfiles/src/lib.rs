@@ -1,0 +1,79 @@
+//! cumulus-dotfiles — Rust tooling for the cumulus.dotfiles desktop.
+//!
+//! All logic lives in this library; each installed `cumulus-*` command is a
+//! thin multi-call binary that dispatches on its own name via [`dispatch`].
+//! `cargo install cumulus-dotfiles` installs the whole suite into
+//! `~/.cargo/bin`.
+
+pub mod collate;
+pub mod context;
+pub mod error;
+pub mod theme;
+pub mod util;
+
+use context::Context;
+use error::Result;
+use std::path::Path;
+use std::process::ExitCode;
+
+/// Map a resolved command name to its handler.
+fn run_command(name: &str, args: &[String]) -> Result<()> {
+    let ctx = Context::discover()?;
+    match name {
+        "theme" => theme::run(&ctx, args),
+        other => Err(error::Error::new(format!(
+            "unknown command '{other}' (known: theme)"
+        ))),
+    }
+}
+
+/// Resolve the command from `argv[0]` (`cumulus-<name>`) or, when invoked as
+/// the umbrella `cumulus`, from the first argument.
+pub fn dispatch() -> ExitCode {
+    let args: Vec<String> = std::env::args().collect();
+    let prog = args
+        .first()
+        .map(|p| {
+            Path::new(p)
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or(p)
+                .to_string()
+        })
+        .unwrap_or_default();
+
+    let (name, rest): (String, Vec<String>) = if let Some(sub) = prog.strip_prefix("cumulus-") {
+        // Invoked via a `cumulus-<name>` symlink/binary.
+        (sub.to_string(), args[1..].to_vec())
+    } else {
+        // Invoked as the umbrella `cumulus <command> ...`.
+        match args.get(1) {
+            Some(cmd) if !cmd.starts_with('-') => (cmd.clone(), args[2..].to_vec()),
+            _ => {
+                print!("{UMBRELLA_HELP}");
+                return ExitCode::SUCCESS;
+            }
+        }
+    };
+
+    match run_command(&name, &rest) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("\x1b[1;31m[cumulus] error:\x1b[0m {e}");
+            ExitCode::from(e.code())
+        }
+    }
+}
+
+const UMBRELLA_HELP: &str = "\
+cumulus — tooling for the cumulus.dotfiles Sway/Wayland desktop.
+
+Usage:
+  cumulus <command> [args...]
+  cumulus-<command> [args...]      (installed alias)
+
+Commands:
+  theme      select a desktop flavor + background mode and apply it live
+
+Run `cumulus <command> --help` for command-specific usage.
+";

@@ -23,3 +23,7 @@ config/wofi/style.css
 themes/wallpapers/*
 !themes/wallpapers/*.svg
 !themes/wallpapers/ATTRIBUTION.md
+
+# Rust build artifacts (the cumulus-theme port). Cargo.lock is tracked
+# (binary crate best practice) — only the build output is ignored.
+rust/**/target/
