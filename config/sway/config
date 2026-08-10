@@ -51,10 +51,10 @@ exec blueman-applet
 exec 1password --silent
 
 # Idle management (lock -> screen off -> suspend). See cumulus-idle.
-exec cumulus-idle
+exec ~/.local/bin/cumulus-idle
 
 # Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
-exec_always cumulus-autotiling
+exec_always ~/.local/bin/cumulus-autotiling
 
 # Polkit authentication agent — required for GUI privilege prompts (Intune, NetworkManager, disk mounts).
 # GNOME's polkit agent is reused since it is desktop-agnostic; no separate install needed.
@@ -249,8 +249,14 @@ bindsym $mod+minus scratchpad show
 bindsym $mod+r mode "resize"
 
 # which-key style cheatsheet — shows all bindings from this config in wofi
-bindsym $mod+question exec cumulus-whichkey
-bindsym $mod+slash exec cumulus-whichkey
+bindsym $mod+question exec ~/.local/bin/cumulus-whichkey
+bindsym $mod+slash exec ~/.local/bin/cumulus-whichkey
+bindsym $mod+Shift+slash exec ~/.local/bin/cumulus-whichkey
+bindsym $mod+Shift+question exec ~/.local/bin/cumulus-whichkey
+bindcode $mod+61 exec ~/.local/bin/cumulus-whichkey
+bindcode $mod+Shift+61 exec ~/.local/bin/cumulus-whichkey
+bindcode $mod+193 exec ~/.local/bin/cumulus-whichkey
+bindcode $mod+Shift+193 exec ~/.local/bin/cumulus-whichkey
 
 
 # Display configuration — wdisplays GUI for multi-monitor setup
@@ -258,21 +264,21 @@ bindsym $mod+Shift+d exec wdisplays
 
 # Theme picker — wofi GUI to pick a cloud flavor + background mode
 # (flat color / wallpaper / rotate), front-end for cumulus-theme.
-bindsym $mod+Shift+t exec cumulus-theme-picker
+bindsym $mod+Shift+t exec ~/.local/bin/cumulus-theme-picker
 
 # Lock screen, suspend, and shutdown
 # Note: lock is bound to $mod+Escape (not $mod+Shift+l — that collides with $mod+Shift+$right
 # (vim-style "l" = right, see `set $right l` above), which silently wins
 # and made sway show a "there are errors in your config" banner).
-bindsym $mod+Escape exec cumulus-lock # Lock screen
+bindsym $mod+Escape exec ~/.local/bin/cumulus-lock # Lock screen
 bindsym $mod+Shift+Escape exec systemctl suspend # Suspend system
 bindsym $mod+Control+Escape exec systemctl poweroff # Shutdown system
 bindsym $mod+Control+Shift+Escape exec systemctl reboot # Reboot system
 
 # Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
-bindsym Print exec cumulus-screenshot full
-bindsym $mod+Print exec cumulus-screenshot region
-bindsym $mod+Shift+Print exec cumulus-screenshot window
+bindsym Print exec ~/.local/bin/cumulus-screenshot full
+bindsym $mod+Print exec ~/.local/bin/cumulus-screenshot region
+bindsym $mod+Shift+Print exec ~/.local/bin/cumulus-screenshot window
 
 ### ────────────────────────────────────────────────────────────────
 ### Modes
