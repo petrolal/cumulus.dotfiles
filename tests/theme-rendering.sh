@@ -29,7 +29,7 @@ for flavor in "${cloud_flavors[@]}"; do
   source "$REPO_ROOT/themes/palettes/$flavor.sh"
   assert rg -q "window#waybar \{" "$REPO_ROOT/config/waybar/style.css"
   assert rg -q "background-color: $BASE;" "$REPO_ROOT/config/waybar/style.css"
-  assert rg -q "exec_always swaybg -c \"$BASE\"" "$REPO_ROOT/config/sway/colors.conf"
+  assert rg -q "exec_always pkill -x swaybg; swaybg -c \"$BASE\"" "$REPO_ROOT/config/sway/colors.conf"
   if rg -q '@@(BASE|TEXT|SUBTEXT0|SURFACE0|BLUE|RED|YELLOW)@@' "$REPO_ROOT/config/waybar/style.css"; then
     printf 'FAIL: unresolved Waybar placeholder for %s\n' "$flavor" >&2
     exit 1
