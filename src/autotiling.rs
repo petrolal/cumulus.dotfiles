@@ -1,8 +1,10 @@
 //! `cumulus-autotiling` — Fibonacci spiral autotiling for Sway.
-//! Ports `scripts/autotiling.py` to std Rust.
+//! Listens to Sway IPC window events and dynamically sets split direction (`splith` / `splitv`)
+//! based on focused window dimensions, skipping floating, fullscreen, or tabbed/stacked windows.
 
 use crate::context::Context;
 use crate::error::{Error, Result};
+use serde::Deserialize;
 use std::env;
 use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
@@ -14,12 +16,42 @@ const RUN_COMMAND: u32 = 0;
 const SUBSCRIBE: u32 = 2;
 const GET_TREE: u32 = 4;
 
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+struct SwayNode {
+    id: Option<i64>,
+    name: Option<String>,
+    #[serde(rename = "type")]
+    node_type: Option<String>,
+    layout: Option<String>,
+    orientation: Option<String>,
+    fullscreen_mode: Option<i64>,
+    floating: Option<String>,
+    focused: Option<bool>,
+    rect: Option<Rect>,
+    nodes: Option<Vec<SwayNode>>,
+    floating_nodes: Option<Vec<SwayNode>>,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
+struct Rect {
+    x: i64,
+    y: i64,
+    width: u64,
+    height: u64,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+struct SwayWindowEvent {
+    change: String,
+    container: Option<SwayNode>,
+}
+
 fn get_socket_path() -> Option<String> {
     if let Ok(sock) = env::var("SWAYSOCK") {
         if !sock.is_empty() && Path::new(&sock).exists() {
             return Some(sock);
-        } else {
-            return None;
         }
     }
     if let Ok(out) = Command::new("swaymsg").args(["-t", "get_version"]).output() {
@@ -71,40 +103,74 @@ fn send_ipc(stream: &mut UnixStream, msg_type: u32, payload: &str) -> std::io::R
     Ok(resp)
 }
 
-#[derive(Debug, PartialEq, Eq)]
-struct Rect {
-    width: u64,
-    height: u64,
+fn find_focused<'a>(
+    node: &'a SwayNode,
+    parent: Option<&'a SwayNode>,
+) -> Option<(&'a SwayNode, Option<&'a SwayNode>)> {
+    if node.focused == Some(true) {
+        return Some((node, parent));
+    }
+    if let Some(nodes) = &node.nodes {
+        for child in nodes {
+            if let Some(found) = find_focused(child, Some(node)) {
+                return Some(found);
+            }
+        }
+    }
+    if let Some(floating_nodes) = &node.floating_nodes {
+        for child in floating_nodes {
+            if let Some(found) = find_focused(child, Some(node)) {
+                return Some(found);
+            }
+        }
+    }
+    None
 }
 
-fn find_focused_rect(json_str: &str) -> Option<Rect> {
-    let focused_idx = json_str
-        .find("\"focused\": true")
-        .or_else(|| json_str.find("\"focused\":true"))?;
+fn should_autotile(focused: &SwayNode, parent: Option<&SwayNode>) -> bool {
+    // Skip floating containers
+    if focused.node_type.as_deref() == Some("floating_con") {
+        return false;
+    }
+    if focused.layout.as_deref() == Some("floating") {
+        return false;
+    }
+    if let Some(floating) = &focused.floating {
+        if floating != "auto_off" && floating != "user_off" && floating != "none" && !floating.is_empty() {
+            return false;
+        }
+    }
 
-    let rect_idx = json_str[focused_idx..].find("\"rect\"")?;
-    let rect_substr = &json_str[focused_idx + rect_idx..];
+    // Skip fullscreen containers
+    if focused.fullscreen_mode.unwrap_or(0) != 0 {
+        return false;
+    }
 
-    let width_val = extract_json_number(rect_substr, "width")?;
-    let height_val = extract_json_number(rect_substr, "height")?;
+    // Skip if parent container or workspace is tabbed or stacked
+    if let Some(p) = parent {
+        if let Some(layout) = &p.layout {
+            if layout == "tabbed" || layout == "stacked" {
+                return false;
+            }
+        }
+    }
 
-    Some(Rect {
-        width: width_val,
-        height: height_val,
-    })
+    // Skip if focused container itself is tabbed or stacked
+    if let Some(layout) = &focused.layout {
+        if layout == "tabbed" || layout == "stacked" {
+            return false;
+        }
+    }
+
+    true
 }
 
-fn extract_json_number(s: &str, key: &str) -> Option<u64> {
-    let pattern = format!("\"{key}\"");
-    let key_idx = s.find(&pattern)?;
-    let after_key = &s[key_idx + pattern.len()..];
-    let colon_idx = after_key.find(':')?;
-    let num_str = after_key[colon_idx + 1..]
-        .trim_start()
-        .chars()
-        .take_while(|c| c.is_ascii_digit())
-        .collect::<String>();
-    num_str.parse::<u64>().ok()
+fn calculate_split(rect: &Rect) -> &'static str {
+    if rect.width >= rect.height {
+        "splith"
+    } else {
+        "splitv"
+    }
 }
 
 pub fn run(_ctx: &Context, args: &[String]) -> Result<()> {
@@ -125,21 +191,39 @@ pub fn run(_ctx: &Context, args: &[String]) -> Result<()> {
         .map_err(|e| Error::new(format!("failed to subscribe to sway events: {e}")))?;
 
     while let Ok((_, payload)) = unpack_header(&mut event_sock) {
-        let is_focus =
-            payload.contains("\"change\":\"focus\"") || payload.contains("\"change\": \"focus\"");
-        let is_new =
-            payload.contains("\"change\":\"new\"") || payload.contains("\"change\": \"new\"");
+        let is_target_event = if let Ok(event) = serde_json::from_str::<SwayWindowEvent>(&payload) {
+            matches!(event.change.as_str(), "focus" | "new" | "move")
+        } else {
+            payload.contains("\"change\":\"focus\"")
+                || payload.contains("\"change\": \"focus\"")
+                || payload.contains("\"change\":\"new\"")
+                || payload.contains("\"change\": \"new\"")
+                || payload.contains("\"change\":\"move\"")
+                || payload.contains("\"change\": \"move\"")
+        };
 
-        if is_focus || is_new {
+        if is_target_event {
             if let Ok(tree_payload) = send_ipc(&mut cmd_sock, GET_TREE, "") {
-                if let Some(rect) = find_focused_rect(&tree_payload) {
-                    if rect.width > 0 && rect.height > 0 {
-                        let cmd = if rect.width >= rect.height {
-                            "splith"
-                        } else {
-                            "splitv"
-                        };
-                        let _ = send_ipc(&mut cmd_sock, RUN_COMMAND, cmd);
+                if let Ok(root) = serde_json::from_str::<SwayNode>(&tree_payload) {
+                    if let Some((focused, parent)) = find_focused(&root, None) {
+                        if should_autotile(focused, parent) {
+                            if let Some(rect) = focused.rect {
+                                if rect.width > 0 && rect.height > 0 {
+                                    let cmd = calculate_split(&rect);
+                                    let current_orientation =
+                                        focused.orientation.as_deref().unwrap_or("none");
+                                    let is_already_target = match cmd {
+                                        "splith" => current_orientation == "horizontal",
+                                        "splitv" => current_orientation == "vertical",
+                                        _ => false,
+                                    };
+
+                                    if !is_already_target {
+                                        let _ = send_ipc(&mut cmd_sock, RUN_COMMAND, cmd);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -154,28 +238,70 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_find_focused_rect() {
+    fn test_find_focused_and_calculate_split() {
         let sample = r#"{
             "id": 1,
             "focused": false,
-            "rect": { "width": 3840, "height": 1080 },
+            "rect": { "x": 0, "y": 0, "width": 3840, "height": 1080 },
             "nodes": [
                 {
                     "id": 2,
+                    "type": "con",
                     "focused": true,
                     "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080 }
                 }
             ]
         }"#;
-        let rect = find_focused_rect(sample).unwrap();
-        assert_eq!(rect.width, 1920);
-        assert_eq!(rect.height, 1080);
+        let root: SwayNode = serde_json::from_str(sample).unwrap();
+        let (focused, parent) = find_focused(&root, None).unwrap();
+        assert_eq!(focused.id, Some(2));
+        assert!(parent.is_some());
+        assert!(should_autotile(focused, parent));
+        assert_eq!(calculate_split(&focused.rect.unwrap()), "splith");
     }
 
     #[test]
-    fn test_extract_json_number() {
-        let snippet = r#""rect": { "x": 100, "y": 200, "width": 1920, "height": 1080 }"#;
-        assert_eq!(extract_json_number(snippet, "width"), Some(1920));
-        assert_eq!(extract_json_number(snippet, "height"), Some(1080));
+    fn test_vertical_split_calculation() {
+        let sample = r#"{
+            "id": 1,
+            "focused": true,
+            "type": "con",
+            "rect": { "x": 0, "y": 0, "width": 960, "height": 1080 }
+        }"#;
+        let root: SwayNode = serde_json::from_str(sample).unwrap();
+        let (focused, parent) = find_focused(&root, None).unwrap();
+        assert_eq!(calculate_split(&focused.rect.unwrap()), "splitv");
+        assert!(should_autotile(focused, parent));
+    }
+
+    #[test]
+    fn test_skip_floating_and_tabbed() {
+        let floating_sample = r#"{
+            "id": 1,
+            "focused": true,
+            "type": "floating_con",
+            "rect": { "x": 100, "y": 100, "width": 800, "height": 600 }
+        }"#;
+        let root: SwayNode = serde_json::from_str(floating_sample).unwrap();
+        let (focused, parent) = find_focused(&root, None).unwrap();
+        assert!(!should_autotile(focused, parent));
+
+        let tabbed_parent_sample = r#"{
+            "id": 1,
+            "focused": false,
+            "layout": "tabbed",
+            "nodes": [
+                {
+                    "id": 2,
+                    "focused": true,
+                    "type": "con",
+                    "rect": { "x": 0, "y": 0, "width": 1920, "height": 1080 }
+                }
+            ]
+        }"#;
+        let root: SwayNode = serde_json::from_str(tabbed_parent_sample).unwrap();
+        let (focused, parent) = find_focused(&root, None).unwrap();
+        assert!(!should_autotile(focused, parent));
     }
 }
+
