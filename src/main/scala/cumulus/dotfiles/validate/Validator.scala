@@ -7,7 +7,7 @@ object Validator:
   val VersionStr = "0.1.0 (Scala 3.5.2 Native Image)"
 
   val Subcommands: Seq[String] = Seq(
-    "theme", "runtime-refresh", "os-colorscheme", "rgb-theme", "lock", "idle",
+    "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
     "screenshot", "autotiling", "validate", "backup", "restore", "update",
     "sdd", "install", "deploy", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
@@ -36,7 +36,7 @@ object Validator:
     println("\n\u001b[1m--- System Binary Audit ---\u001b[0m")
     val requiredTools = Seq(
       "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp",
-      "pactl", "brightnessctl", "gsettings", "openrgb", "git", "tar", "curl", "unzip",
+      "pactl", "brightnessctl", "gsettings", "git", "tar", "curl", "unzip",
       "fc-cache", "which", "zsh"
     )
 

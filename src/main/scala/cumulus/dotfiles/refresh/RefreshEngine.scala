@@ -30,13 +30,3 @@ object RefreshEngine:
       Right(())
     catch
       case e: Exception => Right(println(s"  \u001b[33m[NOTE]\u001b[0m gsettings update: ${e.getMessage}"))
-
-  def runRgbTheme(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    val color = args.headOption.getOrElse("33ccff")
-    println(s"\u001b[1;36m[cumulus rgb-theme]\u001b[0m Syncing OpenRGB hardware lighting (color: #$color)...")
-    try
-      os.proc("openrgb", "--color", color).call(check = false)
-      println(s"  \u001b[32m[OK]\u001b[0m Updated OpenRGB profile to #$color")
-      Right(())
-    catch
-      case _: Exception => Right(println("  \u001b[33m[NOTE]\u001b[0m OpenRGB daemon not running"))

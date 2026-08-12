@@ -14,8 +14,3 @@ class RefreshSuite extends FunSuite:
     val ctx = Context.discover().toOption.get
     val res = RefreshEngine.runOsColorscheme(ctx)
     assert(res.isRight)
-
-  test("RefreshEngine.runRgbTheme executes without exception"):
-    val ctx = Context.discover().toOption.get
-    val res = RefreshEngine.runRgbTheme(ctx, List("33ccff"))
-    assert(res.isRight)

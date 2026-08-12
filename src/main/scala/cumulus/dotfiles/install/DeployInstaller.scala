@@ -6,11 +6,11 @@ import upickle.default._
 
 object DeployInstaller:
   val Subcommands: Seq[String] = Seq(
-    "theme", "runtime-refresh", "os-colorscheme", "rgb-theme", "lock", "idle",
+    "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
     "screenshot", "autotiling", "validate", "backup", "restore", "update",
-    "sdd", "install", "deploy", "install-fonts", "install-apps", "install-browser",
+    "sdd", "install", "deploy", "install-deps", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
-    "install-nvim-deps", "theme-picker", "whichkey", "wichkey"
+    "install-nvim-deps", "install-all", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
@@ -86,4 +86,8 @@ object DeployInstaller:
 
     println(s"  \u001b[32m[OK]\u001b[0m Created $symlinkCount subcommand symlinks in $binDir")
     println("\n\u001b[1;32m[SUCCESS]\u001b[0m cumulus.dotfiles deployment complete!")
-    Right(())
+
+    if !args.contains("--links-only") then
+      ToolInstallers.runTool("install-all", ctx, args)
+    else
+      Right(())

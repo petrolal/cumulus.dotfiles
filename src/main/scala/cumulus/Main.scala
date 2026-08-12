@@ -55,7 +55,6 @@ object Main:
       case "theme" => cumulus.dotfiles.theme.ThemeEngine.run(ctx, args)
       case "runtime-refresh" => cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
       case "os-colorscheme" => cumulus.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
-      case "rgb-theme" => cumulus.dotfiles.refresh.RefreshEngine.runRgbTheme(ctx, args)
       case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
       case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
       case "whichkey" | "wichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
@@ -76,9 +75,8 @@ object Main:
       |Commands:
       |  install          deploy cumulus.dotfiles onto a machine (full setup)
       |  theme            select a desktop flavor + background mode and apply it live
-      |  runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os/rgb)
+      |  runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os)
       |  os-colorscheme   sync the GNOME/GTK color-scheme setting
-      |  rgb-theme        sync hardware RGB lighting with the active theme color
       |  lock             lock the screen (swaylock) styled to the active theme
       |  idle             run the swayidle daemon (auto-lock, dpms, suspend)
       |  screenshot       capture a screenshot (full|region|window)
@@ -88,15 +86,16 @@ object Main:
       |  restore          restore a snapshot created by backup
       |  update           git pull the dotfiles and re-run the installer
       |  sdd              token-efficient spec-driven development for AI workflows
+      |  install-deps     install system & build dependencies (sbt, gcc, git, etc.)
       |  install-fonts    install the JetBrainsMono Nerd Font
-      |
       |  install-apps     install core desktop apps (sway/waybar/kitty/etc.)
-      |  install-browser  install a web browser (brave/chromium)
+      |  install-browser  install a web browser (chromium/firefox)
       |  install-devops   install devops tooling (docker/terraform/kubectl/etc.)
       |  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
       |  install-sdkman   install SDKMAN! and JVM tooling
       |  install-nvim     install the Neovim config dependencies (deploy)
       |  install-nvim-deps install Neovim + its plugin ecosystem dependencies
+      |  install-all      install all system packages, desktop apps, fonts, and tooling
       |  theme-picker     wofi GUI front-end for the theme command
       |  whichkey         wofi cheatsheet of the live sway keybindings
       |
