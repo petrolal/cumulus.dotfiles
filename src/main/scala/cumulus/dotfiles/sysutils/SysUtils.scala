@@ -19,26 +19,96 @@ object SysUtils:
         "swayidle", "-w",
         "timeout", "300", "swaylock -f -c 1e1e2e",
         "timeout", "600", "swaymsg 'output * dpms off'",
-        "resume", "swaymsg 'output * dpms on'"
+        "resume", "swaymsg 'output * dpms on'",
+        "timeout", "900", "systemctl suspend",
+        "before-sleep", "swaylock -f -c 1e1e2e"
       ).call(check = false)
       Right(())
     catch
       case e: Exception => Left(CommandError(s"Idle daemon failed: ${e.getMessage}"))
 
   def runScreenshot(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    val mode = args.headOption.getOrElse("full")
+    val mode = args.headOption.getOrElse("region")
+
+    if mode != "full" && mode != "region" && mode != "window" then
+      System.err.println("Usage: cumulus-screenshot {full|region|window}")
+      return Left(CommandError("Usage: cumulus-screenshot {full|region|window}", 1))
+
     val screenshotsDir = ctx.home / "Pictures" / "Screenshots"
     os.makeDir.all(screenshotsDir)
-    val file = screenshotsDir / s"screenshot-${System.currentTimeMillis()}.png"
+    val timestamp = os.proc("date", "+%Y-%m-%d_%H-%M-%S").call(check = false).out.text().trim
+    val file = screenshotsDir / s"$timestamp.png"
 
     println(s"\u001b[1;34m[cumulus screenshot]\u001b[0m Capturing $mode screenshot to $file...")
+
     try
-      mode match
-        case "region" =>
-          os.proc("bash", "-c", s"grim -g \"$$(slurp)\" $file && wl-copy < $file").call(check = false)
-        case _ =>
+      val captureRes = mode match
+        case "full" =>
           os.proc("grim", file.toString).call(check = false)
-      println(s"  \u001b[32m[OK]\u001b[0m Screenshot saved to $file")
-      Right(())
+        case "region" =>
+          val slurpRes = os.proc("slurp").call(check = false)
+          if slurpRes.exitCode == 0 && slurpRes.out.text().trim.nonEmpty then
+            val geom = slurpRes.out.text().trim
+            os.proc("grim", "-g", geom, file.toString).call(check = false)
+          else
+            notifyDesktop("Cancelled", "Screenshot region selection cancelled.")
+            return Right(())
+        case "window" =>
+          getFocusedWindowGeometry() match
+            case Some(geom) =>
+              os.proc("grim", "-g", geom, file.toString).call(check = false)
+            case None =>
+              notifyDesktop("Failed", "No focused window found.")
+              return Left(CommandError("No focused window found", 1))
+
+      if captureRes.exitCode == 0 && os.exists(file) then
+        // Copy screenshot image bytes to wl-copy clipboard if available
+        try
+          if isCommandAvailable("wl-copy") then
+            os.proc("wl-copy").call(stdin = os.read.bytes(file), check = false)
+        catch
+          case _: Exception => ()
+
+        notifyDesktop("Screenshot Saved", s"Saved to ${file.toString} (copied to clipboard)")
+        println(s"  \u001b[32m[OK]\u001b[0m Saved to $file (copied to clipboard)")
+        Right(())
+      else
+        Left(CommandError("grim screenshot capture failed", 1))
     catch
       case e: Exception => Left(CommandError(s"Screenshot failed: ${e.getMessage}"))
+
+  private def getFocusedWindowGeometry(): Option[String] =
+    try
+      val res = os.proc("swaymsg", "-t", "get_tree").call(check = false)
+      if res.exitCode == 0 then
+        val json = ujson.read(res.out.text())
+        findFocusedNodeGeometry(json)
+      else None
+    catch
+      case _: Exception => None
+
+  private def findFocusedNodeGeometry(node: ujson.Value): Option[String] =
+    try
+      if node.obj.get("focused").exists(_.bool) then
+        val rect = node.obj("rect")
+        val x = rect("x").num.toInt
+        val y = rect("y").num.toInt
+        val w = rect("width").num.toInt
+        val h = rect("height").num.toInt
+        Some(s"$x,$y ${w}x$h")
+      else
+        val tiledNodes = node.obj.get("nodes").map(_.arr).getOrElse(Vector.empty)
+        val floatingNodes = node.obj.get("floating_nodes").map(_.arr).getOrElse(Vector.empty)
+        (tiledNodes ++ floatingNodes).flatMap(findFocusedNodeGeometry).headOption
+    catch
+      case _: Exception => None
+
+  private def notifyDesktop(title: String, body: String): Unit =
+    try
+      if isCommandAvailable("notify-send") then
+        os.proc("notify-send", title, body).call(check = false)
+    catch
+      case _: Exception => ()
+
+  private def isCommandAvailable(cmd: String): Boolean =
+    try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false
