@@ -24,22 +24,31 @@ detect_pkg_mgr() {
 PKG_MGR="$(detect_pkg_mgr)"
 
 install_system_deps() {
+  if [ "$PKG_MGR" = "unknown" ]; then
+    echo -e "  \033[33m[NOTE]\033[0m Package manager not detected. Skipping system package installation."
+    return
+  fi
+
   echo -e "  \033[1;36m[cumulus]\033[0m Installing all system & build dependencies for $PKG_MGR..."
+  echo -e "  \033[33m[INFO]\033[0m You may be prompted for your sudo password..."
+
   case "$PKG_MGR" in
     pacman)
-      sudo pacman -S --needed --noconfirm sbt jdk-openjdk gcc git curl fontconfig zsh tar unzip which sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl libpulse chromium docker terraform kubectl helm neovim ttf-jetbrains-mono-nerd || true
+      sudo pacman -S --needed --noconfirm sbt jdk-openjdk gcc git curl fontconfig zsh tar unzip which sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl libpulse chromium docker terraform kubectl helm neovim ttf-jetbrains-mono-nerd
+      echo -e "  \033[32m[OK]\033[0m System packages installed"
       ;;
     apt-get)
-      sudo apt-get update || true
+      sudo apt-get update
       if ! command -v sbt &> /dev/null; then
         echo -e "  \033[33m[cumulus]\033[0m Configuring sbt apt repository..."
-        sudo apt-get install -y apt-transport-https curl gnupg || true
-        echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list || true
-        echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list || true
-        curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add - 2>/dev/null || true
-        sudo apt-get update || true
+        sudo apt-get install -y apt-transport-https curl gnupg
+        echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list > /dev/null
+        echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list > /dev/null
+        curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add -
+        sudo apt-get update
       fi
-      sudo apt-get install -y build-essential default-jdk sbt git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl pulseaudio-utils firefox docker.io helm neovim fonts-jetbrains-mono || true
+      sudo apt-get install -y build-essential default-jdk sbt git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl pulseaudio-utils firefox docker.io helm neovim fonts-jetbrains-mono
+      echo -e "  \033[32m[OK]\033[0m System packages installed"
       ;;
     *)
       echo -e "  \033[33m[NOTE]\033[0m Package manager '$PKG_MGR' not automatically managed. Skipping system package installation."
