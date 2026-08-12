@@ -60,7 +60,7 @@ object SysUtils:
         case "full" =>
           os.proc("grim", file.toString).call(check = false)
         case "region" =>
-          val slurpRes = os.proc("slurp").call(check = false)
+          val slurpRes = os.proc("bash", "-c", "slurp").call(check = false, stdin = os.Inherit)
           if slurpRes.exitCode == 0 && slurpRes.out.text().trim.nonEmpty then
             val geom = slurpRes.out.text().trim
             os.proc("grim", "-g", geom, file.toString).call(check = false)
