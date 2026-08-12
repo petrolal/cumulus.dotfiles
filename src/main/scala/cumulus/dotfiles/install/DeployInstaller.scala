@@ -21,6 +21,21 @@ object DeployInstaller:
     val mainBinary = binDir / "cumulus"
     println(s"  \u001b[32m[OK]\u001b[0m Target executable: $mainBinary")
 
+    // Purge obsolete cumulus-* symlinks not in Subcommands
+    val validSymlinkNames = Subcommands.map(cmd => s"cumulus-$cmd").toSet
+    var purgedCount = 0
+    if os.exists(binDir) then
+      for file <- os.list(binDir) do
+        val filename = file.last
+        if filename.startsWith("cumulus-") && !validSymlinkNames.contains(filename) then
+          try
+            os.remove(file)
+            purgedCount += 1
+          catch case _: Exception => ()
+
+    if purgedCount > 0 then
+      println(s"  \u001b[32m[OK]\u001b[0m Cleaned up $purgedCount obsolete symlinks in $binDir")
+
     var manifestEntries = List.empty[ManifestEntry]
 
     // Preserve existing sway config
