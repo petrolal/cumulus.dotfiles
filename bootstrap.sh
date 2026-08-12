@@ -33,3 +33,13 @@ else
 fi
 
 echo -e "\n\033[1;32m[SUCCESS]\033[0m cumulus.dotfiles (Scala 3) bootstrap & deployment completed successfully!"
+
+# Step 5: Ask user if they want to reboot the system
+echo -en "\n\033[1;33m[?] Would you like to reboot the system now? (y/N): \033[0m"
+read -r response
+if [[ "$response" =~ ^[Yy]$ ]]; then
+  echo -e "\033[1;36m[cumulus]\033[0m Rebooting system..."
+  sudo reboot || systemctl reboot || reboot
+else
+  echo -e "\033[1;32m[cumulus]\033[0m Reboot skipped. System configuration complete!"
+fi
