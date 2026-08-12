@@ -4,6 +4,8 @@ import cumulus.dotfiles.context.Context
 import cumulus.dotfiles.error.{CommandError, CumulusError}
 
 object Validator:
+  val VersionStr = "0.1.0 (Scala 3.5.2 Native Image)"
+
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "rgb-theme", "lock", "idle",
     "screenshot", "autotiling", "validate", "backup", "restore", "update",
@@ -13,11 +15,24 @@ object Validator:
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus validate]\u001b[0m Running 25+ point desktop health & symlink audit (Scala 3.5.2 Native Engine)...")
+    println(s"\u001b[1;36m[cumulus validate]\u001b[0m Running 25+ point desktop health & symlink audit...")
 
     var missingCount = 0
 
-    // 1. Audit Desktop CLI Tools
+    // 1. Audit Engine Version & Binary Target
+    println("\n\u001b[1m--- Engine & Version Audit ---\u001b[0m")
+    println(s"  \u001b[32m[OK]\u001b[0m Version: $VersionStr")
+
+    val binDir = ctx.home / ".local" / "bin"
+    val mainBinary = binDir / "cumulus"
+
+    if os.exists(mainBinary) then
+      println(s"  \u001b[32m[OK]\u001b[0m Main executable target: $mainBinary")
+    else
+      println(s"  \u001b[31m[FAIL]\u001b[0m Main executable missing at $mainBinary")
+      missingCount += 1
+
+    // 2. Audit Desktop CLI Tools
     println("\n\u001b[1m--- System Binary Audit ---\u001b[0m")
     val requiredTools = Seq(
       "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp",
@@ -32,17 +47,8 @@ object Validator:
         println(s"  \u001b[31m[FAIL]\u001b[0m Binary '$tool' is MISSING")
         missingCount += 1
 
-    // 2. Audit Subcommand Binary Symlinks in ~/.local/bin/
+    // 3. Audit Subcommand Binary Symlinks in ~/.local/bin/
     println("\n\u001b[1m--- Subcommand Symlink Audit (~/.local/bin/) ---\u001b[0m")
-    val binDir = ctx.home / ".local" / "bin"
-    val mainBinary = binDir / "cumulus"
-
-    if os.exists(mainBinary) then
-      println(s"  \u001b[32m[OK]\u001b[0m Main executable target: $mainBinary")
-    else
-      println(s"  \u001b[31m[FAIL]\u001b[0m Main executable missing at $mainBinary")
-      missingCount += 1
-
     for cmd <- Subcommands do
       val symlinkPath = binDir / s"cumulus-$cmd"
       if os.exists(symlinkPath) || os.isLink(symlinkPath) then
@@ -51,7 +57,7 @@ object Validator:
         println(s"  \u001b[31m[FAIL]\u001b[0m Symlink 'cumulus-$cmd' is MISSING at $symlinkPath")
         missingCount += 1
 
-    // 3. Audit Desktop Config Paths
+    // 4. Audit Desktop Config Paths
     println("\n\u001b[1m--- Desktop Configuration Paths ---\u001b[0m")
     val requiredPaths = Seq(
       ctx.configDir / "sway",
@@ -74,7 +80,7 @@ object Validator:
       println(s"  \u001b[33m[NOTE]\u001b[0m User fonts directory not created yet ($fontsDir)")
 
     if missingCount == 0 then
-      println("\n\u001b[1;32m[SUCCESS]\u001b[0m All system binaries, configuration paths, and subcommand symlinks validated!")
+      println(s"\n\u001b[1;32m[SUCCESS]\u001b[0m Engine ($VersionStr), system binaries, paths, and subcommand symlinks validated!")
       Right(())
     else
       Left(CommandError(s"Validation failed: $missingCount required components missing.", 1))
