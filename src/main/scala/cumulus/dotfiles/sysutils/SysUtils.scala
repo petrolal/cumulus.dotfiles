@@ -120,7 +120,7 @@ object SysUtils:
   private def notifyDesktop(title: String, body: String): Unit =
     try
       if isCommandAvailable("notify-send") then
-        os.proc(
+        val proc = os.proc(
           "notify-send",
           "-u", "normal",
           "-t", "4000",
@@ -129,8 +129,9 @@ object SysUtils:
           title,
           body
         ).spawn()
+        // Spawn in background; ignore DBus errors in headless environments
     catch
-      case _: Exception => ()
+      case _: Exception => () // Silently fail if notification daemon unavailable
 
   private def isCommandAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false

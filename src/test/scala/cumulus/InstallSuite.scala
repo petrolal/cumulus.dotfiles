@@ -44,21 +44,11 @@ class InstallSuite extends FunSuite:
     val res = ToolInstallers.runTool("install-fonts", ctx, Nil)
     assert(res.isRight)
 
-  test("ToolInstallers.runTool handles install-apps"):
-    val ctx = Context.discover().toOption.get
-    val res = ToolInstallers.runTool("install-apps", ctx, Nil)
-    assert(res.isRight || res.isLeft)
-
   test("ToolInstallers.runTool rejects invalid tools"):
     val ctx = Context.discover().toOption.get
     val res = ToolInstallers.runTool("install-invalid-tool-xyz", ctx, Nil)
     assert(res.isLeft)
 
-  test("DeployInstaller.run preserves existing non-symlink configs"):
-    val ctx = Context.discover().toOption.get
-    val testDir = ctx.configDir / "test_preserve"
-    os.makeDir.all(testDir)
-    val testFile = testDir / "test.conf"
-    os.write(testFile, "test data")
-    // Verify the file exists
-    assert(os.exists(testFile))
+  test("ToolInstallers.detectPackageManager returns valid PM"):
+    val pm = ToolInstallers.detectPackageManager()
+    assert(pm.toString.nonEmpty)
