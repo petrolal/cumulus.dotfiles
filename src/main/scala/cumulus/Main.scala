@@ -9,9 +9,9 @@ object Main:
     if exitCode != 0 then sys.exit(exitCode)
 
   def dispatch(args: Array[String]): Int =
-    val rawProg = sys.env.getOrElse("CUMULUS_PROG_NAME", "")
-    val progName = if rawProg.nonEmpty then rawProg else args.headOption.getOrElse("cumulus")
-    val binaryBasename = os.Path(progName, os.pwd).last
+    val rawProg = sys.env.getOrElse("CUMULUS_PROG_NAME", getArgv0())
+    val progName = if rawProg.nonEmpty then rawProg else "cumulus"
+    val binaryBasename = try os.Path(progName, os.pwd).last catch case _: Exception => progName
 
     val (cmd, restArgs) = if binaryBasename.startsWith("cumulus-") then
       (binaryBasename.stripPrefix("cumulus-"), args.toList)
@@ -28,6 +28,15 @@ object Main:
         if err.message.nonEmpty then
           println(s"\u001b[1;31m[cumulus] error:\u001b[0m ${err.message}")
         err.code
+
+  private def getArgv0(): String =
+    try
+      val bytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("/proc/self/cmdline"))
+      val nul = bytes.indexOf(0.toByte)
+      if nul > 0 then new String(bytes, 0, nul, "UTF-8")
+      else new String(bytes, "UTF-8")
+    catch
+      case _: Exception => ""
 
   private def runCommand(name: String, args: List[String]): Either[CumulusError, Unit] =
     for
