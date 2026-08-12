@@ -14,12 +14,12 @@ object DeployInstaller:
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println("[1;32m[cumulus install][0m Deploying cumulus.dotfiles configurations & symlinks...")
+    println("[1;32m[cumulus install][0m Deploying cumulus.dotfiles configurations & symlinks...")
     val binDir = ctx.home / ".local" / "bin"
     os.makeDir.all(binDir)
 
     val mainBinary = binDir / "cumulus"
-    println(s"  [32m[OK][0m Target executable: $mainBinary")
+    println(s"  [32m[OK][0m Target executable: $mainBinary")
 
     var manifestEntries = List.empty[ManifestEntry]
 
@@ -48,37 +48,36 @@ object DeployInstaller:
             os.makeDir.all(backupBaseDir)
             os.copy(targetPath, backupTarget)
             backupPathOpt = Some(backupTarget.toString)
-            println(s"  [32m[OK][0m Preserved pre-existing config -> $backupTarget")
+            println(s"  [32m[OK][0m Preserved pre-existing config -> $backupTarget")
           catch
-            case e: Exception => println(s"  [33m[NOTE][0m Config backup skipped for ${targetPath.last}: ${e.getMessage}")
+            case e: Exception => println(s"  [33m[NOTE][0m Config backup skipped for ${targetPath.last}: ${e.getMessage}")
 
-        // Ensure any existing path is removed before creating symlink
-        var removalSuccess = true
-        if os.exists(targetPath) || os.isLink(targetPath) then
-          try
-            os.remove.all(targetPath)
-          catch
-            case e: Exception =>
-              removalSuccess = false
-              println(s"  [33m[WARN][0m Failed to remove existing $targetPath: ${e.getMessage}")
+        // Remove any existing path (file or directory) to make room for symlink
+        try
+          if os.exists(targetPath) then os.remove.all(targetPath)
+          if os.isLink(targetPath) then os.remove(targetPath)
+        catch
+          case e: Exception => println(s"  [33m[WARN][0m Could not remove existing $targetPath: ${e.getMessage}")
 
-        if removalSuccess then
+        // Create symlink if path was successfully removed
+        if !os.exists(targetPath) && !os.isLink(targetPath) then
           try
             val parentStr = targetPath.toString
             val parentPath = os.Path(parentStr.substring(0, parentStr.lastIndexOf('/')))
             os.makeDir.all(parentPath)
-            os.symlink(sourcePath, targetPath)
+            // Use ln command for more reliable symlink creation
+            os.proc("ln", "-s", sourcePath.toString, targetPath.toString).call()
             configSymlinkCount += 1
             manifestEntries = manifestEntries :+ ManifestEntry(
               sourcePath = sourcePath.toString,
               targetPath = targetPath.toString,
               backupPath = backupPathOpt
             )
-            println(s"  [32m[OK][0m Symlinked $targetPath -> $sourcePath")
+            println(s"  [32m[OK][0m Symlinked $targetPath -> $sourcePath")
           catch
-            case e: Exception => println(s"  [33m[NOTE][0m Symlink failed for ${targetPath.last}: $sourcePath (${e.getMessage})")
+            case e: Exception => println(s"  [33m[NOTE][0m Symlink creation failed for ${targetPath.last}: ${e.getMessage}")
         else
-          println(s"  [33m[NOTE][0m Skipping symlink for ${targetPath.last} due to removal failure")
+          println(s"  [33m[WARN][0m Skipping symlink for ${targetPath.last} - could not remove existing path")
 
     // 2. Purge obsolete cumulus-* symlinks not in Subcommands
     val validSymlinkNames = Subcommands.map(cmd => s"cumulus-$cmd").toSet
@@ -93,7 +92,7 @@ object DeployInstaller:
           catch case _: Exception => ()
 
     if purgedCount > 0 then
-      println(s"  [32m[OK][0m Cleaned up $purgedCount obsolete symlinks in $binDir")
+      println(s"  [32m[OK][0m Cleaned up $purgedCount obsolete symlinks in $binDir")
 
     // 3. Clean & deploy CLI subcommand symlinks in ~/.local/bin/
     var binSymlinkCount = 0
@@ -101,7 +100,7 @@ object DeployInstaller:
       val symlinkPath = binDir / s"cumulus-$cmd"
       try
         if os.exists(symlinkPath) || os.isLink(symlinkPath) then os.remove(symlinkPath)
-        os.symlink(symlinkPath, mainBinary)
+        os.symlink(mainBinary, symlinkPath)
         binSymlinkCount += 1
         manifestEntries = manifestEntries :+ ManifestEntry(
           sourcePath = mainBinary.toString,
@@ -124,12 +123,12 @@ object DeployInstaller:
     try
       val jsonText = write(manifestData, indent = 2)
       os.write.over(manifestFile, jsonText)
-      println(s"  [32m[OK][0m Manifest written -> $manifestFile (${manifestEntries.size} entries)")
+      println(s"  [32m[OK][0m Manifest written -> $manifestFile (${manifestEntries.size} entries)")
     catch
-      case e: Exception => println(s"  [33m[NOTE][0m Manifest write failed: ${e.getMessage}")
+      case e: Exception => println(s"  [33m[NOTE][0m Manifest write failed: ${e.getMessage}")
 
-    println(s"  [32m[OK][0m Created $configSymlinkCount config symlinks and $binSymlinkCount CLI subcommand symlinks")
-    println("\n[1;32m[SUCCESS][0m cumulus.dotfiles deployment complete!")
+    println(s"  [32m[OK][0m Created $configSymlinkCount config symlinks and $binSymlinkCount CLI subcommand symlinks")
+    println("\n[1;32m[SUCCESS][0m cumulus.dotfiles deployment complete!")
 
     // Apply active desktop theme to re-render all config files
     val activePalette = cumulus.dotfiles.theme.ThemeEngine.getActivePalette(ctx)
@@ -141,11 +140,11 @@ object DeployInstaller:
 
       if os.exists(bootstrapScript) && !isBootstrapRunning then
         try
-          println("  [1;36m[cumulus install][0m Executing bootstrap.sh installer...")
+          println("  [1;36m[cumulus install][0m Executing bootstrap.sh installer...")
           val procArgs = Seq("bash", bootstrapScript.toString) ++ args
           os.proc(procArgs).call(cwd = ctx.dotfilesDir, stdout = os.Inherit, stderr = os.Inherit, env = Map("CUMULUS_BOOTSTRAP_RUNNING" -> "1"))
         catch
-          case e: Exception => println(s"  [33m[NOTE][0m bootstrap.sh execution note: ${e.getMessage}")
+          case e: Exception => println(s"  [33m[NOTE][0m bootstrap.sh execution note: ${e.getMessage}")
       else
         ToolInstallers.runTool("install-all", ctx, args)
 
