@@ -100,7 +100,8 @@ object DeployInstaller:
       val symlinkPath = binDir / s"cumulus-$cmd"
       try
         if os.exists(symlinkPath) || os.isLink(symlinkPath) then os.remove(symlinkPath)
-        os.symlink(mainBinary, symlinkPath)
+        // Use ln command for reliable symlink creation
+        os.proc("ln", "-s", mainBinary.toString, symlinkPath.toString).call()
         binSymlinkCount += 1
         manifestEntries = manifestEntries :+ ManifestEntry(
           sourcePath = mainBinary.toString,
@@ -108,7 +109,7 @@ object DeployInstaller:
           backupPath = None
         )
       catch
-        case _: Exception => ()
+        case e: Exception => println(s"  [33m[NOTE][0m Failed to create symlink for cumulus-$cmd: ${e.getMessage}")
 
     // 4. Save manifest JSON
     val manifestDir = ctx.shareDir
