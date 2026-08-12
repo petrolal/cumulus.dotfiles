@@ -49,7 +49,7 @@ object Main:
       case "rgb-theme" => cumulus.dotfiles.refresh.RefreshEngine.runRgbTheme(ctx, args)
       case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
       case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
-      case "whichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
+      case "whichkey" | "wichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
       case "backup" => cumulus.dotfiles.maintenance.Maintenance.runBackup(ctx, args)
       case "restore" => cumulus.dotfiles.maintenance.Maintenance.runRestore(ctx, args)
       case "update" => cumulus.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)

@@ -25,7 +25,7 @@ object WofiPickers:
         "--lines", "10",
         "--cache-file", "/dev/null"
       ).call(stdin = inputList, check = false)
-      
+
       val selected = res.out.text().trim
       if selected.nonEmpty then
         println(s"  \u001b[32m[OK]\u001b[0m Selected theme '$selected'")
@@ -41,13 +41,13 @@ object WofiPickers:
     val inputList = if keybindingsList.nonEmpty then keybindingsList.mkString("\n") else defaultKeybindings.mkString("\n")
 
     try
-      os.proc(
+      val proc = os.proc(
         "wofi", "--show", "dmenu",
         "--prompt", "which-key",
-        "--width", "700",
-        "--lines", "20",
+        "--width", "750",
+        "--lines", "22",
         "--cache-file", "/dev/null"
-      ).call(stdin = inputList, check = false)
+      ).spawn(stdin = inputList)
       Right(())
     catch
       case e: Exception => Left(CommandError(s"Wofi whichkey failed: ${e.getMessage}"))
@@ -69,7 +69,9 @@ object WofiPickers:
         val configFile = ctx.configDir / "sway" / "config"
         if os.exists(configFile) then os.read(configFile) else ""
     catch
-      case _: Exception => ""
+      case _: Exception =>
+        val configFile = ctx.configDir / "sway" / "config"
+        if os.exists(configFile) then os.read(configFile) else ""
 
   private def expandBindings(config: String): Seq[String] =
     var varDefs = Map.empty[String, String]
@@ -77,32 +79,35 @@ object WofiPickers:
 
     for line <- config.linesIterator do
       val trimmed = line.trim
-      if trimmed.startsWith("set ") then
-        val parts = trimmed.split("\\s+", 3)
-        if parts.length >= 3 && parts(1).startsWith("$") then
-          varDefs += (parts(1) -> parts(2).replace("\"", ""))
-      else if trimmed.startsWith("bindsym ") || trimmed.startsWith("bindcode ") then
-        var bindingLine = trimmed.stripPrefix("bindsym ").stripPrefix("bindcode ").trim
-        for (varName, varVal) <- varDefs do
-          bindingLine = bindingLine.replace(varName, varVal)
-        val parts = bindingLine.split("\\s+", 2)
-        if parts.length == 2 then
-          val key = parts(0)
-          val action = parts(1)
-          bindings = bindings :+ f"$key%-22s → $action"
-        else
-          bindings = bindings :+ bindingLine
+      if !trimmed.startsWith("#") && trimmed.nonEmpty then
+        if trimmed.startsWith("set ") then
+          val parts = trimmed.split("\\s+", 3)
+          if parts.length >= 3 && parts(1).startsWith("$") then
+            varDefs += (parts(1) -> parts(2).replace("\"", ""))
+        else if trimmed.startsWith("bindsym ") || trimmed.startsWith("bindcode ") then
+          var bindingLine = trimmed.stripPrefix("bindsym ").stripPrefix("bindcode ").trim
+          bindingLine = bindingLine.replaceAll("--[a-z-]+", "").trim
+          for (varName, varVal) <- varDefs do
+            bindingLine = bindingLine.replace(varName, varVal)
+          val parts = bindingLine.split("\\s+", 2)
+          if parts.length == 2 then
+            val key = parts(0)
+            val action = parts(1)
+            bindings = bindings :+ f"$key%-24s → $action"
+          else
+            bindings = bindings :+ bindingLine
 
     bindings
 
   private val defaultKeybindings = Seq(
-    "Mod+Return            → Open Kitty Terminal",
-    "Mod+D                 → Open Wofi Launcher",
-    "Mod+Shift+Q           → Close Focused Window",
-    "Mod+Shift+E           → Exit Sway",
-    "Mod+F                 → Toggle Fullscreen",
-    "Mod+V                 → Toggle Split Layout",
-    "Mod+Shift+L           → Lock Screen (cumulus-lock)",
-    "Mod+Shift+P           → Theme Picker (cumulus-theme-picker)",
-    "Mod+Shift+S           → Screenshot Region (cumulus-screenshot)"
+    "Mod4+Return              → exec kitty",
+    "Mod4+d                   → exec wofi --show drun",
+    "Mod4+Shift+q             → kill",
+    "Mod4+Shift+e             → exec swaynag -t warning -m 'Exit Sway?'",
+    "Mod4+f                   → fullscreen toggle",
+    "Mod4+v                   → splitv",
+    "Mod4+b                   → splith",
+    "Mod4+Shift+l             → exec cumulus-lock",
+    "Mod4+Shift+p             → exec cumulus-theme-picker",
+    "Mod4+Shift+s             → exec cumulus-screenshot"
   )

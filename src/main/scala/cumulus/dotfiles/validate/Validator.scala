@@ -11,7 +11,7 @@ object Validator:
     "screenshot", "autotiling", "validate", "backup", "restore", "update",
     "sdd", "install", "deploy", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
-    "install-nvim-deps", "theme-picker", "whichkey"
+    "install-nvim-deps", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
