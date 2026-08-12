@@ -23,8 +23,8 @@ jobs:
 
       - name: Install sbt
         run: |
-          apt-get update
-          apt-get install -y sbt
+          sudo apt-get update
+          sudo apt-get install -y sbt
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3
