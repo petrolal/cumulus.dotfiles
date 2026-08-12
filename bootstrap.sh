@@ -64,8 +64,7 @@ mkdir -p "$BIN_DIR"
 # Step 4: Copy compiled binary & deploy subcommand symlinks
 if [ -f "$TARGET_BINARY" ]; then
   echo -e "  \033[32m[OK]\033[0m Installing compiled Scala binary to $BIN_DIR/cumulus..."
-  cp "$TARGET_BINARY" "$BIN_DIR/cumulus"
-  chmod +x "$BIN_DIR/cumulus"
+  install -m 755 "$TARGET_BINARY" "$BIN_DIR/cumulus"
   
   # Step 5: Run cumulus install and validate health
   "$BIN_DIR/cumulus" install "$@"
