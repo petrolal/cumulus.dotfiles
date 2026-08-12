@@ -63,7 +63,8 @@ object Validator:
       ctx.configDir / "sway",
       ctx.configDir / "kitty",
       ctx.configDir / "waybar",
-      ctx.configDir / "wofi"
+      ctx.configDir / "wofi",
+      ctx.configDir / "rofi"
     )
 
     for path <- requiredPaths do
