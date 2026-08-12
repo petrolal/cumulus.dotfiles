@@ -21,6 +21,21 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
+      - name: Install sbt
+        run: |
+          apt-get update
+          apt-get install -y sbt
+
+      - name: Cache sbt dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
       - name: Run sbt Compile & Tests
         run: sbt compile test
 
