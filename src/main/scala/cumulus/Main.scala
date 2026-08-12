@@ -49,9 +49,9 @@ object Main:
       case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
       case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
       case "whichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
-      case "backup" => Right(println(s"[cumulus] module 'backup' invoked (placeholder)"))
-      case "restore" => Right(println(s"[cumulus] module 'restore' invoked (placeholder)"))
-      case "update" => Right(println(s"[cumulus] module 'update' invoked (placeholder)"))
+      case "backup" => cumulus.dotfiles.maintenance.Maintenance.runBackup(ctx, args)
+      case "restore" => cumulus.dotfiles.maintenance.Maintenance.runRestore(ctx, args)
+      case "update" => cumulus.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)
       case "install" | "deploy" => Right(println(s"[cumulus] module 'install' invoked (placeholder)"))
       case "install-fonts" | "install-apps" | "install-browser" | "install-devops" |
            "install-zsh" | "install-sdkman" | "install-nvim" | "install-nvim-deps" =>
