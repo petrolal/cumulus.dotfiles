@@ -15,9 +15,9 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR1", "kitty").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR1 to Kitty instances")
 
-    // Waybar reload
-    try os.proc("killall", "-SIGUSR1", "waybar").call(check = false) catch case _: Exception => ()
-    println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR1 to Waybar instances")
+    // Waybar reload (SIGUSR2 reloads config & CSS stylesheet without hiding bar)
+    try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
+    println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
     runOsColorscheme(ctx)
     Right(())
