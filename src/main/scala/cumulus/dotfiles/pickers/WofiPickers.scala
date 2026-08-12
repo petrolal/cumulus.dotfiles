@@ -29,7 +29,7 @@ object WofiPickers:
       val selected = res.out.text().trim
       if selected.nonEmpty then
         println(s"  \u001b[32m[OK]\u001b[0m Selected theme '$selected'")
-        cumulus.dotfiles.theme.ThemeEngine.run(ctx, List(selected))
+        cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, selected, "dark")
       else
         Right(())
     catch

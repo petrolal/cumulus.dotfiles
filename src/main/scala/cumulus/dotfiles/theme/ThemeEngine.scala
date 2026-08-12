@@ -5,9 +5,14 @@ import cumulus.dotfiles.error.{CommandError, CumulusError}
 
 object ThemeEngine:
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    val flavor = args.headOption.getOrElse("catppuccin-mocha")
-    val mode = args.lift(1).getOrElse("dark")
+    if args.isEmpty then
+      cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
+    else
+      val flavor = args.head
+      val mode = args.lift(1).getOrElse("dark")
+      applyTheme(ctx, flavor, mode)
 
+  def applyTheme(ctx: Context, flavor: String, mode: String): Either[CumulusError, Unit] =
     println(s"\u001b[1;35m[cumulus theme]\u001b[0m Applying theme '$flavor' (mode: $mode)...")
     val palette = Palette.find(flavor)
 
