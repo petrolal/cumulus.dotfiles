@@ -120,16 +120,11 @@ object SysUtils:
   private def notifyDesktop(title: String, body: String): Unit =
     try
       if isCommandAvailable("notify-send") then
+        // Redirect stderr to suppress DBus errors when notification daemon unavailable
         val proc = os.proc(
-          "notify-send",
-          "-u", "normal",
-          "-t", "4000",
-          "-a", "cumulus",
-          "--",
-          title,
-          body
+          "bash", "-c",
+          s"""notify-send -u normal -t 4000 -a cumulus -- "${title.replace("\"", "\\\"")}" "${body.replace("\"", "\\\"")}\" 2>/dev/null"""
         ).spawn()
-        // Spawn in background; ignore DBus errors in headless environments
     catch
       case _: Exception => () // Silently fail if notification daemon unavailable
 

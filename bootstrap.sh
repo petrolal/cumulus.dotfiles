@@ -34,7 +34,7 @@ install_system_deps() {
 
   case "$PKG_MGR" in
     pacman)
-      sudo pacman -S --needed --noconfirm sbt jdk-openjdk gcc git curl fontconfig zsh tar unzip which sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl libpulse chromium docker terraform kubectl helm neovim ttf-jetbrains-mono-nerd
+      sudo pacman -S --needed --noconfirm sbt jdk-openjdk gcc git curl fontconfig zsh tar unzip which sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl libpulse chromium docker terraform kubectl helm neovim ttf-jetbrains-mono-nerd mako
       echo -e "  \033[32m[OK]\033[0m System packages installed"
       ;;
     apt-get)
@@ -47,7 +47,7 @@ install_system_deps() {
         curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add -
         sudo apt-get update
       fi
-      sudo apt-get install -y build-essential default-jdk sbt git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl pulseaudio-utils firefox docker.io helm neovim fonts-jetbrains-mono
+      sudo apt-get install -y build-essential default-jdk sbt git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl pulseaudio-utils firefox docker.io helm neovim fonts-jetbrains-mono mako
       echo -e "  \033[32m[OK]\033[0m System packages installed"
       ;;
     *)
@@ -55,9 +55,35 @@ install_system_deps() {
       ;;
   esac
 }
+}
+
+enable_notification_daemon() {
+  echo -e "  \033[1;36m[cumulus]\033[0m Configuring notification daemon (mako)..."
+
+  if command -v mako &> /dev/null; then
+    if systemctl --user is-active --quiet mako; then
+      echo -e "  \033[32m[OK]\033[0m Mako notification daemon is running"
+    else
+      echo -e "  \033[36m[INFO]\033[0m Starting mako notification daemon..."
+      systemctl --user start mako 2>/dev/null || echo -e "  \033[33m[NOTE]\033[0m Mako will start on next login"
+
+      if systemctl --user is-enabled --quiet mako 2>/dev/null; then
+        echo -e "  \033[32m[OK]\033[0m Mako is enabled for auto-start"
+      else
+        systemctl --user enable mako 2>/dev/null || true
+        echo -e "  \033[32m[OK]\033[0m Mako enabled for auto-start"
+      fi
+    fi
+  else
+    echo -e "  \033[33m[NOTE]\033[0m Mako notification daemon not found (will be installed with system dependencies)"
+  fi
+}
 
 # Install all system dependencies by default
 install_system_deps
+
+# Enable notification daemon after package installation
+enable_notification_daemon
 
 # Step 2: Ensure sbt / GraalVM build
 if command -v sbt &> /dev/null; then
@@ -90,8 +116,34 @@ echo -e "\n\033[1;32m[SUCCESS]\033[0m cumulus.dotfiles (Scala 3) bootstrap & dep
 echo -en "\n\033[1;33m[?] Would you like to reboot the system now? (y/N): \033[0m"
 read -r response || response="n"
 if [[ "$response" =~ ^[Yy]$ ]]; then
-  echo -e "\033[1;36m[cumulus]\033[0m Rebooting system..."
-  sudo reboot || systemctl reboot || reboot
+  echo -e "\033[1;36m[cumulus]\033[0m Initiating system reboot..."
+
+  # Try reboot methods in order of preference, with explicit feedback
+  if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Attempting reboot via sudo..."
+    if sudo reboot; then
+      exit 0
+    fi
+  fi
+
+  if command -v systemctl &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Attempting reboot via systemctl..."
+    if systemctl reboot; then
+      exit 0
+    fi
+  fi
+
+  if command -v reboot &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Attempting reboot via reboot command..."
+    if reboot; then
+      exit 0
+    fi
+  fi
+
+  # All reboot methods failed
+  echo -e "  \033[31m[ERROR]\033[0m Unable to automatically reboot system. Please reboot manually:"
+  echo -e "    \033[33msudo reboot\033[0m"
+  exit 1
 else
   echo -e "\033[1;32m[cumulus]\033[0m Reboot skipped. System configuration complete!"
 fi
