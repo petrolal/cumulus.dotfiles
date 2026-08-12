@@ -60,6 +60,50 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  publish-aur:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust (for makepkg validation)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y namcap
+
+      - name: Update PKGBUILD
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          sed -i "s/pkgver=.*/pkgver=$VERSION/" PKGBUILD
+          sed -i 's/pkgrel=.*/pkgrel=1/' PKGBUILD
+
+      - name: Validate PKGBUILD
+        run: |
+          namcap PKGBUILD || true
+
+      - name: Setup SSH for AUR
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_key
+          chmod 600 ~/.ssh/aur_key
+          ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur_key
+            User aur
+          EOF
+
+      - name: Publish to AUR
+        run: |
+          git config user.email "${{ secrets.MAINTAINER_EMAIL }}"
+          git config user.name "CI/CD Pipeline"
+          git remote add aur ssh://aur@aur.archlinux.org/cumulus-dotfiles.git
+          git push aur master:master || git push -f aur master:master
+
   publish-docs:
     needs: build-and-deploy
     runs-on: ubuntu-latest

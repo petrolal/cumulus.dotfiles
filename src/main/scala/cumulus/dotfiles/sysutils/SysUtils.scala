@@ -48,6 +48,10 @@ object SysUtils:
       System.err.println("Usage: cumulus-screenshot {full|region|window}")
       return Left(CommandError("Usage: cumulus-screenshot {full|region|window}", 1))
 
+    val hasInputTTY = System.console() != null
+    if mode == "region" && !hasInputTTY then
+      return runScreenshotInTerminal(ctx, args)
+
     val screenshotsDir = ctx.home / "Pictures" / "Screenshots"
     os.makeDir.all(screenshotsDir)
     val timestamp = os.proc("date", "+%Y-%m-%d_%H-%M-%S").call(check = false).out.text().trim
@@ -90,6 +94,34 @@ object SysUtils:
         Left(CommandError("grim screenshot capture failed", 1))
     catch
       case e: Exception => Left(CommandError(s"Screenshot failed: ${e.getMessage}"))
+
+  private def runScreenshotInTerminal(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+    val terminals = Seq("alacritty", "kitty", "termite", "gnome-terminal", "xfce4-terminal")
+    val terminal = terminals.find(isCommandAvailable)
+
+    terminal match
+      case Some(term) =>
+        val cumulusCmd = os.proc("which", "cumulus").call(check = false).out.text().trim
+        if cumulusCmd.isEmpty then
+          return Left(CommandError("cumulus binary not found in PATH"))
+
+        val cmd = Seq(cumulusCmd, "screenshot") ++ args
+        val termCmd = term match
+          case "alacritty" => Seq("alacritty", "-e") ++ cmd
+          case "kitty" => Seq("kitty") ++ cmd
+          case "termite" => Seq("termite", "-e") ++ cmd
+          case "gnome-terminal" => Seq("gnome-terminal", "--") ++ cmd
+          case "xfce4-terminal" => Seq("xfce4-terminal", "-e", cmd.mkString(" "))
+          case _ => Seq(term, "-e") ++ cmd
+
+        try
+          os.proc(termCmd).spawn()
+          Right(())
+        catch
+          case e: Exception => Left(CommandError(s"Failed to spawn terminal: ${e.getMessage}"))
+
+      case None =>
+        Left(CommandError("No compatible terminal emulator found. Install alacritty, kitty, termite, gnome-terminal, or xfce4-terminal"))
 
   private def getFocusedWindowGeometry(): Option[String] =
     try
