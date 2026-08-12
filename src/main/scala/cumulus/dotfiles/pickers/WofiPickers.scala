@@ -2,6 +2,7 @@ package cumulus.dotfiles.pickers
 
 import cumulus.dotfiles.context.Context
 import cumulus.dotfiles.error.{CommandError, CumulusError}
+import cumulus.dotfiles.theme.ThemeEngine
 
 object WofiPickers:
   def runThemePicker(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
@@ -10,7 +11,8 @@ object WofiPickers:
     val inputList = themes.mkString("\n")
 
     try
-      val res = os.proc(
+      // Step 1: Select Theme
+      val resTheme = os.proc(
         "wofi", "--show", "dmenu",
         "--prompt", "Select Theme",
         "--width", "400",
@@ -18,12 +20,30 @@ object WofiPickers:
         "--cache-file", "/dev/null"
       ).call(stdin = inputList, check = false)
 
-      val selected = res.out.text().trim
-      if selected.nonEmpty then
-        println(s"  \u001b[32m[OK]\u001b[0m Selected theme '$selected'")
-        cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, selected, "dark")
+      val selectedTheme = resTheme.out.text().trim
+      if selectedTheme.isEmpty then return Right(())
+
+      println(s"  \u001b[32m[OK]\u001b[0m Selected theme '$selectedTheme'")
+
+      // Step 2: Select Wallpaper Mode
+      val modes = Seq("1. Default Wallpaper", "2. Flat Color (No Wallpaper)", "3. Rotate Wallpapers (30m)")
+      val resMode = os.proc(
+        "wofi", "--show", "dmenu",
+        "--prompt", s"Wallpaper mode for '$selectedTheme'",
+        "--width", "450",
+        "--lines", "5",
+        "--cache-file", "/dev/null"
+      ).call(stdin = modes.mkString("\n"), check = false)
+
+      val selectedModeStr = resMode.out.text().trim
+      val (mode, interval) = if selectedModeStr.contains("Flat") then
+        ("flat", "30m")
+      else if selectedModeStr.contains("Rotate") then
+        ("rotate", "30m")
       else
-        Right(())
+        ("wallpaper", "30m")
+
+      ThemeEngine.applyTheme(ctx, selectedTheme, mode = mode, customWallpaper = None, interval = interval)
     catch
       case e: Exception => Left(CommandError(s"Wofi theme-picker failed: ${e.getMessage}"))
 
