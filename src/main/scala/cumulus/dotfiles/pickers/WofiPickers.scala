@@ -6,15 +6,7 @@ import cumulus.dotfiles.error.{CommandError, CumulusError}
 object WofiPickers:
   def runThemePicker(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
     println("\u001b[1;35m[cumulus theme-picker]\u001b[0m Launching Wofi GUI theme picker...")
-    val themes = Seq(
-      "catppuccin-mocha",
-      "catppuccin-latte",
-      "nord",
-      "tokyonight",
-      "gruvbox-dark",
-      "dracula",
-      "rose-pine"
-    )
+    val themes = cumulus.dotfiles.theme.Palette.listAll(ctx)
     val inputList = themes.mkString("\n")
 
     try

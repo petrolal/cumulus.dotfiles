@@ -14,9 +14,9 @@ object ThemeEngine:
 
   def applyTheme(ctx: Context, flavor: String, mode: String): Either[CumulusError, Unit] =
     println(s"\u001b[1;35m[cumulus theme]\u001b[0m Applying theme '$flavor' (mode: $mode)...")
-    val palette = Palette.find(flavor)
+    val palette = Palette.find(flavor, ctx)
 
-    // Render Kitty theme config
+    // 1. Render Kitty theme config
     val kittyDir = ctx.configDir / "kitty"
     os.makeDir.all(kittyDir)
     val kittyThemeFile = kittyDir / "theme.conf"
@@ -30,7 +30,7 @@ object ThemeEngine:
     os.write.over(kittyThemeFile, kittyContent)
     println(s"  \u001b[32m[OK]\u001b[0m Rendered Kitty theme -> $kittyThemeFile")
 
-    // Render Waybar theme CSS
+    // 2. Render Waybar theme CSS
     val waybarDir = ctx.configDir / "waybar"
     os.makeDir.all(waybarDir)
     val waybarThemeFile = waybarDir / "theme.css"
@@ -44,7 +44,7 @@ object ThemeEngine:
     os.write.over(waybarThemeFile, waybarContent)
     println(s"  \u001b[32m[OK]\u001b[0m Rendered Waybar theme -> $waybarThemeFile")
 
-    // Render Wofi theme CSS
+    // 3. Render Wofi theme CSS
     val wofiDir = ctx.configDir / "wofi"
     os.makeDir.all(wofiDir)
     val wofiThemeFile = wofiDir / "theme.css"
@@ -56,7 +56,7 @@ object ThemeEngine:
     os.write.over(wofiThemeFile, wofiContent)
     println(s"  \u001b[32m[OK]\u001b[0m Rendered Wofi theme -> $wofiThemeFile")
 
-    // Update active theme symlink
+    // 4. Update active theme symlink / config
     val activeThemeSymlink = ctx.configDir / "sway" / "active-theme"
     try
       if os.exists(activeThemeSymlink) || os.isLink(activeThemeSymlink) then os.remove(activeThemeSymlink)
@@ -64,6 +64,27 @@ object ThemeEngine:
     catch
       case _: Exception => ()
 
-    // Trigger live reloads across desktop applications
+    // 5. Apply matching wallpaper if present
+    applyWallpaper(ctx, palette.name)
+
+    // 6. Trigger live reloads across desktop applications
     cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
     Right(())
+
+  private def applyWallpaper(ctx: Context, themeName: String): Unit =
+    try
+      val wallpapersDir = ctx.dotfilesDir / "themes" / "wallpapers"
+      if os.exists(wallpapersDir) then
+        val candidates = Seq(
+          wallpapersDir / s"${themeName}.svg",
+          wallpapersDir / s"${themeName}_2.svg",
+          wallpapersDir / s"${themeName}.png",
+          wallpapersDir / s"${themeName}.jpg"
+        )
+        candidates.find(os.exists).foreach { wallPath =>
+          os.proc("pkill", "-x", "swaybg").call(check = false)
+          os.proc("swaybg", "-i", wallPath.toString, "-m", "fill").spawn()
+          println(s"  \u001b[32m[OK]\u001b[0m Applied wallpaper -> $wallPath")
+        }
+    catch
+      case _: Exception => ()

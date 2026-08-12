@@ -6,12 +6,21 @@ import munit.FunSuite
 
 class ThemeSuite extends FunSuite:
   test("Palette.find retrieves default and named palettes"):
-    val nord = Palette.find("nord")
+    val ctx = Context.discover().toOption.get
+    val nord = Palette.find("nord", ctx)
     assertEquals(nord.name, "nord")
     assertEquals(nord.base, "#2e3440")
 
-    val mocha = Palette.find("unknown-theme")
+    val mocha = Palette.find("unknown-theme", ctx)
     assertEquals(mocha.name, "catppuccin-mocha")
+
+  test("Palette.listAll discovers custom conf palettes"):
+    val ctx = Context.discover().toOption.get
+    val themes = Palette.listAll(ctx)
+    assert(themes.contains("aws"))
+    assert(themes.contains("azure"))
+    assert(themes.contains("gcp"))
+    assert(themes.contains("oci"))
 
   test("ThemeEngine.run renders theme config files"):
     val ctx = Context.discover().toOption.get
