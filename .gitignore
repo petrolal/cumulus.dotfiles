@@ -9,6 +9,7 @@
 .claude/
 .github/*
 !.github/copilot-instructions.md
+!.github/workflows/
 _bmad/
 .cumulus-sdd/*
 
