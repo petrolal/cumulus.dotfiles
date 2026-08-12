@@ -37,6 +37,11 @@ object Main:
 
   private def dispatchModule(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
     name match
+      case "validate" => cumulus.dotfiles.validate.Validator.run(ctx, args)
+      case "sdd" => cumulus.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
+      case "lock" => cumulus.dotfiles.sysutils.SysUtils.runLock(ctx)
+      case "idle" => cumulus.dotfiles.sysutils.SysUtils.runIdle(ctx)
+      case "screenshot" => cumulus.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
       case "theme" => Right(println(s"[cumulus] module 'theme' invoked (placeholder)"))
       case "runtime-refresh" => Right(println(s"[cumulus] module 'runtime-refresh' invoked (placeholder)"))
       case "os-colorscheme" => Right(println(s"[cumulus] module 'os-colorscheme' invoked (placeholder)"))
