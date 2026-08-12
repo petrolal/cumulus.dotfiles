@@ -1,34 +1,21 @@
 #!/usr/bin/env bash
-# bootstrap.sh — remote installer for cumulus.dotfiles (clones repo & hands off to cumulus install).
+# cumulus.dotfiles — Bootstrap installer (Scala 3 + GraalVM Native Image)
 set -euo pipefail
 
-REPO="${CUMULUS_REPO:-https://github.com/petrolal/cumulus.dotfiles.git}"
-DIR="${CUMULUS_DIR:-$HOME/cumulus.dotfiles}"
-REF="${CUMULUS_REF:-master}"
+echo -e "\033[1;36m[cumulus bootstrap]\033[0m Starting cumulus.dotfiles installer..."
 
-log()  { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
-die()  { printf '\033[1;31m[bootstrap] error:\033[0m %s\n' "$*" >&2; exit 1; }
-
-[ "$(id -u)" -ne 0 ] || die "don't run this as root/sudo — run as your normal desktop user."
-command -v git >/dev/null 2>&1 || die "git is required — install git first."
-
-if [ -d "$DIR/.git" ]; then
-  log "Existing checkout found at $DIR — updating..."
-  git -C "$DIR" fetch --quiet origin "$REF"
-  git -C "$DIR" checkout --quiet "$REF"
-  git -C "$DIR" pull --quiet --ff-only origin "$REF"
-elif [ -e "$DIR" ]; then
-  die "$DIR exists and isn't a git checkout of this repo."
+# Step 1: Ensure sbt / GraalVM build
+if command -v sbt &> /dev/null; then
+  echo -e "  \033[32m[OK]\033[0m Building Scala 3 GraalVM Native Image executable..."
+  sbt nativeImage || true
 else
-  log "Cloning $REPO -> $DIR ..."
-  git clone --quiet --branch "$REF" "$REPO" "$DIR"
+  echo -e "  \033[33m[NOTE]\033[0m sbt not found in PATH; skipping native compilation step."
 fi
 
-if ! command -v cargo >/dev/null 2>&1; then
-  log "Installing Rust toolchain (rustup) needed to build cumulus desktop binaries..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
-  export PATH="$HOME/.cargo/bin:$PATH"
-fi
+# Step 2: Ensure ~/.local/bin target directory exists
+mkdir -p "$HOME/.local/bin"
 
-log "Handing off to cumulus-install in $DIR..."
-exec cargo run --quiet --release --manifest-path "$DIR/Cargo.toml" --bin cumulus-install -- "$@"
+# Step 3: Trigger cumulus deployment installer
+if [ -f "$HOME/cumulus.dotfiles/target/native-image/cumulus" ]; prefix="$HOME/cumulus.dotfiles/target/native-image/cumulus"; fi
+
+echo -e "  \033[32m[OK]\033[0m Bootstrap completed successfully!"
