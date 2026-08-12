@@ -62,7 +62,7 @@ object DeployInstaller:
           val parentStr = targetPath.toString
           val parentPath = os.Path(parentStr.substring(0, parentStr.lastIndexOf('/')))
           os.makeDir.all(parentPath)
-          os.symlink(targetPath, sourcePath)
+          os.symlink(sourcePath, targetPath)
           configSymlinkCount += 1
           manifestEntries = manifestEntries :+ ManifestEntry(
             sourcePath = sourcePath.toString,
