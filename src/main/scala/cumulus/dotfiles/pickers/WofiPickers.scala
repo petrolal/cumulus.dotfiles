@@ -26,19 +26,17 @@ object WofiPickers:
       println(s"  \u001b[32m[OK]\u001b[0m Selected theme '$selectedTheme'")
 
       // Step 2: Select Wallpaper Mode
-      val modes = Seq("1. Default Wallpaper", "2. Flat Color (No Wallpaper)", "3. Rotate Wallpapers (30m)")
+      val modes = Seq("1. Static Wallpaper", "2. Rotate Wallpapers (30m)")
       val resMode = os.proc(
         "wofi", "--show", "dmenu",
         "--prompt", s"Wallpaper mode for '$selectedTheme'",
         "--width", "450",
-        "--lines", "5",
+        "--lines", "4",
         "--cache-file", "/dev/null"
       ).call(stdin = modes.mkString("\n"), check = false)
 
       val selectedModeStr = resMode.out.text().trim
-      val (mode, interval) = if selectedModeStr.contains("Flat") then
-        ("flat", "30m")
-      else if selectedModeStr.contains("Rotate") then
+      val (mode, interval) = if selectedModeStr.contains("Rotate") then
         ("rotate", "30m")
       else
         ("wallpaper", "30m")
