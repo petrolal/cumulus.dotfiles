@@ -13,7 +13,7 @@ object Validator:
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus validate]\u001b[0m Running 25+ point desktop health & symlink audit...")
+    println("\u001b[1;36m[cumulus validate]\u001b[0m Running 25+ point desktop health & symlink audit (Scala 3.5.2 Native Engine)...")
 
     var missingCount = 0
 

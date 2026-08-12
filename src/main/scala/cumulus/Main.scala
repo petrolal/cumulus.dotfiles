@@ -37,6 +37,7 @@ object Main:
 
   private def dispatchModule(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
     name match
+      case "version" | "-v" | "--version" => Right(println("cumulus 0.1.0 (Scala 3.5.2 Native Image)"))
       case "validate" => cumulus.dotfiles.validate.Validator.run(ctx, args)
       case "sdd" => cumulus.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
       case "lock" => cumulus.dotfiles.sysutils.SysUtils.runLock(ctx)
