@@ -66,9 +66,10 @@ if [ -f "$TARGET_BINARY" ]; then
   echo -e "  \033[32m[OK]\033[0m Installing compiled Scala binary to $BIN_DIR/cumulus..."
   install -m 755 "$TARGET_BINARY" "$BIN_DIR/cumulus"
   
-  # Step 5: Run cumulus install and validate health
+  # Step 5: Run cumulus install and healthcheck
+  export CUMULUS_BOOTSTRAP_RUNNING=1
   "$BIN_DIR/cumulus" install "$@"
-  "$BIN_DIR/cumulus" validate "$@"
+  "$BIN_DIR/cumulus" healthcheck "$@"
 else
   echo -e "  \033[31m[ERROR]\033[0m Native binary missing at $TARGET_BINARY. Please run 'sbt nativeImage' first."
   exit 1

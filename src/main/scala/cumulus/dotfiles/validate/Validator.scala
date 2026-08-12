@@ -8,14 +8,14 @@ object Validator:
 
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
-    "screenshot", "autotiling", "validate", "backup", "restore", "update",
+    "screenshot", "autotiling", "healthcheck", "backup", "restore", "update",
     "sdd", "install", "deploy", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
     "install-nvim-deps", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println(s"\u001b[1;36m[cumulus validate]\u001b[0m Running 25+ point desktop health & symlink audit...")
+    println(s"\u001b[1;36m[cumulus healthcheck]\u001b[0m Running 25+ point desktop health & symlink audit...")
 
     var missingCount = 0
 

@@ -47,7 +47,7 @@ object Main:
   private def dispatchModule(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
     name match
       case "version" | "-v" | "--version" => Right(println("cumulus 0.1.0 (Scala 3.5.2 Native Image)"))
-      case "validate" => cumulus.dotfiles.validate.Validator.run(ctx, args)
+      case "healthcheck" | "validate" => cumulus.dotfiles.validate.Validator.run(ctx, args)
       case "sdd" => cumulus.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
       case "lock" => cumulus.dotfiles.sysutils.SysUtils.runLock(ctx)
       case "idle" => cumulus.dotfiles.sysutils.SysUtils.runIdle(ctx)
@@ -81,7 +81,7 @@ object Main:
       |  idle             run the swayidle daemon (auto-lock, dpms, suspend)
       |  screenshot       capture a screenshot (full|region|window)
       |  autotiling       Fibonacci spiral autotiling daemon for Sway
-      |  validate         read-only health check of the deployed setup
+      |  healthcheck      read-only health check of the deployed setup
       |  backup           snapshot managed configs to a timestamped tarball
       |  restore          restore a snapshot created by backup
       |  update           git pull the dotfiles and re-run the installer

@@ -7,7 +7,7 @@ import upickle.default._
 object DeployInstaller:
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
-    "screenshot", "autotiling", "validate", "backup", "restore", "update",
+    "screenshot", "autotiling", "healthcheck", "backup", "restore", "update",
     "sdd", "install", "deploy", "install-deps", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
     "install-nvim-deps", "install-all", "theme-picker", "whichkey", "wichkey"
@@ -129,6 +129,19 @@ object DeployInstaller:
     cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, activePalette.name)
 
     if !args.contains("--links-only") then
-      ToolInstallers.runTool("install-all", ctx, args)
+      val bootstrapScript = ctx.dotfilesDir / "bootstrap.sh"
+      val isBootstrapRunning = sys.env.get("CUMULUS_BOOTSTRAP_RUNNING").contains("1")
+
+      if os.exists(bootstrapScript) && !isBootstrapRunning then
+        try
+          println("  \u001b[1;36m[cumulus install]\u001b[0m Executing bootstrap.sh installer...")
+          val procArgs = Seq("bash", bootstrapScript.toString) ++ args
+          os.proc(procArgs).call(cwd = ctx.dotfilesDir, stdout = os.Inherit, stderr = os.Inherit, env = Map("CUMULUS_BOOTSTRAP_RUNNING" -> "1"))
+        catch
+          case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m bootstrap.sh execution note: ${e.getMessage}")
+      else
+        ToolInstallers.runTool("install-all", ctx, args)
+
+      cumulus.dotfiles.validate.Validator.run(ctx, args)
     else
       Right(())

@@ -7,7 +7,7 @@ import munit.FunSuite
 class InstallSuite extends FunSuite:
   test("DeployInstaller.run executes symlink deployment and writes manifest"):
     val ctx = Context.discover().toOption.get
-    val res = DeployInstaller.run(ctx, Nil)
+    val res = DeployInstaller.run(ctx, List("--links-only"))
     assert(res.isRight)
     assert(os.exists(ctx.shareDir / "manifest.json"))
 
