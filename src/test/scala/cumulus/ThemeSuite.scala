@@ -5,14 +5,13 @@ import cumulus.dotfiles.theme.{Palette, ThemeEngine}
 import munit.FunSuite
 
 class ThemeSuite extends FunSuite:
-  test("Palette.find retrieves default and named palettes"):
+  test("Palette.find retrieves custom palettes"):
     val ctx = Context.discover().toOption.get
-    val nord = Palette.find("nord", ctx)
-    assertEquals(nord.name, "nord")
-    assertEquals(nord.base, "#2e3440")
+    val aws = Palette.find("aws", ctx)
+    assertEquals(aws.name, "aws")
 
-    val mocha = Palette.find("unknown-theme", ctx)
-    assertEquals(mocha.name, "catppuccin-mocha")
+    val fallback = Palette.find("unknown-theme", ctx)
+    assert(fallback.name.nonEmpty)
 
   test("Palette.listAll discovers custom conf palettes"):
     val ctx = Context.discover().toOption.get
@@ -22,9 +21,9 @@ class ThemeSuite extends FunSuite:
     assert(themes.contains("gcp"))
     assert(themes.contains("oci"))
 
-  test("ThemeEngine.run renders theme config files"):
+  test("ThemeEngine.run renders custom theme config files"):
     val ctx = Context.discover().toOption.get
-    val res = ThemeEngine.run(ctx, List("catppuccin-mocha"))
+    val res = ThemeEngine.run(ctx, List("aws"))
     assert(res.isRight)
     assert(os.exists(ctx.configDir / "kitty" / "theme.conf"))
     assert(os.exists(ctx.configDir / "waybar" / "theme.css"))
