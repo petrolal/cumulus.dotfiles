@@ -42,7 +42,7 @@ object Palette:
     if confMap.contains(lower) then
       confMap(lower)
     else
-      confMap.values.headOption.getOrElse(FallbackPalette)
+      confMap.get(lower).orElse(confMap.get("aws")).getOrElse(FallbackPalette)
 
   private def discoverConfFiles(ctx: Context): Map[String, Palette] =
     var result = Map.empty[String, Palette]
@@ -55,6 +55,7 @@ object Palette:
       for file <- os.list(dir) if file.ext == "conf" do
         parseConfFile(file).foreach { pal =>
           result += (pal.name.toLowerCase -> pal)
+          result += (file.baseName.toLowerCase -> pal)
         }
 
     result

@@ -2,26 +2,40 @@ package cumulus.dotfiles.sysutils
 
 import cumulus.dotfiles.context.Context
 import cumulus.dotfiles.error.{CommandError, CumulusError}
+import cumulus.dotfiles.theme.ThemeEngine
 
 object SysUtils:
   def runLock(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;34m[cumulus lock]\u001b[0m Locking screen via swaylock...")
+    val lockConfigFile = ctx.configDir / "swaylock" / "config"
     try
-      os.proc("swaylock", "-f", "-c", "1e1e2e").call(check = false)
+      val cmd = if os.exists(lockConfigFile) then
+        Seq("swaylock", "-f", "--config", lockConfigFile.toString)
+      else
+        val palette = ThemeEngine.getActivePalette(ctx)
+        val baseHex = palette.base.stripPrefix("#")
+        Seq("swaylock", "-f", "-c", baseHex)
+      os.proc(cmd).call(check = false)
       Right(())
     catch
       case e: Exception => Left(CommandError(s"Lock failed: ${e.getMessage}"))
 
   def runIdle(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;34m[cumulus idle]\u001b[0m Launching swayidle daemon...")
+    val lockConfigFile = ctx.configDir / "swaylock" / "config"
+    val lockCmd = if os.exists(lockConfigFile) then
+      s"swaylock -f --config $lockConfigFile"
+    else
+      "swaylock -f -c 1e1e2e"
+
     try
       val res = os.proc(
         "swayidle", "-w",
-        "timeout", "300", "swaylock -f -c 1e1e2e",
+        "timeout", "300", lockCmd,
         "timeout", "600", "swaymsg 'output * dpms off'",
         "resume", "swaymsg 'output * dpms on'",
         "timeout", "900", "systemctl suspend",
-        "before-sleep", "swaylock -f -c 1e1e2e"
+        "before-sleep", lockCmd
       ).call(check = false)
       Right(())
     catch
