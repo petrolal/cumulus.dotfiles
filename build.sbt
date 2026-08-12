@@ -8,7 +8,8 @@ version := "0.1.0"
 libraryDependencies ++= Seq(
   "com.lihaoyi" %% "os-lib" % "0.11.9-M8",
   "com.lihaoyi" %% "upickle" % "4.4.3",
-  "com.lihaoyi" %% "mainargs" % "0.7.0"
+  "com.lihaoyi" %% "mainargs" % "0.7.0",
+  "org.scalameta" %% "munit" % "1.0.0" % Test
 )
 
 Compile / mainClass := Some("cumulus.Main")
