@@ -46,6 +46,7 @@ object Main:
       case "runtime-refresh" => cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
       case "os-colorscheme" => cumulus.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
       case "rgb-theme" => cumulus.dotfiles.refresh.RefreshEngine.runRgbTheme(ctx, args)
+      case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
       case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
       case "whichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
       case "backup" => Right(println(s"[cumulus] module 'backup' invoked (placeholder)"))
