@@ -52,11 +52,8 @@ object Main:
       case "backup" => cumulus.dotfiles.maintenance.Maintenance.runBackup(ctx, args)
       case "restore" => cumulus.dotfiles.maintenance.Maintenance.runRestore(ctx, args)
       case "update" => cumulus.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)
-      case "install" | "deploy" => Right(println(s"[cumulus] module 'install' invoked (placeholder)"))
-      case "install-fonts" | "install-apps" | "install-browser" | "install-devops" |
-           "install-zsh" | "install-sdkman" | "install-nvim" | "install-nvim-deps" =>
-        Right(println(s"[cumulus] module '$name' invoked (placeholder)"))
-        Right(println(s"[cumulus] module '$name' invoked (placeholder)"))
+      case "install" | "deploy" => cumulus.dotfiles.install.DeployInstaller.run(ctx, args)
+      case name if name.startsWith("install-") => cumulus.dotfiles.install.ToolInstallers.runTool(name, ctx, args)
       case other => Left(UnknownCommandError(other))
 
   val UmbrellaHelp: String =
