@@ -77,7 +77,8 @@ object ToolInstallers:
 
   private def runPkgInstall(cmd: String, args: Seq[String]): Either[CumulusError, Unit] =
     try
-      val res = os.proc(cmd, args*).call(check = false)
+      val fullCmd = cmd +: args
+      val res = os.proc(fullCmd*).call(check = false)
       if res.exitCode == 0 then
         println(s"  \u001b[32m[OK]\u001b[0m Package installation complete.")
         Right(())
