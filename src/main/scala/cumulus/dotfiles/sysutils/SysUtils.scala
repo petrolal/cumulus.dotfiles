@@ -120,7 +120,15 @@ object SysUtils:
   private def notifyDesktop(title: String, body: String): Unit =
     try
       if isCommandAvailable("notify-send") then
-        os.proc("notify-send", title, body).call(check = false)
+        os.proc(
+          "notify-send",
+          "-u", "normal",
+          "-t", "4000",
+          "-a", "cumulus",
+          "--",
+          title,
+          body
+        ).spawn()
     catch
       case _: Exception => ()
 
