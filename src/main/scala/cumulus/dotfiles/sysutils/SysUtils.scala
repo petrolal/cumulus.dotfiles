@@ -123,7 +123,7 @@ object SysUtils:
         // Redirect stderr to suppress DBus errors when notification daemon unavailable
         val proc = os.proc(
           "bash", "-c",
-          s"""notify-send -u normal -t 4000 -a cumulus -- "${title.replace("\"", "\\\"")}" "${body.replace("\"", "\\\"")}\" 2>/dev/null"""
+          s"""notify-send -u normal -t 4000 -a cumulus -- "${title.replace("\"", "\\\"")}" "${body.replace("\"", "\\\"")}" 2>/dev/null"""
         ).spawn()
     catch
       case _: Exception => () // Silently fail if notification daemon unavailable
