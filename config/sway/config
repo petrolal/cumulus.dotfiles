@@ -276,11 +276,11 @@ bindsym $mod+Control+Escape exec systemctl poweroff # Shutdown system
 bindsym $mod+Control+Shift+Escape exec systemctl reboot # Reboot system
 
 # Screenshots — saved to ~/Pictures/Screenshots and copied to clipboard
-bindsym Print exec ~/.local/bin/cumulus-screenshot full
-bindsym --release Print exec ~/.local/bin/cumulus-screenshot full
-bindcode 107 exec ~/.local/bin/cumulus-screenshot full
-bindsym $mod+Print exec ~/.local/bin/cumulus-screenshot region
-bindsym $mod+Shift+Print exec ~/.local/bin/cumulus-screenshot window
+bindsym Print exec ~/.local/bin/cumulus screenshot full
+bindsym --release Print exec ~/.local/bin/cumulus screenshot full
+bindcode 107 exec ~/.local/bin/cumulus screenshot full
+bindsym $mod+Print exec ~/.local/bin/cumulus screenshot region
+bindsym $mod+Shift+Print exec ~/.local/bin/cumulus screenshot window
 
 ### ────────────────────────────────────────────────────────────────
 ### Modes
