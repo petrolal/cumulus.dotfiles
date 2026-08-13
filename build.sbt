@@ -25,7 +25,7 @@ sonatypeCredentialHost := "oss.sonatype.org"
 sonatypeRepository := "https://oss.sonatype.org/service/local"
 
 // PGP signing - reads from GPG keyring
-usePgpKeyHex("YOUR_KEY_ID")  // Replace with your actual GPG key ID
+// usePgpKeyHex("YOUR_KEY_ID")  // Uncomment and replace with your actual GPG key ID for publishing
 
 // Publishing repository
 publishTo := sonatypePublishToBundle.value
@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
 Compile / mainClass := Some("cumulus.Main")
 
 // Coursier configuration - makes `cs install io.github.petrolal::cumulus` work
-scriptClasspath := Seq("*")
+// scriptClasspath := Seq("*")  // Requires sbt-coursier plugin
 
 // Package JAR with all dependencies (fat JAR)
 assembly / assemblyMergeStrategy := {
