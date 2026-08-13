@@ -21,10 +21,11 @@ object RefreshEngine:
 
     // Mako reload (kill and restart to pick up new config)
     try
-      os.proc("killall", "mako").call(check = false)
-      Thread.sleep(200)
-      os.proc("mako").call(check = false)
-      println("  [32m[OK][0m Restarted Mako notification daemon")
+      val killRes = os.proc("killall", "mako").call(check = false)
+      if killRes.exitCode == 0 then
+        Thread.sleep(100)
+        os.proc("mako").call(stdout = os.Pipe, stderr = os.Pipe, check = false)
+        println("  [32m[OK][0m Restarted Mako notification daemon")
     catch
       case _: Exception => ()
 
