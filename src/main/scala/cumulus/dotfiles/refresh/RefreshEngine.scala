@@ -19,11 +19,12 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
-    // Mako reload (force kill and restart via Sway)
+    // Mako reload (force kill and restart)
     try
-      os.proc("killall", "-9", "mako").call(check = false)
-      Thread.sleep(150)
-      os.proc("swaymsg", "exec", "mako").call(check = false)
+      os.proc("pkill", "-9", "mako").call(check = false)
+      Thread.sleep(200)
+      // Start mako in background with proper environment
+      os.proc("bash", "-c", "nohup mako > /dev/null 2>&1 &").call(check = false)
       println("  [32m[OK][0m Restarted Mako notification daemon with new colors")
     catch
       case _: Exception => ()
