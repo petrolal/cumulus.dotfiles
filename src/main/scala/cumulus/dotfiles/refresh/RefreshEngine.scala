@@ -19,13 +19,12 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
-    // Mako reload (force kill and restart)
+    // Mako reload - skip automatic restart, user must manually restart
+    // Mako doesn't support live config reload, so colors won't update until restart
     try
       os.proc("pkill", "-9", "mako").call(check = false)
       Thread.sleep(200)
-      // Start mako in background with proper environment
-      os.proc("bash", "-c", "nohup mako > /dev/null 2>&1 &").call(check = false)
-      println("  [32m[OK][0m Restarted Mako notification daemon with new colors")
+      os.proc("bash", "-c", "mako &").call(check = false)
     catch
       case _: Exception => ()
 
