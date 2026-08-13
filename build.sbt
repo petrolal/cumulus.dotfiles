@@ -39,6 +39,27 @@ libraryDependencies ++= Seq(
 
 Compile / mainClass := Some("cumulus.Main")
 
+// Coursier configuration - makes `cs install io.github.petrolal::cumulus` work
+scriptClasspath := Seq("*")
+
+// Package JAR with all dependencies (fat JAR)
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+assembly / assemblyJarName := s"${name.value}-${version.value}-assembly.jar"
+assembly / mainClass := Some("cumulus.Main")
+
+// Create lightweight launcher JAR for Coursier
+packageBin / packageOptions += Package.ManifestAttributes(
+  ("Implementation-Title", name.value),
+  ("Implementation-Version", version.value),
+  ("Implementation-Vendor", "petrolal"),
+  ("Specification-Title", name.value),
+  ("Specification-Version", version.value),
+  ("Multi-Release", "true")
+)
+
 nativeImageOptions ++= Seq(
   "--no-fallback",
   "-H:+ReportExceptionStackTraces",
