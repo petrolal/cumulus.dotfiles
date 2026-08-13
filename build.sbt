@@ -26,7 +26,7 @@ sonatypeCredentialHost := "s01.oss.sonatype.org"
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 // PGP signing - reads from GPG keyring
-// usePgpKeyHex("YOUR_KEY_ID")  // Uncomment and replace with your actual GPG key ID for publishing
+usePgpKeyHex("C7A30CAF507B01B9F4BED6C3D79966B7698B8A7D")
 
 // Publishing repository
 publishTo := sonatypePublishToBundle.value

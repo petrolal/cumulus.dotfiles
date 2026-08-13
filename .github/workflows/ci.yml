@@ -22,9 +22,9 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Install sbt
-        uses: scalacenter/setup-scala@v1
+        uses: coursier/setup-scala@v1
         with:
-          scala-version: 3.5.2
+          jvm: graalvm-ce-21.0
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3
