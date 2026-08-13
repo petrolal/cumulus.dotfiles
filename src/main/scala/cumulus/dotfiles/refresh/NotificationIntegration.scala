@@ -1,0 +1,102 @@
+package cumulus.dotfiles.refresh
+
+import cumulus.dotfiles.context.Context
+import cumulus.dotfiles.error.{CommandError, CumulusError}
+
+object NotificationIntegration:
+  def configureApps(ctx: Context): Either[CumulusError, Unit] =
+    println("[1;36m[cumulus notify-config][0m Configuring apps for system notifications...")
+
+    val results = scala.collection.mutable.ListBuffer[String]()
+
+    // Configure Chromium/Chrome
+    configureChromium(ctx) match
+      case Right(_) => results += "  [32m[OK][0m Chromium/Chrome configured for native notifications"
+      case Left(_) => results += "  [33m[NOTE][0m Chromium not found or already configured"
+
+    // Configure Firefox (already uses system notifications by default on Wayland)
+    results += "  [32m[OK][0m Firefox uses system notifications by default"
+
+    // Configure Slack (if installed)
+    configureSlack(ctx) match
+      case Right(_) => results += "  [32m[OK][0m Slack configured for system notifications"
+      case Left(_) => results += "  [33m[NOTE][0m Slack not installed"
+
+    // Configure Discord (if installed)
+    configureDiscord(ctx) match
+      case Right(_) => results += "  [32m[OK][0m Discord configured for system notifications"
+      case Left(_) => results += "  [33m[NOTE][0m Discord not installed"
+
+    for line <- results do println(line)
+
+    println("[1;32m[SUCCESS][0m Application notification integration complete!")
+    Right(())
+
+  private def configureChromium(ctx: Context): Either[CumulusError, Unit] =
+    try
+      val binDir = ctx.home / ".local" / "bin"
+      os.makeDir.all(binDir)
+
+      val chromiumWrapper = binDir / "chromium"
+      val wrapperScript = """#!/bin/bash
+# Chromium launcher with native notification support for Wayland
+exec /usr/bin/chromium --enable-features=UseOsNotificationCenter "$@"
+"""
+
+      os.write.over(chromiumWrapper, wrapperScript)
+      os.perms.set(chromiumWrapper, "rwxr-xr-x")
+
+      // Also create google-chrome wrapper if it exists
+      if isCommandAvailable("google-chrome") || isCommandAvailable("google-chrome-stable") then
+        val chromeWrapper = binDir / "google-chrome"
+        val chromeScript = """#!/bin/bash
+# Google Chrome launcher with native notification support for Wayland
+exec /usr/bin/google-chrome --enable-features=UseOsNotificationCenter "$@"
+"""
+        os.write.over(chromeWrapper, chromeScript)
+        os.perms.set(chromeWrapper, "rwxr-xr-x")
+
+      Right(())
+    catch
+      case _: Exception => Left(CommandError("Chromium wrapper creation failed", 1))
+
+  private def isCommandAvailable(cmd: String): Boolean =
+    try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false
+
+  private def configureSlack(ctx: Context): Either[CumulusError, Unit] =
+    val slackConfigDir = ctx.home / ".config" / "Slack"
+    if os.exists(slackConfigDir) then
+      try
+        val settingsFile = slackConfigDir / "settings.json"
+        if os.exists(settingsFile) then
+          val content = os.read(settingsFile)
+          if !content.contains("\"useNativeNotifications\": true") then
+            val updatedContent = content.replace(
+              "\"useNativeNotifications\": false",
+              "\"useNativeNotifications\": true"
+            )
+            os.write.over(settingsFile, updatedContent)
+        Right(())
+      catch
+        case _: Exception => Left(CommandError("Slack config update failed", 1))
+    else
+      Left(CommandError("Slack not installed", 1))
+
+  private def configureDiscord(ctx: Context): Either[CumulusError, Unit] =
+    val discordConfigDir = ctx.home / ".config" / "discord"
+    if os.exists(discordConfigDir) then
+      try
+        val settingsFile = discordConfigDir / "settings.json"
+        if os.exists(settingsFile) then
+          val content = os.read(settingsFile)
+          if !content.contains("\"USE_SYSTEM_NOTIFICATIONS\":true") then
+            val updatedContent = content.replace(
+              "\"USE_SYSTEM_NOTIFICATIONS\":false",
+              "\"USE_SYSTEM_NOTIFICATIONS\":true"
+            )
+            os.write.over(settingsFile, updatedContent)
+        Right(())
+      catch
+        case _: Exception => Left(CommandError("Discord config update failed", 1))
+    else
+      Left(CommandError("Discord not installed", 1))

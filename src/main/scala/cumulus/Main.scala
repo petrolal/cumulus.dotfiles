@@ -55,6 +55,7 @@ object Main:
       case "theme" => cumulus.dotfiles.theme.ThemeEngine.run(ctx, args)
       case "runtime-refresh" => cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
       case "os-colorscheme" => cumulus.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
+      case "notify-config" => cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
       case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
       case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
       case "whichkey" | "wichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
@@ -85,6 +86,7 @@ object Main:
       |  backup           snapshot managed configs to a timestamped tarball
       |  restore          restore a snapshot created by backup
       |  update           git pull the dotfiles and re-run the installer
+      |  notify-config    configure installed apps to use system notifications
       |  sdd              token-efficient spec-driven development for AI workflows
       |  install-deps     install system & build dependencies (sbt, gcc, git, etc.)
       |  install-fonts    install the JetBrainsMono Nerd Font

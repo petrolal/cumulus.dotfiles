@@ -7,7 +7,7 @@ import upickle.default._
 object DeployInstaller:
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
-    "screenshot", "autotiling", "healthcheck", "backup", "restore", "update",
+    "screenshot", "autotiling", "healthcheck", "backup", "restore", "update", "notify-config",
     "sdd", "install", "deploy", "install-deps", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
     "install-nvim-deps", "install-all", "theme-picker", "whichkey", "wichkey"

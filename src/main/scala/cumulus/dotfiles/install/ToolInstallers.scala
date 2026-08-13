@@ -110,6 +110,7 @@ object ToolInstallers:
       _ <- installDevops(ctx)
       _ <- installZsh(ctx)
       _ <- installNvim(ctx)
+      _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
     yield ()
 
   private def runPkgInstall(cmd: String, args: Seq[String]): Either[CumulusError, Unit] =
