@@ -20,6 +20,16 @@ developers := List(
 )
 pomIncludeRepository := { _ => false }
 
+// Manual publishing configuration (alongside GitHub Actions CI)
+sonatypeCredentialHost := "oss.sonatype.org"
+sonatypeRepository := "https://oss.sonatype.org/service/local"
+
+// PGP signing - reads from GPG keyring
+usePgpKeyHex("YOUR_KEY_ID")  // Replace with your actual GPG key ID
+
+// Publishing repository
+publishTo := sonatypePublishToBundle.value
+
 libraryDependencies ++= Seq(
   "com.lihaoyi" %% "os-lib" % "0.11.9-M8",
   "com.lihaoyi" %% "upickle" % "4.4.3",
