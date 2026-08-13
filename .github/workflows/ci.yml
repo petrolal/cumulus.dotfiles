@@ -22,9 +22,10 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Install sbt
-        uses: coursier/setup-scala@v1
-        with:
-          jvm: graalvm-ce-21.0
+        run: |
+          curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gunzip > cs
+          chmod +x cs
+          ./cs install sbt
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3
