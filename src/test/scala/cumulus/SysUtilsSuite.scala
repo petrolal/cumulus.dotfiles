@@ -7,12 +7,14 @@ import munit.FunSuite
 class SysUtilsSuite extends FunSuite:
   private val isCI = sys.env.contains("CI") || sys.env.contains("GITHUB_ACTIONS")
 
-  test("SysUtils.runLock handles lock call gracefully".ignore(isCI)):
+  test("SysUtils.runLock handles lock call gracefully"):
+    assume(!isCI)
     val ctx = Context.discover().toOption.get
     val res = SysUtils.runLock(ctx)
     assert(res.isRight)
 
-  test("SysUtils.runLock returns Right".ignore(isCI)):
+  test("SysUtils.runLock returns Right"):
+    assume(!isCI)
     val ctx = Context.discover().toOption.get
     val res = SysUtils.runLock(ctx)
     assertEquals(res.isRight, true)

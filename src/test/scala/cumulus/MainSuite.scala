@@ -25,7 +25,8 @@ class MainSuite extends FunSuite:
     val code = Main.dispatch(Array("sdd"))
     assertEquals(code, 0)
 
-  test("Main.dispatch routes theme command".ignore(isCI)):
+  test("Main.dispatch routes theme command"):
+    assume(!isCI)
     val code = Main.dispatch(Array("theme"))
     assertEquals(code, 0)
 
