@@ -23,12 +23,9 @@ jobs:
           native-image-job-reports: 'true'
 
       - name: Install sbt
-        run: |
-          sudo apt-get update
-          echo "deb [signed-by=/usr/share/keyrings/sbt-archive-keyring.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
-          sudo curl -sL "https://repo.scala-sbt.org/scalasbt/debian/sbt-release.asc" | sudo gpg --dearmor > /usr/share/keyrings/sbt-archive-keyring.gpg
-          sudo apt-get update
-          sudo apt-get install -y sbt
+        uses: coursier/setup-scala@v1
+        with:
+          jvm: graalvm-ce-21.0
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3
