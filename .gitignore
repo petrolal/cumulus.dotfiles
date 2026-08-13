@@ -43,6 +43,8 @@ graalvm-build/
 _bmad/
 _bmad-output/
 .cumulus-sdd/*
+AGENTS.md
+CLAUDE.md
 
 # Generated configuration files (from theme.sh)
 config/sway/colors.conf
