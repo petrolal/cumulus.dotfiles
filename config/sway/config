@@ -36,8 +36,8 @@ set $ws9 "9:scratch"
 # `cumulus-theme list` for Catppuccin and AWS/Azure/GCP/OCI choices.
 include colors.conf
 
-# Notification daemon (SwayNC) — must start before waybar to register the swaync tray icon correctly.
-exec swaync
+# Notification daemon (Mako) — lightweight Wayland-native notification manager.
+exec mako
 
 # Status bar
 exec waybar

@@ -20,8 +20,8 @@ developers := List(
 )
 pomIncludeRepository := { _ => false }
 
-// Sonatype Central Portal (legacy OSSRH was sunset June 2025)
-ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
+// Note: sbt-ci-release handles Sonatype Central Portal config automatically
+// ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 
 // PGP signing - reads from GPG keyring
 usePgpKeyHex("C7A30CAF507B01B9F4BED6C3D79966B7698B8A7D")

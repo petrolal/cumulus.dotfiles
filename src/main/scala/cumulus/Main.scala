@@ -73,7 +73,7 @@ object Main:
       |  cumulus-<command> [args...]      (installed alias)
       |
       |Commands:
-      |  install          deploy cumulus.dotfiles onto a machine (full setup)
+      |  install          full setup: symlinks config + installs/updates all dependencies
       |  theme            select a desktop flavor + background mode and apply it live
       |  runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os)
       |  os-colorscheme   sync the GNOME/GTK color-scheme setting

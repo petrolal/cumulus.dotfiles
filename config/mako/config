@@ -1,0 +1,40 @@
+# Mako notification daemon configuration
+# For Wayland (Sway)
+
+# Display settings
+output=*
+width=300
+height=auto
+margin=10,10,10,10
+padding=10
+border-size=1
+border-radius=5
+
+# Timeout (in milliseconds)
+# 0 = no timeout, keep notification until clicked
+# 4000 = 4 seconds (good default)
+timeout=4000
+
+# Default notification style
+font=Monospace 10
+text-color=#cdd6f4
+background-color=#313244
+border-color=#89b4fa
+
+# Audio
+muted=false
+
+# Actions
+max-visible=5
+on-button-left=dismiss all
+on-button-middle=none
+on-button-right=dismiss
+
+# Sorting (oldest first)
+sort=-time
+
+# Format:
+# %a = application name
+# %s = summary
+# %b = body
+format=%s\n%b

@@ -34,7 +34,8 @@ object DeployInstaller:
       (ctx.configDir / "kitty", ctx.dotfilesDir / "config" / "kitty"),
       (ctx.configDir / "waybar", ctx.dotfilesDir / "config" / "waybar"),
       (ctx.configDir / "wofi", ctx.dotfilesDir / "config" / "wofi"),
-      (ctx.configDir / "rofi", ctx.dotfilesDir / "config" / "rofi")
+      (ctx.configDir / "rofi", ctx.dotfilesDir / "config" / "rofi"),
+      (ctx.configDir / "mako", ctx.dotfilesDir / "config" / "mako")
     )
 
     var configSymlinkCount = 0
@@ -136,19 +137,10 @@ object DeployInstaller:
     cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, activePalette.name)
 
     if !args.contains("--links-only") then
-      val bootstrapScript = ctx.dotfilesDir / "bootstrap.sh"
-      val isBootstrapRunning = sys.env.get("CUMULUS_BOOTSTRAP_RUNNING").contains("1")
-
-      if os.exists(bootstrapScript) && !isBootstrapRunning then
-        try
-          println("  [1;36m[cumulus install][0m Executing bootstrap.sh installer...")
-          val procArgs = Seq("bash", bootstrapScript.toString) ++ args
-          os.proc(procArgs).call(cwd = ctx.dotfilesDir, stdout = os.Inherit, stderr = os.Inherit, env = Map("CUMULUS_BOOTSTRAP_RUNNING" -> "1"))
-        catch
-          case e: Exception => println(s"  [33m[NOTE][0m bootstrap.sh execution note: ${e.getMessage}")
-      else
-        ToolInstallers.runTool("install-all", ctx, args)
-
-      cumulus.dotfiles.validate.Validator.run(ctx, args)
+      println("\n[1;32m[cumulus install-all][0m Installing all system dependencies, desktop apps, fonts, and tooling...")
+      for
+        _ <- ToolInstallers.runTool("install-all", ctx, args)
+        _ <- cumulus.dotfiles.validate.Validator.run(ctx, args)
+      yield ()
     else
       Right(())
