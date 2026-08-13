@@ -19,15 +19,14 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
-    // Mako reload (kill and restart to pick up new config)
+    // Mako reload (restart via Sway to ensure proper session)
     try
-      val killRes = os.proc("killall", "mako").call(check = false)
-      if killRes.exitCode == 0 then
-        Thread.sleep(100)
-        os.proc("mako").call(stdout = os.Pipe, stderr = os.Pipe, check = false)
-        println("  [32m[OK][0m Restarted Mako notification daemon")
+      os.proc("killall", "mako").call(check = false)
+      Thread.sleep(100)
+      os.proc("swaymsg", "exec", "mako").call(check = false)
+      println("  [32m[OK][0m Restarted Mako notification daemon")
     catch
-      case _: Exception => ()
+      case _: Exception => println("  [33m[NOTE][0m Mako restart skipped")
 
     runOsColorscheme(ctx)
     Right(())
