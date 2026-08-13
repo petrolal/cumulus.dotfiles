@@ -1,6 +1,20 @@
 # Coursier Installation Configuration
 
-This guide explains how to make your project installable via Coursier (`cs install`).
+Coursier is the Scala dependency manager used in **Stage 2** of the 3-stage installation flow.
+
+This guide explains the Coursier installation process and configuration.
+
+**Quick reference:**
+```bash
+# Stage 1: Bootstrap (installs Coursier)
+bash bootstrap.sh
+
+# Stage 2: Install cumulus from Maven Central via Coursier
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+
+# Stage 3: Run interactive installer
+cumulus install
+```
 
 ## Overview
 

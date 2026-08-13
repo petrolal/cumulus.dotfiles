@@ -1,376 +1,274 @@
 # Bootstrap Setup Guide
 
-The `bootstrap.sh` script now provides a complete development environment setup including Scala, GraalVM, and Coursier installation.
+The `bootstrap.sh` script is **Stage 1** of the 3-stage installation flow. It performs minimal system setup only.
+
+For the complete installation workflow, see [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md).
 
 ## What Gets Installed
 
-The bootstrap script automates the installation of:
+The bootstrap script installs **only essential components**:
 
-### Quick Setup with Interactive Menu
-
-After bootstrap, use the interactive installer for more options:
+### Bootstrap Stage (Stage 1 of 3)
 
 ```bash
-./scripts/maintain-sdkman.sh install
+bash bootstrap.sh
 ```
 
-This lets you choose:
-- **Java versions** (21 GraalVM, 21 OpenJDK, 17, 11)
-- **Scala versions** (3.5.2, 3.4.0, 2.13.12)
-- **Build tools** (sbt, Maven, Gradle)
-- **Languages** (Kotlin, Groovy)
+Installs:
+- **System Dependencies** - Sway, Waybar, Kitty, Wofi, etc.
+- **Java 21 GraalVM** - For native image support
+- **Coursier** - Scala dependency manager & app installer
+- **SDKMan** - Scala Development Kit Manager (for Java management)
 
-### 1. System Dependencies
+### Interactive Setup via cumulus CLI (Stage 3)
+
+After bootstrap and Coursier install, run the interactive installer:
+
 ```bash
-# Arch Linux (pacman)
-sbt, jdk-openjdk, gcc, git, curl, fontconfig, zsh, tar, unzip
-sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
-brightnessctl, libpulse, chromium, docker, terraform, kubectl
-helm, neovim, ttf-jetbrains-mono-nerd, mako
-
-# Ubuntu/Debian (apt-get)
-build-essential, default-jdk, sbt, git, curl, fontconfig, zsh, tar, unzip
-sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
-brightnessctl, pulseaudio-utils, firefox, docker.io, helm, neovim
-fonts-jetbrains-mono, mako
+cumulus install
 ```
 
-### 2. SDKMan (Scala Development Kit Manager)
-- Downloads to `~/.sdkman`
-- Manages multiple Java, Scala, and sbt versions
-- Isolated from system package managers
+This Scala-based CLI handles:
+- Desktop configuration
+- Symlink deployment
+- Optional tool installation
+- System health checks
 
-### 3. Development Tools via SDKMan
+### System Dependencies
 
-**Core Tools (installed by default):**
-- **Java 21 GraalVM** - For native image compilation
-- **Scala 3.5.2** - Latest Scala version
+**Arch Linux (pacman):**
+```
+sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
+brightnessctl, libpulse, mako, firefox, chromium, neovim
+```
+
+**Ubuntu/Debian (apt-get):**
+```
+sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
+brightnessctl, pulseaudio-utils, mako, firefox, neovim
+```
+
+### Core Tools (Bootstrap)
+
+- **Java 21 GraalVM** - Via SDKMan
+- **Coursier** - Scala/JVM dependency manager
+
+### Optional Tools (Post-Installation)
+
+Installed after bootstrap via `./scripts/maintain-sdkman.sh install`:
+
+- **Scala 3.5.2** - Scala language
 - **sbt 1.9.9** - Scala build tool
-
-**Additional Tools (available via interactive menu):**
-- **Maven 3.9.6** - Java/Kotlin/Groovy build tool
+- **Maven 3.9.6** - Java build tool
 - **Gradle 8.5** - Modern build system
-- **Kotlin 1.9.22** - Modern JVM language
-- **Groovy 4.0.17** - Dynamic JVM language
-
-### 4. Coursier
-- Downloads to `~/.local/bin/cs`
-- Enables `cs install` command
-- Bootstraps dependency cache
-
-### 5. cumulus CLI
-- Compiles native image using GraalVM
-- Installs to `~/.local/bin/cumulus`
-- Deploys configuration files and symlinks
+- **Kotlin 1.9.22** - JVM language
+- **Groovy 4.0.17** - JVM language
 
 ## Quick Start
 
-### Interactive Setup After Bootstrap
-
-Once bootstrap completes, customize your development environment:
+### 3-Stage Installation (Recommended)
 
 ```bash
-# Interactive menu to choose versions
-./scripts/maintain-sdkman.sh install
-```
-
-Choose from:
-- **4 Java versions** (GraalVM or OpenJDK, versions 21, 17, or 11)
-- **3 Scala versions** (3.5.2, 3.4.0, or 2.13.12)
-- **3+ build tools** (sbt, Maven, Gradle, or combinations)
-- **2 JVM languages** (Kotlin, Groovy, or both)
-
-### Fresh Machine Installation
-
-```bash
-# One-liner for fresh machine
+# Stage 1: Bootstrap (Java + Coursier + system deps)
 bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
 
-# Or clone and run locally
+# Stage 2: Download binary from Maven Central
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+
+# Stage 3: Interactive setup (Scala-based installer)
+cumulus install
+```
+
+### Local Installation (From Clone)
+
+```bash
 git clone https://github.com/petrolal/cumulus.dotfiles.git ~/cumulus.dotfiles
 cd ~/cumulus.dotfiles
+
+# Stage 1
 ./bootstrap.sh
+
+# Stage 2
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+
+# Stage 3
+cumulus install
 ```
 
-### What Happens During Bootstrap
+## Bootstrap Flow
 
 ```
-1. Detect package manager (pacman/apt-get/dnf/unknown)
+1. Detect package manager (pacman/apt-get/dnf)
    ↓
 2. Install system dependencies (requires sudo)
    ↓
-3. Enable mako notification daemon
+3. Install SDKMan (Scala Development Kit Manager)
    ↓
-4. Install SDKMan (Scala Development Kit Manager)
+4. Install Java 21 GraalVM via SDKMan
    ↓
-5. Install Java 21 GraalVM via SDKMan
+5. Install Coursier (app installer & dependency manager)
    ↓
-6. Install Scala 3.5.2 via SDKMan
+6. Add ~/.local/bin to PATH
    ↓
-7. Install sbt 1.9.9 via SDKMan
-   ↓
-8. Install Coursier (cs command)
-   ↓
-9. Build GraalVM native image (sbt nativeImage)
-   ↓
-10. Install cumulus CLI to ~/.local/bin/cumulus
-    ↓
-11. Run cumulus install (deploy configs, create symlinks)
-    ↓
-12. Run cumulus healthcheck (verify installation)
-    ↓
-13. Ask if you want to reboot
+BOOTSTRAP COMPLETE!
+
+Next: cs install io.github.petrolal::cumulus
 ```
 
 ## Environment Setup
 
-After bootstrap completes, you need to load SDKMan in your shell:
-
-### Add to ~/.zshrc (already included in cumulus config)
+### Add to ~/.bashrc or ~/.zshrc
 
 ```bash
-# SDKMan initialization
+# Coursier and cumulus binaries
+export PATH="$HOME/.local/bin:$PATH"
+
+# SDKMan (for Java/Scala/sbt management)
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 ```
 
-### Verify Installation
+### Reload Shell
 
 ```bash
-# Check SDKMan
-$HOME/.sdkman/bin/sdkman-init.sh version
+source ~/.bashrc
+# or
+exec zsh
+```
 
-# Check Java (GraalVM)
-source $HOME/.sdkman/bin/sdkman-init.sh
+## Verify Installation
+
+After bootstrap:
+
+```bash
+# Check Java
 java -version
-
-# Check Scala
-scala -version
-
-# Check sbt
-sbt --version
 
 # Check Coursier
 cs --version
 
-# Check cumulus
-cumulus --version
+# Verify PATH
+echo $PATH | grep "$HOME/.local/bin"
 ```
+
+## Next Steps
+
+1. **Install cumulus binary:**
+   ```bash
+   cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+   ```
+
+2. **Run interactive installer:**
+   ```bash
+   cumulus install
+   ```
+
+3. **(Optional) Install additional development tools:**
+   ```bash
+   ./scripts/maintain-sdkman.sh install
+   ```
 
 ## Troubleshooting
 
 ### "SDKMan: command not found"
 
-SDKMan needs to be sourced in your current shell session:
+Source SDKMan in current shell:
 
 ```bash
 source $HOME/.sdkman/bin/sdkman-init.sh
 java -version
 ```
 
-Or add to `~/.bashrc` or `~/.zshrc`:
+Or add to shell config permanently:
 
 ```bash
+cat >> ~/.bashrc << 'EOF'
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-```
-
-### "Java 21 GraalVM not found"
-
-```bash
-# Verify SDKMan is installed
-ls -la $HOME/.sdkman
-
-# Source SDKMan
-source $HOME/.sdkman/bin/sdkman-init.sh
-
-# Install Java manually
-sdk install java 21.0.1-graal --default
-
-# Check
-java -version
-```
-
-### "sbt: command not found"
-
-```bash
-# Source SDKMan first
-source $HOME/.sdkman/bin/sdkman-init.sh
-
-# Install sbt manually
-sdk install sbt 1.9.9 --default
-
-# Check
-sbt --version
+EOF
+source ~/.bashrc
 ```
 
 ### "Coursier not found"
 
+Verify installation:
+
 ```bash
-# Check installation
 ls -la ~/.local/bin/cs
-
-# If missing, reinstall
-mkdir -p ~/.local/bin
-curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gzip -d > ~/.local/bin/cs
-chmod +x ~/.local/bin/cs
-
-# Add to PATH if not already there
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```
 
-### "sudo password required" (during system package install)
-
-The bootstrap script will prompt for your sudo password when installing system packages. This is required for:
-
-```bash
-# Arch Linux
-sudo pacman -S --needed --noconfirm [packages]
-
-# Ubuntu/Debian
-sudo apt-get install -y [packages]
-```
-
-### Native Image Build Fails
-
-If `sbt nativeImage` fails:
-
-```bash
-# 1. Ensure GraalVM Java 21 is active
-source $HOME/.sdkman/bin/sdkman-init.sh
-java -version  # Should show GraalVM
-
-# 2. Clean and rebuild
-cd ~/cumulus.dotfiles
-sbt clean compile
-sbt nativeImage
-
-# 3. Check errors in detail
-sbt -v nativeImage  # Verbose output
-```
-
-## Manual Installation Steps
-
-If you prefer to install components manually:
-
-### SDKMan Only
-
-```bash
-# Install SDKMan
-curl -s "https://get.sdkman.io" | bash
-source $HOME/.sdkman/bin/sdkman-init.sh
-
-# Install specific versions
-sdk install java 21.0.1-graal
-sdk install scala 3.5.2
-sdk install sbt 1.9.9
-```
-
-### Coursier Only
+Install manually if missing:
 
 ```bash
 mkdir -p ~/.local/bin
-
-# Linux
 curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gzip -d > ~/.local/bin/cs
-
-# macOS
-curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-apple-darwin.gz | gzip -d > ~/.local/bin/cs
-
 chmod +x ~/.local/bin/cs
 cs update
 ```
 
-### System Dependencies Only
+### "Java not found"
+
+Check SDKMan:
 
 ```bash
-# Arch Linux
-sudo pacman -S sbt jdk-openjdk gcc git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl libpulse chromium docker terraform kubectl helm neovim ttf-jetbrains-mono-nerd mako
-
-# Ubuntu/Debian
-sudo apt-get update
-sudo apt-get install -y build-essential default-jdk sbt git curl fontconfig zsh tar unzip sway waybar kitty wofi swaylock swayidle grim slurp brightnessctl pulseaudio-utils firefox docker.io helm neovim fonts-jetbrains-mono mako
+source ~/.sdkman/bin/sdkman-init.sh
+java -version
 ```
 
-## Path Setup
-
-After bootstrap, ensure these directories are in your PATH:
+If still missing, install Java:
 
 ```bash
-# ~/.local/bin contains: cumulus, cs
-echo $PATH | grep -q "$HOME/.local/bin" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-
-# SDKMan adds java, scala, sbt to PATH automatically
-source $HOME/.sdkman/bin/sdkman-init.sh
-echo $PATH
+source ~/.sdkman/bin/sdkman-init.sh
+sdk install java 21.0.1-graal --default
 ```
 
-## Updating Components
+### "sudo password required"
 
-After initial bootstrap, you can update individual components:
+This is normal! System package installation requires elevated privileges.
+
+### "Cannot write to ~/.local/bin"
+
+Create directory with proper permissions:
+
+```bash
+mkdir -p ~/.local/bin
+chmod u+w ~/.local/bin
+```
+
+## Post-Installation
 
 ### Update SDKMan & Java
 
 ```bash
-source $HOME/.sdkman/bin/sdkman-init.sh
+source ~/.sdkman/bin/sdkman-init.sh
 sdk selfupdate
-sdk list java
-sdk install java 21.0.5-graal  # Newer version
-sdk default java 21.0.5-graal
-```
-
-### Update Scala
-
-```bash
-sdk list scala
-sdk install scala 3.6.0  # Newer version
-sdk default scala 3.6.0
-```
-
-### Update sbt
-
-```bash
-sdk list sbt
-sdk install sbt 1.10.0  # Newer version
-sdk default sbt 1.10.0
+sdk install java 21.0.5-graal --default
 ```
 
 ### Update Coursier
 
 ```bash
-# Check for updates
 cs update
 
 # Or reinstall latest
 rm ~/.local/bin/cs
-mkdir -p ~/.local/bin
 curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gzip -d > ~/.local/bin/cs
 chmod +x ~/.local/bin/cs
 ```
 
-## Custom Bootstrap
-
-To customize bootstrap behavior, you can:
-
-### Skip Reboot Prompt
+### Manage Additional Tools
 
 ```bash
-# Don't ask to reboot at the end
-SKIP_REBOOT=1 ./bootstrap.sh
-```
-
-### Run in Headless Mode
-
-```bash
-# For CI/CD or automated setup
-NO_INTERACTIVE=1 ./bootstrap.sh
+./scripts/maintain-sdkman.sh install    # Interactive menu
+./scripts/maintain-sdkman.sh check      # Status check
+./scripts/maintain-sdkman.sh list       # List installed
+./scripts/maintain-sdkman.sh update-all # Update everything
 ```
 
 ## See Also
 
-- [SDKMan Documentation](https://sdkman.io/)
-- [Coursier Documentation](https://get-coursier.io/)
-- [GraalVM Native Image](https://www.graalvm.org/latest/reference-manual/native-image/)
-- [Scala 3 Documentation](https://docs.scala-lang.org/scala3/)
-- [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md) - Local publishing guide
-- [COURSIER_SETUP.md](COURSIER_SETUP.md) - Coursier installation guide
+- [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) - Complete 3-stage guide
+- [COURSIER_SETUP.md](COURSIER_SETUP.md) - Coursier configuration
+- [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md) - Tool management
+- [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md) - Publishing guide
+- [README.md](README.md) - Project overview
