@@ -26,6 +26,7 @@ jobs:
           curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gunzip > cs
           chmod +x cs
           ./cs install sbt
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3
