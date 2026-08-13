@@ -19,14 +19,19 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
-    // Mako reload - skip automatic restart, user must manually restart
-    // Mako doesn't support live config reload, so colors won't update until restart
+    // Mako reload via systemctl
     try
-      os.proc("pkill", "-9", "mako").call(check = false)
-      Thread.sleep(200)
-      os.proc("bash", "-c", "mako &").call(check = false)
+      os.proc("systemctl", "--user", "restart", "mako").call(check = false)
+      println("  [32m[OK][0m Restarted Mako with new theme colors")
     catch
-      case _: Exception => ()
+      case _: Exception =>
+        // Fallback: kill and restart manually if systemd unavailable
+        try
+          os.proc("pkill", "-9", "mako").call(check = false)
+          Thread.sleep(200)
+          os.proc("mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        catch
+          case _: Exception => ()
 
     runOsColorscheme(ctx)
     Right(())

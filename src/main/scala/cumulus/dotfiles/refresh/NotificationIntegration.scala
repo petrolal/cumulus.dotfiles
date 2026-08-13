@@ -9,6 +9,15 @@ object NotificationIntegration:
 
     val results = scala.collection.mutable.ListBuffer[String]()
 
+    // Enable mako systemd service
+    try
+      os.proc("systemctl", "--user", "daemon-reload").call(check = false)
+      os.proc("systemctl", "--user", "enable", "mako").call(check = false)
+      os.proc("systemctl", "--user", "start", "mako").call(check = false)
+      results += "  [32m[OK][0m Mako systemd service enabled"
+    catch
+      case _: Exception => results += "  [33m[NOTE][0m Mako systemd setup skipped"
+
     // Configure Chromium/Chrome
     configureChromium(ctx) match
       case Right(_) => results += "  [32m[OK][0m Chromium/Chrome configured for native notifications"
