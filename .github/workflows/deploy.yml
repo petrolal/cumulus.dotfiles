@@ -22,11 +22,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
-      - name: Install sbt
-        uses: coursier/setup-scala@v1
-        with:
-          jvm: graalvm-ce-21.0
-
       - name: Cache sbt dependencies
         uses: actions/cache@v3
         with:
