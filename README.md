@@ -48,7 +48,7 @@ If downloading the globally installed dependency from Maven Central:
 
 ```bash
 # Download and install cumulus binary globally via Coursier
-cs install com.cumulus::cumulus:0.1.0 --name cumulus
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
 
 # Execute installation (runs bootstrap.sh and cumulus healthcheck)
 cumulus install

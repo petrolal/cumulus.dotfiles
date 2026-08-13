@@ -43,7 +43,7 @@ When you push a tag like `v1.0.0`:
 ### Maven Central
 ```bash
 # Scala/Java developers can depend on:
-"com.github.petrolal" %% "cumulus-dotfiles" % "1.0.0"
+"io.github.petrolal" %% "cumulus-dotfiles" % "1.0.0"
 ```
 
 ### AUR (Arch Linux)
@@ -153,7 +153,7 @@ gh run view <RUN_ID> --log
 # https://search.maven.org/search?q=cumulus-dotfiles
 
 # Or try in your Scala project
-sbt "libraryDependencies += \"com.github.petrolal\" %% \"cumulus-dotfiles\" % \"0.2.0\""
+sbt "libraryDependencies += \"io.github.petrolal\" %% \"cumulus-dotfiles\" % \"0.2.0\""
 ```
 
 **AUR:**

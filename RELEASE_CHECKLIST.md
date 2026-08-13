@@ -56,7 +56,7 @@ Then verify:
 ### Maven Central
 - [ ] Artifact appears on Maven Central (may take 10-30 mins)
   - Search: https://search.maven.org/
-  - Look for: `com.github.petrolal:cumulus-dotfiles:X.Y.Z`
+  - Look for: `io.github.petrolal:cumulus-dotfiles:X.Y.Z`
 
 ### AUR
 - [ ] Package appears on AUR

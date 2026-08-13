@@ -2,7 +2,7 @@ enablePlugins(NativeImagePlugin)
 
 scalaVersion := "3.5.2"
 name := "cumulus"
-organization := "com.cumulus"
+organization := "io.github.petrolal"
 version := "0.1.0"
 
 // Maven Central / Sonatype publishing settings

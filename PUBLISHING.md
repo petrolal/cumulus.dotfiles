@@ -14,7 +14,7 @@ This guide explains how to publish cumulus-dotfiles to Maven Central (as a libra
 
 1. **Sonatype JIRA Account**
    - Sign up at https://issues.sonatype.org/
-   - Create a ticket requesting publish rights for `com.github.petrolal` namespace
+   - Create a ticket requesting publish rights for `io.github.petrolal` namespace
    - Wait for approval (usually 1-2 business days)
 
 2. **GPG Key Setup**
@@ -135,7 +135,7 @@ Always use `v` prefix:
 ### build.sbt Configuration
 
 ```scala
-ThisBuild / organization := "com.github.petrolal"
+ThisBuild / organization := "io.github.petrolal"
 ThisBuild / versionScheme := Some("semver-spec")
 ThisBuild / homepage := Some(url("https://github.com/petrolal/cumulus-dotfiles"))
 ThisBuild / licenses := List("MIT" -> url("https://opensource.org/licenses/MIT"))
@@ -204,7 +204,7 @@ Located at `PKGBUILD`:
 
 ### Maven Central
 - Search: https://search.maven.org/
-- Check: https://repo.maven.apache.org/maven2/com/github/petrolal/cumulus-dotfiles/
+- Check: https://repo.maven.apache.org/maven2/io/github/petrolal/cumulus-dotfiles/
 
 ### AUR
 - Check: https://aur.archlinux.org/packages/cumulus-dotfiles/
