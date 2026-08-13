@@ -79,14 +79,14 @@ https://github.com/petrolal/cumulus-dotfiles/releases/download/v1.0.0/cumulus
    # Export public key
    gpg --keyserver hkp://keyserver.ubuntu.com --send-keys YOUR_KEY_ID
    
-   # Export private key (for GitHub secrets)
-   gpg --export-secret-keys --armor YOUR_KEY_ID > private.key
+   # Export private key for GitHub secrets (base64-encoded for sbt-ci-release)
+   gpg --export-secret-keys --armor YOUR_KEY_ID | base64 -w0 > private.key.b64
    ```
 
 3. **GitHub Secrets** (Settings → Secrets and variables → Actions)
    - `SONATYPE_USERNAME`: Your Sonatype Jira username
    - `SONATYPE_PASSWORD`: Your Sonatype password
-   - `PGP_SECRET`: Output of `gpg --export-secret-keys --armor <KEY_ID>`
+   - `PGP_SECRET`: Base64-encoded output of `gpg --export-secret-keys --armor <KEY_ID> | base64 -w0`
    - `PGP_PASSPHRASE`: Your GPG key passphrase
 
 #### For AUR Publishing

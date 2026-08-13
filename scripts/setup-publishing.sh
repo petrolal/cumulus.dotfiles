@@ -64,7 +64,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "  2. Add these secrets:"
   echo "     - SONATYPE_USERNAME: $SONATYPE_USER"
   echo "     - SONATYPE_PASSWORD: (paste your password)"
-  echo "     - PGP_SECRET: (output of: gpg --export-secret-keys --armor $GPG_KEY_ID)"
+  echo "     - PGP_SECRET: (output of: gpg --export-secret-keys --armor $GPG_KEY_ID | base64 -w0)"
   echo "     - PGP_PASSPHRASE: (your GPG passphrase)"
 fi
 
