@@ -19,6 +19,15 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
+    // Mako reload (kill and restart to pick up new config)
+    try
+      os.proc("killall", "mako").call(check = false)
+      Thread.sleep(200)
+      os.proc("mako").call(check = false)
+      println("  [32m[OK][0m Restarted Mako notification daemon")
+    catch
+      case _: Exception => ()
+
     runOsColorscheme(ctx)
     Right(())
 
