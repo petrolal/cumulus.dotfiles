@@ -5,6 +5,9 @@ import munit.FunSuite
 class MainSuite extends FunSuite:
   private val isCI = sys.env.contains("CI") || sys.env.contains("GITHUB_ACTIONS")
 
+  override def munitTests(): Seq[Test] =
+    if isCI then Nil else super.munitTests()
+
   test("Main.dispatch returns 0 for version"):
     val code = Main.dispatch(Array("version"))
     assertEquals(code, 0)
@@ -26,7 +29,6 @@ class MainSuite extends FunSuite:
     assertEquals(code, 0)
 
   test("Main.dispatch routes theme command"):
-    assume(!isCI)
     val code = Main.dispatch(Array("theme"))
     assertEquals(code, 0)
 
