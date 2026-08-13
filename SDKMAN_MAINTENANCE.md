@@ -5,17 +5,81 @@ This guide covers maintaining existing SDKMan installations, updating tools, and
 ## Quick Start
 
 ```bash
-# Check status
-./scripts/maintain-sdkman.sh check
+# Interactive setup (choose versions for Java, Scala, Build tools, Languages)
+./scripts/maintain-sdkman.sh install
 
-# Update everything
-./scripts/maintain-sdkman.sh update-all
+# Or manual commands:
+./scripts/maintain-sdkman.sh check              # Check status
+./scripts/maintain-sdkman.sh list               # List installed versions
+./scripts/maintain-sdkman.sh update-all         # Update core tools
+./scripts/maintain-sdkman.sh upgrade            # Upgrade SDKMan itself
+```
 
-# Upgrade SDKMan itself
-./scripts/maintain-sdkman.sh upgrade
+## Interactive Installation
 
-# List current versions
-./scripts/maintain-sdkman.sh list
+The easiest way to install and configure SDKMan tools is using the interactive menu:
+
+```bash
+./scripts/maintain-sdkman.sh install
+```
+
+This will prompt you to:
+
+1. **Choose Java version:**
+   - Java 21 GraalVM (recommended, native image support)
+   - Java 21 OpenJDK
+   - Java 17 GraalVM
+   - Java 17 OpenJDK
+   - Java 11 OpenJDK (legacy)
+   - Skip installation
+
+2. **Choose Scala version:**
+   - Scala 3.5.2 (latest, recommended)
+   - Scala 3.4.0
+   - Scala 2.13.12 (legacy)
+   - Skip installation
+
+3. **Choose build tools:**
+   - sbt (Scala Build Tool)
+   - Maven (Java/Kotlin/Groovy)
+   - Gradle (modern build system)
+   - All build tools
+   - Skip installation
+
+4. **Choose additional languages:**
+   - Kotlin (modern JVM language)
+   - Groovy (dynamic JVM language)
+   - Both
+   - Skip installation
+
+Example interactive session:
+
+```bash
+$ ./scripts/maintain-sdkman.sh install
+
+[cumulus-sdkman] Interactive SDKMan Setup
+
+  [INFO] Select Java version:
+  1) Java 21 GraalVM (recommended, native image support)
+  2) Java 21 OpenJDK
+  3) Java 17 GraalVM
+  4) Java 17 OpenJDK
+  5) Java 11 OpenJDK (legacy)
+  6) Skip Java installation
+[?] Choose (1-6): 1
+  [INFO] Installing Java 21 (GraalVM)...
+  [OK] Java 21 GraalVM installed
+
+  [INFO] Select Scala version:
+  1) Scala 3.5.2 (latest, recommended)
+  2) Scala 3.4.0
+  3) Scala 2.13.12 (legacy)
+  4) Skip Scala installation
+[?] Choose (1-4): 1
+  [OK] Scala 3.5.2 installed
+
+...
+[cumulus-sdkman] Setup complete!
 ```
 
 ## Available Commands
@@ -37,6 +101,7 @@ This guide covers maintaining existing SDKMan installations, updating tools, and
 
 ### Upgrading Tools
 
+**JVM Core Tools:**
 ```bash
 # Upgrade SDKMan itself
 ./scripts/maintain-sdkman.sh upgrade
@@ -52,8 +117,33 @@ This guide covers maintaining existing SDKMan installations, updating tools, and
 # Update sbt (default: 1.9.9)
 ./scripts/maintain-sdkman.sh update-sbt
 ./scripts/maintain-sdkman.sh update-sbt 1.10.0  # Specific version
+```
 
-# Update all at once
+**Build Tools:**
+```bash
+# Update Maven (default: 3.9.6)
+./scripts/maintain-sdkman.sh update-maven
+./scripts/maintain-sdkman.sh update-maven 3.9.8  # Specific version
+
+# Update Gradle (default: 8.5)
+./scripts/maintain-sdkman.sh update-gradle
+./scripts/maintain-sdkman.sh update-gradle 8.6  # Specific version
+```
+
+**JVM Languages:**
+```bash
+# Update Kotlin (default: 1.9.22)
+./scripts/maintain-sdkman.sh update-kotlin
+./scripts/maintain-sdkman.sh update-kotlin 1.9.23  # Specific version
+
+# Update Groovy (default: 4.0.17)
+./scripts/maintain-sdkman.sh update-groovy
+./scripts/maintain-sdkman.sh update-groovy 4.0.18  # Specific version
+```
+
+**Update All:**
+```bash
+# Update all core tools (Java, Scala, sbt)
 ./scripts/maintain-sdkman.sh update-all
 ```
 

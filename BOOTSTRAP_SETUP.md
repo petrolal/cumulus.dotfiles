@@ -6,6 +6,20 @@ The `bootstrap.sh` script now provides a complete development environment setup 
 
 The bootstrap script automates the installation of:
 
+### Quick Setup with Interactive Menu
+
+After bootstrap, use the interactive installer for more options:
+
+```bash
+./scripts/maintain-sdkman.sh install
+```
+
+This lets you choose:
+- **Java versions** (21 GraalVM, 21 OpenJDK, 17, 11)
+- **Scala versions** (3.5.2, 3.4.0, 2.13.12)
+- **Build tools** (sbt, Maven, Gradle)
+- **Languages** (Kotlin, Groovy)
+
 ### 1. System Dependencies
 ```bash
 # Arch Linux (pacman)
@@ -27,9 +41,17 @@ fonts-jetbrains-mono, mako
 - Isolated from system package managers
 
 ### 3. Development Tools via SDKMan
+
+**Core Tools (installed by default):**
 - **Java 21 GraalVM** - For native image compilation
 - **Scala 3.5.2** - Latest Scala version
 - **sbt 1.9.9** - Scala build tool
+
+**Additional Tools (available via interactive menu):**
+- **Maven 3.9.6** - Java/Kotlin/Groovy build tool
+- **Gradle 8.5** - Modern build system
+- **Kotlin 1.9.22** - Modern JVM language
+- **Groovy 4.0.17** - Dynamic JVM language
 
 ### 4. Coursier
 - Downloads to `~/.local/bin/cs`
@@ -42,6 +64,21 @@ fonts-jetbrains-mono, mako
 - Deploys configuration files and symlinks
 
 ## Quick Start
+
+### Interactive Setup After Bootstrap
+
+Once bootstrap completes, customize your development environment:
+
+```bash
+# Interactive menu to choose versions
+./scripts/maintain-sdkman.sh install
+```
+
+Choose from:
+- **4 Java versions** (GraalVM or OpenJDK, versions 21, 17, or 11)
+- **3 Scala versions** (3.5.2, 3.4.0, or 2.13.12)
+- **3+ build tools** (sbt, Maven, Gradle, or combinations)
+- **2 JVM languages** (Kotlin, Groovy, or both)
 
 ### Fresh Machine Installation
 
