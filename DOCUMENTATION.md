@@ -35,19 +35,23 @@ Complete guide to all cumulus.dotfiles documentation.
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) | 3-stage installation workflow | Everyone |
-| [BOOTSTRAP_SETUP.md](BOOTSTRAP_SETUP.md) | Stage 1: Bootstrap (Java + Coursier) | System setup |
-| [COURSIER_SETUP.md](COURSIER_SETUP.md) | Stage 2: Binary installation | Developers |
-| [QUICK_START_PUBLISHING.md](QUICK_START_PUBLISHING.md) | Quick publishing guide | Maintainers |
+| [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) | Complete 3-stage installation workflow | Everyone |
+| | - Quick start (3 commands) | |
+| | - Detailed Stage 1, 2, 3 breakdown | |
+| | - Troubleshooting guide | |
+| | - Advanced options & post-install management | |
 
-## Tool & Configuration Guides
+## Publishing & Release Guides
 
 | Document | Purpose | Use Case |
 |----------|---------|----------|
+| [PUBLISHING.md](PUBLISHING.md) | Complete publishing workflow | All release processes |
+| | - Quick start TL;DR | Maintainers (2 min/release) |
+| | - One-time setup guide | New maintainers (5-10 min) |
+| | - Semantic versioning | Version management |
+| | - Release checklist | Pre/post-release verification |
+| | - Troubleshooting | Problem resolution |
 | [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md) | Manage SDKMan & JVM tools | Post-installation tool management |
-| [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md) | Publish to Maven Central | Local/manual releases |
-| [PUBLISHING.md](PUBLISHING.md) | Complete publishing guide | Full publishing workflow |
-| [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) | Pre-release verification | Release management |
 
 ## File Structure
 
@@ -72,14 +76,9 @@ cumulus.dotfiles/
 │
 ├── Documentation/
 │   ├── README.md                   # Project overview
-│   ├── INSTALLATION_FLOW.md        # 3-stage installation
-│   ├── BOOTSTRAP_SETUP.md          # Stage 1 details
-│   ├── COURSIER_SETUP.md           # Stage 2 details
-│   ├── MANUAL_PUBLISHING.md        # Local publishing
-│   ├── PUBLISHING.md               # Full publishing guide
+│   ├── INSTALLATION_FLOW.md        # Complete 3-stage installation
+│   ├── PUBLISHING.md               # Publishing workflow & checklist
 │   ├── SDKMAN_MAINTENANCE.md       # Tool management
-│   ├── RELEASE_CHECKLIST.md        # Release steps
-│   ├── QUICK_START_PUBLISHING.md   # Quick publish guide
 │   ├── DOCUMENTATION.md            # This file
 │   └── project-context.md          # Project context
 │
@@ -93,9 +92,9 @@ cumulus.dotfiles/
 
 ## Understanding the 3-Stage Flow
 
-### Stage 1: Bootstrap
-**Document:** [BOOTSTRAP_SETUP.md](BOOTSTRAP_SETUP.md)
+See [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) for complete details including setup, troubleshooting, and advanced options.
 
+### Stage 1: Bootstrap
 Installs minimal system setup:
 - System dependencies (Sway, Waybar, Kitty, etc.)
 - Java 21 GraalVM (for native image support)
@@ -106,8 +105,6 @@ Installs minimal system setup:
 **Time:** 5-10 minutes
 
 ### Stage 2: Coursier
-**Document:** [COURSIER_SETUP.md](COURSIER_SETUP.md)
-
 Downloads the cumulus CLI binary:
 - Fetches JAR from Maven Central
 - Resolves dependencies
@@ -117,8 +114,6 @@ Downloads the cumulus CLI binary:
 **Time:** 1-2 minutes
 
 ### Stage 3: Interactive Installer
-**Document:** [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md)
-
 Scala-based CLI handles full setup:
 - Interactive configuration prompts
 - Symlink deployment
@@ -268,13 +263,13 @@ When updating documentation:
 ## Quick Links by Task
 
 ### "I want to install cumulus"
-→ [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) - 3 commands
+→ [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) - Quick start (3 commands)
 
 ### "I'm having installation issues"
-→ [BOOTSTRAP_SETUP.md](BOOTSTRAP_SETUP.md#troubleshooting) - Troubleshooting section
+→ [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md#troubleshooting) - Troubleshooting section
 
 ### "I want to publish a release"
-→ [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md) or [QUICK_START_PUBLISHING.md](QUICK_START_PUBLISHING.md)
+→ [PUBLISHING.md](PUBLISHING.md) - Quick start (2 min) or complete setup guide
 
 ### "I need to manage JVM tools"
 → [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md)

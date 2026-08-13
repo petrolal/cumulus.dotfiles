@@ -228,6 +228,111 @@ cumulus --help
 cumulus-theme --help
 ```
 
+## Stage 1: Bootstrap Details
+
+### What Gets Installed
+
+The bootstrap script installs **only essential components**:
+
+- **System Dependencies** - Sway, Waybar, Kitty, Wofi, Swaylock, Swayidle, Grim, Slurp, etc.
+- **Java 21 GraalVM** - For native image support
+- **Coursier** - Scala dependency manager & app installer
+- **SDKMan** - Scala Development Kit Manager (for Java management)
+
+### System Dependencies by Package Manager
+
+**Arch Linux (pacman):**
+```
+sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
+brightnessctl, libpulse, mako, firefox, chromium, neovim
+```
+
+**Ubuntu/Debian (apt-get):**
+```
+sway, waybar, kitty, wofi, swaylock, swayidle, grim, slurp
+brightnessctl, pulseaudio-utils, mako, firefox, neovim
+```
+
+### Bootstrap Environment Setup
+
+After running `bootstrap.sh`, add to `~/.bashrc` or `~/.zshrc`:
+
+```bash
+# Coursier and cumulus binaries
+export PATH="$HOME/.local/bin:$PATH"
+
+# SDKMan (for Java/Scala/sbt management)
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+```
+
+Then reload your shell:
+
+```bash
+source ~/.bashrc  # or exec zsh
+```
+
+### Verify Bootstrap Completed
+
+```bash
+# Check Java
+java -version
+
+# Check Coursier
+cs --version
+
+# Verify PATH
+echo $PATH | grep "$HOME/.local/bin"
+```
+
+## Stage 2: Coursier Configuration
+
+### How Coursier Works
+
+1. **JAR published to Maven Central** → Coursier discovers it
+2. **Main class specified** → Coursier creates launch script
+3. **Dependencies resolved** → Coursier downloads all deps
+4. **Executable installed** → Binary available in `~/.local/share/coursier/bin/`
+
+### Installation Methods
+
+**Standard (recommended):**
+```bash
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+```
+
+**Latest version:**
+```bash
+cs install io.github.petrolal::cumulus --name cumulus
+```
+
+**Fat JAR (for testing before Maven Central sync):**
+```bash
+cd ~/cumulus.dotfiles
+sbt assembly
+cs install file://$(pwd)/target/scala-3.5.2/cumulus-0.1.0-assembly.jar --name cumulus
+```
+
+### Coursier Configuration
+
+**Cache location:**
+```bash
+~/.cache/coursier/  # Linux/Mac
+~/AppData/Local/Coursier/Cache  # Windows
+```
+
+**View installed apps:**
+```bash
+cs list --installed
+ls -la ~/.local/share/coursier/bin/
+```
+
+**Customize installation location:**
+```bash
+cs install io.github.petrolal::cumulus:0.1.0 --install-dir ~/my-bin
+export PATH="~/my-bin:$PATH"
+```
+
 ## Troubleshooting
 
 ### "cumulus: command not found"
@@ -309,6 +414,17 @@ System packages failed to install. Options:
    cumulus install
    ```
 
+### "SDKMan: command not found"
+
+Source SDKMan in current shell:
+
+```bash
+source $HOME/.sdkman/bin/sdkman-init.sh
+java -version
+```
+
+Or add to shell config permanently (see Environment Setup above).
+
 ## Advanced Installation Options
 
 ### Install Without System Packages
@@ -346,7 +462,7 @@ cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
 cumulus install --quiet
 ```
 
-## Development Installation
+### Development Installation (From Source)
 
 To install from source for development:
 
@@ -364,6 +480,36 @@ cp target/native-image/cumulus ~/.local/bin/
 
 # Run installer
 cumulus install
+```
+
+## Post-Installation Management
+
+### Update SDKMan & Java
+
+```bash
+source ~/.sdkman/bin/sdkman-init.sh
+sdk selfupdate
+sdk install java 21.0.5-graal --default
+```
+
+### Update Coursier
+
+```bash
+cs update
+
+# Or reinstall latest
+rm ~/.local/bin/cs
+curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gzip -d > ~/.local/bin/cs
+chmod +x ~/.local/bin/cs
+```
+
+### Manage Additional Development Tools
+
+```bash
+./scripts/maintain-sdkman.sh install    # Interactive menu
+./scripts/maintain-sdkman.sh check      # Status check
+./scripts/maintain-sdkman.sh list       # List installed
+./scripts/maintain-sdkman.sh update-all # Update everything
 ```
 
 ## Installation Timeline
@@ -388,7 +534,6 @@ cumulus install
 
 ## See Also
 
-- [BOOTSTRAP_SETUP.md](BOOTSTRAP_SETUP.md) - Bootstrap details
-- [COURSIER_SETUP.md](COURSIER_SETUP.md) - Coursier configuration
-- [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md) - Publishing to Maven Central
+- [PUBLISHING.md](PUBLISHING.md) - Publishing to Maven Central
 - [README.md](README.md) - Project overview
+- [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md) - Tool management
