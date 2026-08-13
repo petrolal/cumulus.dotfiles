@@ -12,7 +12,7 @@ Complete guide to all cumulus.dotfiles documentation.
 - Detailed walkthrough of each stage
 - Troubleshooting
 
-**Quick reference:** [README.md](README.md)
+**Quick reference:** [README.md](../README.md)
 - Project overview
 - Commands and key bindings
 - What gets installed
@@ -20,12 +20,12 @@ Complete guide to all cumulus.dotfiles documentation.
 
 ### For Development
 
-**Building from source:** [README.md](README.md#building-from-source)
+**Building from source:** [README.md](../README.md#building-from-source)
 - Clone repository
 - Build with sbt
 - Install from source
 
-**Publishing to Maven Central:** [MANUAL_PUBLISHING.md](MANUAL_PUBLISHING.md)
+**Publishing to Maven Central:** [PUBLISHING.md](PUBLISHING.md)
 - Setup Sonatype account
 - Configure GPG keys
 - Manual publishing commands
@@ -74,13 +74,14 @@ cumulus.dotfiles/
 │   ├── maintain-sdkman.sh          # SDKMan tool management
 │   └── ...
 │
-├── Documentation/
-│   ├── README.md                   # Project overview
+├── README.md                       # Project overview
+├── docs/
+│   ├── DOCUMENTATION.md            # Documentation index (this file)
 │   ├── INSTALLATION_FLOW.md        # Complete 3-stage installation
 │   ├── PUBLISHING.md               # Publishing workflow & checklist
 │   ├── SDKMAN_MAINTENANCE.md       # Tool management
-│   ├── DOCUMENTATION.md            # This file
-│   └── project-context.md          # Project context
+│   ├── project-context.md          # Project context
+│   └── migration-rust-to-scala.md  # Migration guide
 │
 └── Configuration/
     ├── config/sway/               # Sway window manager config
@@ -275,7 +276,7 @@ When updating documentation:
 → [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md)
 
 ### "I want to build from source"
-→ [README.md](README.md#building-from-source)
+→ [README.md](../README.md#building-from-source)
 
 ### "I'm developing cumulus"
 → This file's "Development Workflow" section

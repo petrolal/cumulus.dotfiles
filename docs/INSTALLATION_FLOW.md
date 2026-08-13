@@ -535,5 +535,5 @@ chmod +x ~/.local/bin/cs
 ## See Also
 
 - [PUBLISHING.md](PUBLISHING.md) - Publishing to Maven Central
-- [README.md](README.md) - Project overview
+- [README.md](../README.md) - Project overview
 - [SDKMAN_MAINTENANCE.md](SDKMAN_MAINTENANCE.md) - Tool management

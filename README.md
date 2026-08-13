@@ -90,7 +90,7 @@ Stage 3: Interactive Installer (Full system setup via Scala CLI)
 COMPLETE! All dotfiles symlinked, system configured
 ```
 
-See [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) for detailed walkthrough.
+See [docs/INSTALLATION_FLOW.md](docs/INSTALLATION_FLOW.md) for detailed walkthrough.
 
 ---
 

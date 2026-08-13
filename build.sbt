@@ -21,8 +21,9 @@ developers := List(
 pomIncludeRepository := { _ => false }
 
 // Manual publishing configuration (alongside GitHub Actions CI)
-sonatypeCredentialHost := "oss.sonatype.org"
-sonatypeRepository := "https://oss.sonatype.org/service/local"
+// Uses the Central Portal endpoint (s01.oss.sonatype.org)
+sonatypeCredentialHost := "s01.oss.sonatype.org"
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 // PGP signing - reads from GPG keyring
 // usePgpKeyHex("YOUR_KEY_ID")  // Uncomment and replace with your actual GPG key ID for publishing
