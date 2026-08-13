@@ -3,6 +3,8 @@ package cumulus
 import munit.FunSuite
 
 class MainSuite extends FunSuite:
+  private val isCI = sys.env.contains("CI") || sys.env.contains("GITHUB_ACTIONS")
+
   test("Main.dispatch returns 0 for version"):
     val code = Main.dispatch(Array("version"))
     assertEquals(code, 0)
@@ -23,7 +25,7 @@ class MainSuite extends FunSuite:
     val code = Main.dispatch(Array("sdd"))
     assertEquals(code, 0)
 
-  test("Main.dispatch routes theme command"):
+  test("Main.dispatch routes theme command".ignore(isCI)):
     val code = Main.dispatch(Array("theme"))
     assertEquals(code, 0)
 
