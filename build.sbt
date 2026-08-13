@@ -20,16 +20,11 @@ developers := List(
 )
 pomIncludeRepository := { _ => false }
 
-// Manual publishing configuration (alongside GitHub Actions CI)
-// Uses the Central Portal endpoint (s01.oss.sonatype.org)
-sonatypeCredentialHost := "s01.oss.sonatype.org"
-sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+// Sonatype Central Portal (legacy OSSRH was sunset June 2025)
+ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 
 // PGP signing - reads from GPG keyring
 usePgpKeyHex("C7A30CAF507B01B9F4BED6C3D79966B7698B8A7D")
-
-// Publishing repository
-publishTo := sonatypePublishToBundle.value
 
 libraryDependencies ++= Seq(
   "com.lihaoyi" %% "os-lib" % "0.11.9-M8",
