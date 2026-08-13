@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  build-and-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -38,6 +38,45 @@ jobs:
       - name: Run sbt Compile & Tests
         run: sbt compile test
 
+      - name: Compile GraalVM Native Image
+        run: sbt nativeImage
+
+      - name: Upload native image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cumulus-native-image
+          path: target/native-image/cumulus
+          retention-days: 1
+
+  publish-maven-central:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup GraalVM JDK 21
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Cache sbt dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
       - name: Publish to Maven Central
         run: sbt ci-release
         env:
@@ -46,13 +85,22 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
-      - name: Compile GraalVM Native Image
-        run: sbt nativeImage
+  create-release:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download native image
+        uses: actions/download-artifact@v4
+        with:
+          name: cumulus-native-image
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/native-image/cumulus
+          files: cumulus
           draft: false
           prerelease: false
         env:
