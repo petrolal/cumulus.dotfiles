@@ -42,33 +42,68 @@ This repo is the source of truth for configuration files — they are **symlinke
 
 ## Installation & Usage
 
-### 1. Installed via Maven Central (Coursier)
+### Quick Start (3 Commands)
 
-If downloading the globally installed dependency from Maven Central:
+**On a fresh machine:**
 
 ```bash
-# Download and install cumulus binary globally via Coursier
+# Stage 1: Bootstrap (install Java & Coursier)
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
+
+# Stage 2: Install cumulus binary from Maven Central
 cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
 
-# Execute installation (runs bootstrap.sh and cumulus healthcheck)
+# Stage 3: Run interactive installer (full setup)
 cumulus install
 ```
 
-### 2. Quick One-Liner (Fresh Machine)
-
-On a brand-new machine:
+### Alternative: From Cloned Repository
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
+git clone https://github.com/petrolal/cumulus.dotfiles.git ~/cumulus.dotfiles
+cd ~/cumulus.dotfiles
+
+# Stage 1: Bootstrap
+./bootstrap.sh
+
+# Stage 2: Install cumulus from Maven Central
+cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+
+# Stage 3: Interactive setup
+cumulus install
 ```
+
+---
+
+## How It Works (3-Stage Installation)
+
+The installation is orchestrated by a Scala-based CLI tool:
+
+```
+Stage 1: Bootstrap (Java + Coursier setup)
+    ↓ bash bootstrap.sh
+Stage 2: Coursier (Download cumulus binary from Maven Central)
+    ↓ cs install io.github.petrolal::cumulus
+Stage 3: Interactive Installer (Full system setup via Scala CLI)
+    ↓ cumulus install
+    ↓
+COMPLETE! All dotfiles symlinked, system configured
+```
+
+See [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) for detailed walkthrough.
 
 ---
 
 ## Building from Source
 
+To build and test locally:
+
 ```bash
 git clone https://github.com/petrolal/cumulus.dotfiles.git ~/cumulus.dotfiles
 cd ~/cumulus.dotfiles
+
+# Requirements: Java 21+ and sbt
+# Install via: bash bootstrap.sh && cs install io.github.petrolal::cumulus
 
 # Compile & run unit tests
 sbt test
@@ -76,8 +111,11 @@ sbt test
 # Compile GraalVM Native Image binary
 sbt nativeImage
 
-# Run installation and healthcheck
+# Run installation from source
 ./target/native-image/cumulus install
+
+# Or test interactive installer
+./target/native-image/cumulus install --help
 ```
 
 ---
