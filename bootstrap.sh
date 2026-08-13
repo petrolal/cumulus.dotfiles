@@ -81,9 +81,17 @@ enable_notification_daemon() {
 install_sdkman() {
   echo -e "  \033[1;36m[cumulus]\033[0m Checking SDKMan (Scala Development Kit Manager)..."
 
+  local SDKMAN_UPGRADE="${SDKMAN_UPGRADE:-false}"
+
   if [ -d "$HOME/.sdkman" ]; then
-    echo -e "  \033[32m[OK]\033[0m SDKMan already installed"
+    echo -e "  \033[32m[OK]\033[0m SDKMan already installed at $HOME/.sdkman"
     source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+    # Optionally upgrade SDKMan if flag is set
+    if [ "$SDKMAN_UPGRADE" = "true" ]; then
+      echo -e "  \033[36m[INFO]\033[0m Upgrading SDKMan..."
+      sdk selfupdate force 2>/dev/null || echo -e "  \033[33m[NOTE]\033[0m SDKMan selfupdate skipped"
+    fi
   else
     echo -e "  \033[36m[INFO]\033[0m Installing SDKMan..."
     curl -s "https://get.sdkman.io" | bash
