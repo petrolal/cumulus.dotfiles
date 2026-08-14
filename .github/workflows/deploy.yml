@@ -88,6 +88,9 @@ jobs:
   create-release:
     needs: build-and-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -104,4 +107,4 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
