@@ -11,3 +11,4 @@ background-color=#071521
 border-color=#FF9900
 text-color=#E0E6ED
 font=Monospace 10
+default-timeout=5000

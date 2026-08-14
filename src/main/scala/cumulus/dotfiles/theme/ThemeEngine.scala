@@ -387,6 +387,7 @@ object ThemeEngine:
          |border-color=${palette.accent}
          |text-color=${palette.text}
          |font=Monospace 10
+         |default-timeout=5000
          |""".stripMargin
     os.write.over(makoFile, makoContent)
     println(s"  [32m[OK][0m Rendered Mako config -> $makoFile")
