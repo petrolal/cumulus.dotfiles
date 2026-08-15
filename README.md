@@ -156,6 +156,7 @@ All desktop automation, installers, maintenance, and system utilities are built 
 | `cumulus restore` | Restore a configuration snapshot |
 | `cumulus update` | Pull latest git changes and re-run installer |
 | `cumulus sdd` | Spec-driven development framework CLI |
+| `cumulus install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
 | `cumulus install-all` | Install system dependencies, apps, fonts, and developer tools |
 
 ---
@@ -168,6 +169,11 @@ All desktop automation, installers, maintenance, and system utilities are built 
 |---|---|
 | `Mod+Return` | Open terminal (kitty) |
 | `Mod+D` | App launcher (wofi drun) |
+| `Mod+C` | Calculator TUI (`kalker`) |
+| `Mod+Shift+F` | File manager TUI (`yazi`) |
+| `Mod+Shift+M` | Spotify player TUI (`spotify_player`) |
+| `Mod+Shift+U` | Bluetooth manager TUI (`bluetui`) |
+| `Mod+Shift+A` | Email client TUI (`aerc`) |
 | `Mod+Shift+T` | Theme picker GUI (`cumulus-theme-picker`) |
 | `Mod+Shift+?` | Which-key cheatsheet (`cumulus-whichkey`) |
 | `Mod+Shift+Q` | Kill focused window |

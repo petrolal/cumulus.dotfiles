@@ -127,6 +127,83 @@ install_coursier() {
   "$BIN_DIR/cs" update 2>/dev/null || true
 }
 
+install_tools() {
+  local pkg_mgr="$1"
+  echo -e "  \033[1;36m[cumulus]\033[0m Installing terminal & TUI tools (spotify_player, bluetui, kalker)..."
+
+  # Ensure cargo/rust and required build dependencies are available
+  if ! command -v cargo &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Installing Rust & Cargo build toolchain..."
+    case "$pkg_mgr" in
+      pacman)
+        sudo pacman -S --needed --noconfirm rust cargo alsa-lib libpulse dbus openssl pkgconf
+        ;;
+      apt-get)
+        sudo apt-get install -y cargo rustc pkg-config libasound2-dev libpulse-dev libdbus-1-dev libssl-dev
+        ;;
+      dnf)
+        sudo dnf install -y cargo rust alsa-lib-devel pulseaudio-libs-devel dbus-devel openssl-devel pkgconf-pkg-config
+        ;;
+      *)
+        if command -v curl &> /dev/null; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          export PATH="$HOME/.cargo/bin:$PATH"
+        fi
+        ;;
+    esac
+  fi
+
+  if [ -d "$HOME/.cargo/bin" ]; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+  fi
+
+  # 1. spotify_player TUI (cargo)
+  if command -v spotify_player &> /dev/null; then
+    echo -e "  \033[32m[OK]\033[0m spotify_player already installed"
+  elif command -v cargo &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Installing spotify_player via cargo..."
+    cargo install spotify_player --locked --features daemon,pulseaudio-backend,rodio-backend 2>/dev/null || true
+  fi
+
+  # 2. bluetui Bluetooth TUI (cargo)
+  if command -v bluetui &> /dev/null; then
+    echo -e "  \033[32m[OK]\033[0m bluetui already installed"
+  elif command -v cargo &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Installing bluetui via cargo..."
+    cargo install bluetui --locked 2>/dev/null || true
+  fi
+
+  # 3. kalker Calculator TUI (cargo / pacman)
+  if command -v kalker &> /dev/null; then
+    echo -e "  \033[32m[OK]\033[0m kalker calculator already installed"
+  elif [ "$pkg_mgr" = "pacman" ] && pacman -Si kalker &> /dev/null; then
+    sudo pacman -S --needed --noconfirm kalker 2>/dev/null || true
+  elif command -v cargo &> /dev/null; then
+    echo -e "  \033[36m[INFO]\033[0m Installing kalker calculator via cargo..."
+    cargo install kalker --locked 2>/dev/null || true
+  fi
+
+  # 4. aerc Email Client TUI (package manager)
+  if command -v aerc &> /dev/null; then
+    echo -e "  \033[32m[OK]\033[0m aerc email client already installed"
+  else
+    echo -e "  \033[36m[INFO]\033[0m Installing aerc email client..."
+    case "$pkg_mgr" in
+      pacman)
+        sudo pacman -S --needed --noconfirm aerc 2>/dev/null || true
+        ;;
+      apt-get)
+        sudo apt-get install -y aerc 2>/dev/null || true
+        ;;
+      dnf)
+        sudo dnf install -y aerc 2>/dev/null || true
+        ;;
+      *)
+        ;;
+    esac
+  fi
+}
+
 enable_path() {
   if ! echo "$PATH" | grep -q "$BIN_DIR"; then
     echo -e "  \033[36m[INFO]\033[0m Adding $BIN_DIR to PATH..."
@@ -136,6 +213,11 @@ enable_path() {
     if [ -d "$HOME/.sdkman/bin" ]; then
       export PATH="$HOME/.sdkman/bin:$PATH"
     fi
+  fi
+
+  # Cargo binaries in PATH
+  if [ -d "$HOME/.cargo/bin" ] && ! echo "$PATH" | grep -q "$HOME/.cargo/bin"; then
+    export PATH="$HOME/.cargo/bin:$PATH"
   fi
 }
 
@@ -147,6 +229,10 @@ echo ""
 
 # Install system dependencies
 install_system_deps "$PKG_MGR"
+echo ""
+
+# Install TUI tools (spotify_player, bluetui, kalker)
+install_tools "$PKG_MGR"
 echo ""
 
 # Install Java

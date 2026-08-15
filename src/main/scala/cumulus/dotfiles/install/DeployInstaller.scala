@@ -10,7 +10,7 @@ object DeployInstaller:
     "screenshot", "autotiling", "healthcheck", "backup", "restore", "update", "notify-config",
     "sdd", "install", "deploy", "install-deps", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-nvim",
-    "install-nvim-deps", "install-all", "theme-picker", "whichkey", "wichkey"
+    "install-nvim-deps", "install-tools", "install-all", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =

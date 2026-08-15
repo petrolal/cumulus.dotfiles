@@ -112,12 +112,17 @@ object WofiPickers:
   private val defaultKeybindings = Seq(
     "Mod4+Return              → exec kitty",
     "Mod4+d                   → exec wofi --show drun",
+    "Mod4+c                   → exec kitty -e kalker",
     "Mod4+Shift+q             → kill",
     "Mod4+Shift+e             → exec swaynag -t warning -m 'Exit Sway?'",
     "Mod4+f                   → fullscreen toggle",
     "Mod4+v                   → splitv",
     "Mod4+b                   → splith",
-    "Mod4+Shift+l             → exec cumulus-lock",
-    "Mod4+Shift+p             → exec cumulus-theme-picker",
-    "Mod4+Shift+s             → exec cumulus-screenshot"
+    "Mod4+Shift+f             → exec kitty -e yazi",
+    "Mod4+Shift+m             → exec kitty -e spotify_player",
+    "Mod4+Shift+u             → exec kitty -e bluetui",
+    "Mod4+Shift+a             → exec kitty -e aerc",
+    "Mod4+Shift+t             → exec cumulus-theme-picker",
+    "Mod4+Shift+?             → exec cumulus-whichkey",
+    "Mod4+Escape              → exec cumulus-lock"
   )

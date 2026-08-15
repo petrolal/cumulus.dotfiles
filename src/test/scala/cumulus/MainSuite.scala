@@ -30,7 +30,7 @@ class MainSuite extends FunSuite:
     assertEquals(true, true)
 
   test("Main.dispatch routes theme command"):
-    val code = Main.dispatch(Array("theme"))
+    val code = Main.dispatch(Array("theme", "list"))
     assertEquals(code, 0)
 
   test("Main.dispatch routes validate command"):

@@ -24,6 +24,7 @@ object ToolInstallers:
       case "install-zsh" => installZsh(ctx)
       case "install-sdkman" => installSdkman(ctx)
       case "install-nvim" | "install-nvim-deps" => installNvim(ctx)
+      case "install-tools" => installTools(ctx)
       case "install-all" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
@@ -100,6 +101,70 @@ object ToolInstallers:
       case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Neovim environment provisioned."))
 
+  private def installTools(ctx: Context): Either[CumulusError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, kalker)...")
+
+    // Ensure cargo is available if not present
+    if !isAvailable("cargo") then
+      pm match
+        case PackageManager.Pacman =>
+          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "rust", "cargo", "alsa-lib", "libpulse", "dbus", "openssl", "pkgconf"))
+        case PackageManager.Apt =>
+          runPkgInstall("sudo", Seq("apt-get", "install", "-y", "cargo", "rustc", "pkg-config", "libasound2-dev", "libpulse-dev", "libdbus-1-dev", "libssl-dev"))
+        case PackageManager.Dnf =>
+          runPkgInstall("sudo", Seq("dnf", "install", "-y", "cargo", "rust", "alsa-lib-devel", "pulseaudio-libs-devel", "dbus-devel", "openssl-devel", "pkgconf-pkg-config"))
+        case _ => ()
+
+    // 1. spotify_player TUI (cargo)
+    if !isAvailable("spotify_player") then
+      println("  \u001b[36m[INFO]\u001b[0m Installing spotify_player via cargo...")
+      try
+        val res = os.proc("cargo", "install", "spotify_player", "--locked", "--features", "daemon,pulseaudio-backend,rodio-backend").call(check = false)
+        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m spotify_player installed successfully.")
+        else println(s"  \u001b[33m[NOTE]\u001b[0m spotify_player installation exited with code ${res.exitCode}")
+      catch
+        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m spotify_player installation skipped: ${e.getMessage}")
+    else
+      println("  \u001b[32m[OK]\u001b[0m spotify_player already installed.")
+
+    // 2. bluetui Bluetooth TUI (cargo)
+    if !isAvailable("bluetui") then
+      println("  \u001b[36m[INFO]\u001b[0m Installing bluetui via cargo...")
+      try
+        val res = os.proc("cargo", "install", "bluetui", "--locked").call(check = false)
+        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m bluetui installed successfully.")
+        else println(s"  \u001b[33m[NOTE]\u001b[0m bluetui installation exited with code ${res.exitCode}")
+      catch
+        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m bluetui installation skipped: ${e.getMessage}")
+    else
+      println("  \u001b[32m[OK]\u001b[0m bluetui already installed.")
+
+    // 3. kalker Calculator TUI (cargo)
+    if !isAvailable("kalker") then
+      println("  \u001b[36m[INFO]\u001b[0m Installing kalker calculator via cargo...")
+      try
+        val res = os.proc("cargo", "install", "kalker", "--locked").call(check = false)
+        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m kalker installed successfully.")
+        else println(s"  \u001b[33m[NOTE]\u001b[0m kalker installation exited with code ${res.exitCode}")
+      catch
+        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m kalker installation skipped: ${e.getMessage}")
+    else
+      println("  \u001b[32m[OK]\u001b[0m kalker calculator already installed.")
+
+    // 4. aerc Email Client TUI (package manager)
+    if !isAvailable("aerc") then
+      println("  \u001b[36m[INFO]\u001b[0m Installing aerc email client...")
+      pm match
+        case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
+        case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "aerc"))
+        case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "aerc"))
+        case _ => ()
+    else
+      println("  \u001b[32m[OK]\u001b[0m aerc email client already installed.")
+
+    Right(())
+
   private def installAll(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus install-all]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
@@ -110,6 +175,7 @@ object ToolInstallers:
       _ <- installDevops(ctx)
       _ <- installZsh(ctx)
       _ <- installNvim(ctx)
+      _ <- installTools(ctx)
       _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
     yield ()
 

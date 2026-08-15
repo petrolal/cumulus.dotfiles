@@ -178,12 +178,16 @@ assign [class="TelegramDesktop"] $ws8
 ### Key bindings — stock Sway defaults (overrides previous ML4W custom set)
 ### ────────────────────────────────────────────────────────────────
 
-# Basics
+# Basics & TUI Tools
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec $launcher
+bindsym $mod+c exec $term -e kalker
 bindsym $mod+Shift+b exec google-chrome-stable
 bindsym $mod+Shift+f exec $term -e yazi
+bindsym $mod+Shift+m exec $term -e spotify_player
+bindsym $mod+Shift+u exec $term -e bluetui
+bindsym $mod+Shift+a exec $term -e aerc
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'

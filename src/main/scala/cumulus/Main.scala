@@ -97,6 +97,7 @@ object Main:
       |  install-sdkman   install SDKMAN! and JVM tooling
       |  install-nvim     install the Neovim config dependencies (deploy)
       |  install-nvim-deps install Neovim + its plugin ecosystem dependencies
+      |  install-tools    install TUI tools (spotify_player, bluetui, kalker, aerc)
       |  install-all      install all system packages, desktop apps, fonts, and tooling
       |  theme-picker     wofi GUI front-end for the theme command
       |  whichkey         wofi cheatsheet of the live sway keybindings
