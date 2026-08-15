@@ -25,6 +25,13 @@ jobs:
       - name: Setup sbt
         uses: sbt/setup-sbt@v1
 
+      - name: Extract version from git tag
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          echo "CI_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Building version: $VERSION"
+
       - name: Cache sbt dependencies
         uses: actions/cache@v3
         with:
@@ -66,6 +73,13 @@ jobs:
 
       - name: Setup sbt
         uses: sbt/setup-sbt@v1
+
+      - name: Extract version from git tag
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          echo "CI_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Publishing version: $VERSION"
 
       - name: Cache sbt dependencies
         uses: actions/cache@v3

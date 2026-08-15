@@ -3,7 +3,17 @@ enablePlugins(NativeImagePlugin)
 scalaVersion := "3.5.2"
 name := "cumulus"
 organization := "io.github.petrolal"
-version := "0.1.0"
+version := {
+  val tagVersion = sys.env.get("CI_VERSION")
+  tagVersion.getOrElse {
+    val gitTag = try {
+      scala.sys.process.Process("git" :: "describe" :: "--tags" :: "--abbrev=0" :: Nil).!!.trim
+    } catch {
+      case _: Exception => ""
+    }
+    if (gitTag.isEmpty) "0.1.0-SNAPSHOT" else gitTag.stripPrefix("v")
+  }
+}
 
 // Maven Central / Sonatype publishing settings
 publishMavenStyle := true
