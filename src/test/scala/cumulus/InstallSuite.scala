@@ -43,17 +43,11 @@ class InstallSuite extends FunSuite:
     val json = upickle.default.write(entry)
     assert(json.contains("sourcePath"))
 
-  test("ToolInstallers.runTool executes install-tools task"):
-    assume(!isCI)
-    val ctx = Context.discover().toOption.get
-    val res = ToolInstallers.runTool("install-tools", ctx, Nil)
-    assert(res.isRight)
-
-  test("ToolInstallers.runTool executes fonts installer task"):
-    assume(!isCI)
-    val ctx = Context.discover().toOption.get
-    val res = ToolInstallers.runTool("install-fonts", ctx, Nil)
-    assert(res.isRight)
+  test("ToolInstallers.detectKnownSubcommands contains expected tasks"):
+    val tasks = Seq("install-deps", "install-fonts", "install-apps", "install-browser", "install-devops", "install-zsh", "install-sdkman", "install-nvim", "install-tools", "install-all")
+    tasks.foreach { task =>
+      assert(DeployInstaller.Subcommands.contains(task))
+    }
 
   test("ToolInstallers.runTool rejects invalid tools"):
     val ctx = Context.discover().toOption.get

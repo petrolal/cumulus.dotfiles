@@ -194,10 +194,8 @@ object ToolInstallers:
 
   private def runPkgInstall(cmd: String, args: Seq[String]): Either[CumulusError, Unit] =
     try
-      // If invoking sudo, avoid blocking interactively when password is required
-      val effectiveArgs = if cmd == "sudo" then "-n" +: args else args
-      val fullCmd: Seq[os.Shellable] = (cmd +: effectiveArgs).map(s => (s: os.Shellable))
-      val res = os.proc(fullCmd*).call(check = false)
+      val fullCmd: Seq[os.Shellable] = (cmd +: args).map(s => (s: os.Shellable))
+      val res = os.proc(fullCmd*).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
       if res.exitCode == 0 then
         println(s"  \u001b[32m[OK]\u001b[0m Package installation complete.")
         Right(())
