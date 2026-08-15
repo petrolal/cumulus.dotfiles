@@ -23,6 +23,12 @@ pomIncludeRepository := { _ => false }
 // Sonatype Central Portal configuration
 ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 
+// 1. Fix versionScheme warning
+ThisBuild / versionScheme := Some("early-semver")
+
+// 2. Fix missing publishTo repository
+publishTo := sonatypePublishToBundle.value
+
 // PGP signing - reads from GPG keyring
 usePgpKeyHex("C7A30CAF507B01B9F4BED6C3D79966B7698B8A7D")
 
