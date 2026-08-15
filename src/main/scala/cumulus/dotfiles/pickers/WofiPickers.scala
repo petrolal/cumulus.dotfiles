@@ -123,6 +123,6 @@ object WofiPickers:
     "Mod4+Shift+u             → exec kitty -e bluetui",
     "Mod4+Shift+a             → exec kitty -e aerc",
     "Mod4+Shift+t             → exec cumulus-theme-picker",
-    "Mod4+Shift+?             → exec cumulus-whichkey",
+    "Mod4+question / / / ?    → exec cumulus-whichkey",
     "Mod4+Escape              → exec cumulus-lock"
   )

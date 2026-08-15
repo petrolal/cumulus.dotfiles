@@ -103,10 +103,30 @@ object ToolInstallers:
 
   private def installTools(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, kalker)...")
+    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, kalker, aerc)...")
 
-    // Ensure cargo is available if not present
-    if !isAvailable("cargo") then
+    val cargoHomeBin = ctx.home / ".cargo" / "bin"
+    def cargoAvailable(): Boolean =
+      isAvailable("cargo") || os.exists(cargoHomeBin / "cargo")
+
+    def runCargo(tool: String, extraArgs: Seq[String] = Nil): Either[CumulusError, Unit] =
+      val cargoExe = if isAvailable("cargo") then "cargo" else (cargoHomeBin / "cargo").toString
+      val cmd: Seq[os.Shellable] = Seq(cargoExe: os.Shellable, "install": os.Shellable, tool: os.Shellable, "--locked": os.Shellable) ++ extraArgs.map(a => (a: os.Shellable))
+      try
+        val res = os.proc(cmd*).call(check = false)
+        if res.exitCode == 0 then
+          println(s"  \u001b[32m[OK]\u001b[0m $tool installed successfully.")
+          Right(())
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m $tool cargo install exited with code ${res.exitCode}")
+          Right(())
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m $tool cargo install skipped: ${e.getMessage}")
+          Right(())
+
+    // Ensure cargo and C library build headers are present if not available
+    if !cargoAvailable() then
       pm match
         case PackageManager.Pacman =>
           runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "rust", "cargo", "alsa-lib", "libpulse", "dbus", "openssl", "pkgconf"))
@@ -117,51 +137,44 @@ object ToolInstallers:
         case _ => ()
 
     // 1. spotify_player TUI (cargo)
-    if !isAvailable("spotify_player") then
-      println("  \u001b[36m[INFO]\u001b[0m Installing spotify_player via cargo...")
-      try
-        val res = os.proc("cargo", "install", "spotify_player", "--locked", "--features", "daemon,pulseaudio-backend,rodio-backend").call(check = false)
-        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m spotify_player installed successfully.")
-        else println(s"  \u001b[33m[NOTE]\u001b[0m spotify_player installation exited with code ${res.exitCode}")
-      catch
-        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m spotify_player installation skipped: ${e.getMessage}")
-    else
+    if isAvailable("spotify_player") || os.exists(cargoHomeBin / "spotify_player") then
       println("  \u001b[32m[OK]\u001b[0m spotify_player already installed.")
+    else if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing spotify_player via cargo...")
+      runCargo("spotify_player", Seq("--features", "daemon,pulseaudio-backend,rodio-backend"))
+    else
+      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping spotify_player installation.")
 
     // 2. bluetui Bluetooth TUI (cargo)
-    if !isAvailable("bluetui") then
-      println("  \u001b[36m[INFO]\u001b[0m Installing bluetui via cargo...")
-      try
-        val res = os.proc("cargo", "install", "bluetui", "--locked").call(check = false)
-        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m bluetui installed successfully.")
-        else println(s"  \u001b[33m[NOTE]\u001b[0m bluetui installation exited with code ${res.exitCode}")
-      catch
-        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m bluetui installation skipped: ${e.getMessage}")
-    else
+    if isAvailable("bluetui") || os.exists(cargoHomeBin / "bluetui") then
       println("  \u001b[32m[OK]\u001b[0m bluetui already installed.")
-
-    // 3. kalker Calculator TUI (cargo)
-    if !isAvailable("kalker") then
-      println("  \u001b[36m[INFO]\u001b[0m Installing kalker calculator via cargo...")
-      try
-        val res = os.proc("cargo", "install", "kalker", "--locked").call(check = false)
-        if res.exitCode == 0 then println("  \u001b[32m[OK]\u001b[0m kalker installed successfully.")
-        else println(s"  \u001b[33m[NOTE]\u001b[0m kalker installation exited with code ${res.exitCode}")
-      catch
-        case e: Exception => println(s"  \u001b[33m[NOTE]\u001b[0m kalker installation skipped: ${e.getMessage}")
+    else if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing bluetui via cargo...")
+      runCargo("bluetui")
     else
+      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping bluetui installation.")
+
+    // 3. kalker Calculator TUI (cargo / pacman)
+    if isAvailable("kalker") || os.exists(cargoHomeBin / "kalker") then
       println("  \u001b[32m[OK]\u001b[0m kalker calculator already installed.")
+    else if pm == PackageManager.Pacman then
+      runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "kalker"))
+    else if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing kalker calculator via cargo...")
+      runCargo("kalker")
+    else
+      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping kalker installation.")
 
     // 4. aerc Email Client TUI (package manager)
-    if !isAvailable("aerc") then
+    if isAvailable("aerc") then
+      println("  \u001b[32m[OK]\u001b[0m aerc email client already installed.")
+    else
       println("  \u001b[36m[INFO]\u001b[0m Installing aerc email client...")
       pm match
         case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
         case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "aerc"))
         case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "aerc"))
-        case _ => ()
-    else
-      println("  \u001b[32m[OK]\u001b[0m aerc email client already installed.")
+        case _ => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual installation of aerc required for this system."))
 
     Right(())
 
@@ -181,15 +194,20 @@ object ToolInstallers:
 
   private def runPkgInstall(cmd: String, args: Seq[String]): Either[CumulusError, Unit] =
     try
-      val fullCmd: Seq[os.Shellable] = (cmd +: args).map(s => (s: os.Shellable))
+      // If invoking sudo, avoid blocking interactively when password is required
+      val effectiveArgs = if cmd == "sudo" then "-n" +: args else args
+      val fullCmd: Seq[os.Shellable] = (cmd +: effectiveArgs).map(s => (s: os.Shellable))
       val res = os.proc(fullCmd*).call(check = false)
       if res.exitCode == 0 then
         println(s"  \u001b[32m[OK]\u001b[0m Package installation complete.")
         Right(())
       else
-        Right(println(s"  \u001b[33m[NOTE]\u001b[0m Package manager returned code ${res.exitCode}"))
+        println(s"  \u001b[33m[NOTE]\u001b[0m Package manager returned code ${res.exitCode}")
+        Right(())
     catch
-      case e: Exception => Right(println(s"  \u001b[33m[NOTE]\u001b[0m Package installation skipped: ${e.getMessage}"))
+      case e: Exception =>
+        println(s"  \u001b[33m[NOTE]\u001b[0m Package installation skipped: ${e.getMessage}")
+        Right(())
 
   private def isAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false

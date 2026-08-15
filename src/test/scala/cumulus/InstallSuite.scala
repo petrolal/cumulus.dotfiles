@@ -43,6 +43,12 @@ class InstallSuite extends FunSuite:
     val json = upickle.default.write(entry)
     assert(json.contains("sourcePath"))
 
+  test("ToolInstallers.runTool executes install-tools task"):
+    assume(!isCI)
+    val ctx = Context.discover().toOption.get
+    val res = ToolInstallers.runTool("install-tools", ctx, Nil)
+    assert(res.isRight)
+
   test("ToolInstallers.runTool executes fonts installer task"):
     assume(!isCI)
     val ctx = Context.discover().toOption.get

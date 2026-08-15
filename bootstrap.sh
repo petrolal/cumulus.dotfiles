@@ -151,6 +151,21 @@ install_tools() {
         fi
         ;;
     esac
+  else
+    # Install build headers if cargo is already installed
+    case "$pkg_mgr" in
+      pacman)
+        sudo pacman -S --needed --noconfirm alsa-lib libpulse dbus openssl pkgconf 2>/dev/null || true
+        ;;
+      apt-get)
+        sudo apt-get install -y pkg-config libasound2-dev libpulse-dev libdbus-1-dev libssl-dev 2>/dev/null || true
+        ;;
+      dnf)
+        sudo dnf install -y alsa-lib-devel pulseaudio-libs-devel dbus-devel openssl-devel pkgconf-pkg-config 2>/dev/null || true
+        ;;
+      *)
+        ;;
+    esac
   fi
 
   if [ -d "$HOME/.cargo/bin" ]; then
