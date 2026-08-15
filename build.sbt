@@ -20,8 +20,8 @@ developers := List(
 )
 pomIncludeRepository := { _ => false }
 
-// Note: sbt-ci-release handles Sonatype Central Portal config automatically
-// ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
+// Sonatype Central Portal configuration
+ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 
 // PGP signing - reads from GPG keyring
 usePgpKeyHex("C7A30CAF507B01B9F4BED6C3D79966B7698B8A7D")
