@@ -22,10 +22,3 @@ if [ -d "$ZSH_CONFIG_DIR" ]; then
   done
   unset _zsh_config_file
 fi
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Cumulus Neovim alias
-alias cn='[ -d "${XDG_CONFIG_HOME:-$HOME/.config}/cumulus" ] && NVIM_APPNAME=cumulus nvim || nvim'
