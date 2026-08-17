@@ -95,7 +95,7 @@ object Main:
       |  install-fonts    install the JetBrainsMono Nerd Font
       |  install-apps     install core desktop apps (sway/waybar/kitty/etc.)
       |  install-browser  install a web browser (chromium/firefox)
-      |  install-devops   install devops tooling (docker/terraform/kubectl/etc.)
+      |  install-devops   install devops & cloud tooling (docker/terraform/ansible/aws/gcp/oci/kubectl/etc.)
       |  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
       |  install-sdkman   install SDKMAN! and JVM tooling
       |  install-nvim     install Neovim & cumulus.neovim via Coursier flow

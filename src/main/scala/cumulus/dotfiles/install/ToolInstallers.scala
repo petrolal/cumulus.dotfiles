@@ -37,8 +37,12 @@ object ToolInstallers:
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sbt", "jdk-openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "gcc", "gcc-c++", "java-latest-openjdk-devel", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which"))
       case PackageManager.Apt =>
         runPkgInstall("sudo", Seq("apt-get", "install", "-y", "build-essential", "default-jdk", "git", "curl", "fontconfig", "zsh", "tar", "unzip"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package dependency installation recommended for current OS."))
 
@@ -73,28 +77,108 @@ object ToolInstallers:
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "chromium"))
       case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "chromium"))
       case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "firefox"))
+      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "--cask", "chromium"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Browser provisioned."))
 
   private def installDevops(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-devops]\u001b[0m Installing DevOps CLI tools (PM: $pm)...")
+    val localBin = ctx.home / ".local" / "bin"
+    os.makeDir.all(localBin)
+    println(s"\u001b[1;36m[cumulus install-devops]\u001b[0m Installing DevOps & Cloud CLI tools (PM: $pm)...")
     pm match
-      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "docker", "terraform", "kubectl", "helm"))
-      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "docker", "kubectl", "helm"))
-      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "docker.io", "helm"))
-      case _ => Right(println("  \u001b[32m[OK]\u001b[0m DevOps tools provisioned."))
+      case PackageManager.Pacman =>
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "docker", "terraform", "ansible", "aws-cli", "kubectl", "helm"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "docker", "terraform", "ansible", "awscli", "kubectl", "helm"))
+      case PackageManager.Apt =>
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "docker.io", "ansible", "awscli", "helm"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "docker", "terraform", "ansible", "awscli", "google-cloud-sdk", "oci-cli", "kubectl", "helm"))
+      case _ =>
+        Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
+
+    // Kubectl binary fallback (e.g. for Debian/Ubuntu APT where kubectl is not in main repo)
+    if !isAvailable("kubectl") && !os.exists(localBin / "kubectl") then
+      println("  \u001b[36m[INFO]\u001b[0m Downloading kubectl binary...")
+      try
+        val kubectlUrl = "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
+        os.proc("curl", "-fsSL", "-o", (localBin / "kubectl").toString, kubectlUrl).call(check = false)
+        os.proc("chmod", "+x", (localBin / "kubectl").toString).call(check = false)
+        println("  \u001b[32m[OK]\u001b[0m kubectl installed to ~/.local/bin.")
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m kubectl download skipped: ${e.getMessage}")
+
+    // Google Cloud CLI (gcloud)
+    if isAvailable("gcloud") || os.exists(localBin / "gcloud") then
+      println("  \u001b[32m[OK]\u001b[0m Google Cloud CLI (gcloud) already installed.")
+    else
+      println("  \u001b[36m[INFO]\u001b[0m Installing Google Cloud CLI (gcloud)...")
+      if pm == PackageManager.Pacman && isAvailable("yay") then
+        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "google-cloud-cli"))
+      else
+        try
+          val gcloudInstallScript = "curl -sSL https://sdk.cloud.google.com | bash --disable-prompts --install-dir=" + (ctx.home / ".local" / "share").toString
+          val res = os.proc("bash", "-c", gcloudInstallScript).call(check = false)
+          if res.exitCode == 0 then
+            println("  \u001b[32m[OK]\u001b[0m Google Cloud CLI installed.")
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI install exited with code ${res.exitCode}")
+        catch
+          case e: Exception =>
+            println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI installation skipped: ${e.getMessage}")
+
+    // Oracle Cloud Infrastructure CLI (oci)
+    if isAvailable("oci") || os.exists(localBin / "oci") then
+      println("  \u001b[32m[OK]\u001b[0m Oracle Cloud CLI (oci) already installed.")
+    else
+      println("  \u001b[36m[INFO]\u001b[0m Installing Oracle Cloud CLI (oci)...")
+      if pm == PackageManager.Pacman && isAvailable("yay") then
+        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "python-oci-cli"))
+      else
+        try
+          val ociInstallScript = s"""bash -c "$$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --install-dir "${ctx.home / ".local" / "lib" / "oracle-cli"}" --exec-dir "$localBin""""
+          val res = os.proc("bash", "-c", ociInstallScript).call(check = false)
+          if res.exitCode == 0 then
+            println("  \u001b[32m[OK]\u001b[0m Oracle Cloud CLI (oci) installed.")
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI install exited with code ${res.exitCode}")
+        catch
+          case e: Exception =>
+            println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI installation skipped: ${e.getMessage}")
+
+    Right(println("  \u001b[32m[OK]\u001b[0m DevOps and Cloud CLI tools provisioned."))
 
   private def installZsh(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
     println(s"\u001b[1;36m[cumulus install-zsh]\u001b[0m Installing Zsh shell environment (PM: $pm)...")
     pm match
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "zsh", "curl", "git"))
+      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "zsh", "curl", "git"))
       case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "zsh", "curl", "git"))
+      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "zsh", "curl", "git"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Zsh environment provisioned."))
 
   private def installSdkman(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
-    Right(println("  \u001b[32m[OK]\u001b[0m SDKMAN! provisioned."))
+    val sdkmanDir = ctx.home / ".sdkman"
+    if os.exists(sdkmanDir) then
+      println("  \u001b[32m[OK]\u001b[0m SDKMAN! already installed at ~/.sdkman.")
+      Right(())
+    else
+      try
+        println("  \u001b[36m[INFO]\u001b[0m Bootstrapping SDKMAN!...")
+        val res = os.proc("bash", "-c", "curl -s 'https://get.sdkman.io' | bash").call(check = false)
+        if res.exitCode == 0 then
+          println("  \u001b[32m[OK]\u001b[0m SDKMAN! provisioned successfully.")
+          Right(())
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! install exited with code ${res.exitCode}")
+          Right(())
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! install skipped: ${e.getMessage}")
+          Right(())
 
   private def getBrewBin(ctx: Context): Option[os.Path] =
     val standardPaths = Seq(
@@ -197,45 +281,13 @@ object ToolInstallers:
 
   private def installNvim(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-nvim]\u001b[0m Provisioning Neovim & cumulus.neovim (PM: $pm)...")
-    
-    // 1. Install base Neovim editor
-    if !isAvailable("nvim") then
-      pm match
-        case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "neovim"))
-        case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
-        case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "neovim"))
-        case PackageManager.Brew => runPkgInstall("brew", Seq("install", "neovim"))
-        case _ =>
-          getBrewBin(ctx) match
-            case Some(brewBin) => runPkgInstall(brewBin.toString, Seq("install", "neovim"))
-            case None => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual neovim installation recommended."))
-    else
-      println("  \u001b[32m[OK]\u001b[0m Neovim editor already installed.")
-
-    // 2. Install cumulus.neovim via Coursier flow
-    installCoursier(ctx)
-    val csExe = getCoursierBin(ctx).map(_.toString).getOrElse("cs")
-    println("  \u001b[36m[INFO]\u001b[0m Installing/updating cumulus.neovim via Coursier flow...")
-    try
-      val res = os.proc(csExe, "install", "io.github.petrolal::cumulus.neovim", "--name", "cumulus-neovim").call(
-        stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false
-      )
-      if res.exitCode == 0 then
-        println("  \u001b[32m[OK]\u001b[0m cumulus.neovim installed successfully via Coursier.")
-      else
-        val fallbackRes = os.proc(csExe, "install", "io.github.petrolal::cumulus.neovim").call(
-          stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false
-        )
-        if fallbackRes.exitCode == 0 then
-          println("  \u001b[32m[OK]\u001b[0m cumulus.neovim installed successfully via Coursier.")
-        else
-          println(s"  \u001b[33m[NOTE]\u001b[0m Coursier install for cumulus.neovim completed with code ${fallbackRes.exitCode}")
-      Right(())
-    catch
-      case e: Exception =>
-        println(s"  \u001b[33m[NOTE]\u001b[0m cumulus.neovim coursier installation skipped: ${e.getMessage}")
-        Right(())
+    println(s"\u001b[1;36m[cumulus install-nvim]\u001b[0m Provisioning Neovim & LSP dependencies (PM: $pm)...")
+    pm match
+      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "neovim"))
+      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "neovim"))
+      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
+      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "neovim"))
+      case _ => Right(println("  \u001b[32m[OK]\u001b[0m Neovim environment provisioned."))
 
   private def installTools(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
@@ -270,6 +322,8 @@ object ToolInstallers:
           runPkgInstall("sudo", Seq("apt-get", "install", "-y", "cargo", "rustc", "pkg-config", "libasound2-dev", "libpulse-dev", "libdbus-1-dev", "libssl-dev"))
         case PackageManager.Dnf =>
           runPkgInstall("sudo", Seq("dnf", "install", "-y", "cargo", "rust", "alsa-lib-devel", "pulseaudio-libs-devel", "dbus-devel", "openssl-devel", "pkgconf-pkg-config"))
+        case PackageManager.Brew =>
+          runPkgInstall("brew", Seq("install", "pkg-config", "openssl", "rust"))
         case _ => ()
 
     // 1. spotify_player TUI (cargo)
@@ -310,6 +364,7 @@ object ToolInstallers:
         case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
         case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "aerc"))
         case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "aerc"))
+        case PackageManager.Brew => runPkgInstall("brew", Seq("install", "aerc"))
         case _ => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual installation of aerc required for this system."))
 
     Right(())
