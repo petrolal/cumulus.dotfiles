@@ -44,7 +44,11 @@ class InstallSuite extends FunSuite:
     assert(json.contains("sourcePath"))
 
   test("ToolInstallers.detectKnownSubcommands contains expected tasks"):
-    val tasks = Seq("install-deps", "install-fonts", "install-apps", "install-browser", "install-devops", "install-zsh", "install-sdkman", "install-nvim", "install-tools", "install-all")
+    val tasks = Seq(
+      "install-deps", "install-brew", "install-gh", "install-coursier",
+      "install-fonts", "install-apps", "install-browser", "install-devops",
+      "install-zsh", "install-sdkman", "install-nvim", "install-tools", "install-all"
+    )
     tasks.foreach { task =>
       assert(DeployInstaller.Subcommands.contains(task))
     }

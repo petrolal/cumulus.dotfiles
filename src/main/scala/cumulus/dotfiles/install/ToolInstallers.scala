@@ -17,13 +17,16 @@ object ToolInstallers:
   def runTool(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
     name match
       case "install-deps" => installSystemDeps(ctx)
+      case "install-brew" | "install-homebrew" => installHomebrew(ctx)
+      case "install-gh" | "install-github-cli" => installGh(ctx)
+      case "install-coursier" | "install-cs" => installCoursier(ctx)
       case "install-fonts" => installFonts(ctx)
       case "install-apps" => installApps(ctx)
       case "install-browser" => installBrowser(ctx)
       case "install-devops" => installDevops(ctx)
       case "install-zsh" => installZsh(ctx)
       case "install-sdkman" => installSdkman(ctx)
-      case "install-nvim" | "install-nvim-deps" => installNvim(ctx)
+      case "install-nvim" | "install-nvim-deps" | "install-neovim" => installNvim(ctx)
       case "install-tools" => installTools(ctx)
       case "install-all" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
@@ -93,13 +96,146 @@ object ToolInstallers:
     println("\u001b[1;36m[cumulus install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
     Right(println("  \u001b[32m[OK]\u001b[0m SDKMAN! provisioned."))
 
+  private def getBrewBin(ctx: Context): Option[os.Path] =
+    val standardPaths = Seq(
+      ctx.home / ".linuxbrew" / "bin" / "brew",
+      os.root / "home" / "linuxbrew" / ".linuxbrew" / "bin" / "brew",
+      os.root / "opt" / "homebrew" / "bin" / "brew",
+      os.root / "usr" / "local" / "bin" / "brew"
+    )
+    if isAvailable("brew") then
+      try Some(os.Path(os.proc("which", "brew").call().out.trim()))
+      catch case _: Exception => standardPaths.find(os.exists)
+    else standardPaths.find(os.exists)
+
+  private def installHomebrew(ctx: Context): Either[CumulusError, Unit] =
+    println("\u001b[1;36m[cumulus install-brew]\u001b[0m Checking/Installing Homebrew...")
+    getBrewBin(ctx) match
+      case Some(brewPath) =>
+        println(s"  \u001b[32m[OK]\u001b[0m Homebrew already installed at $brewPath")
+        Right(())
+      case None =>
+        println("  \u001b[36m[INFO]\u001b[0m Installing Homebrew via official non-interactive installer...")
+        try
+          val res = os.proc(
+            "bash", "-c",
+            "NONINTERACTIVE=1 /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+          ).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+          if res.exitCode == 0 then
+            println("  \u001b[32m[OK]\u001b[0m Homebrew installed successfully.")
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m Homebrew installer returned code ${res.exitCode}")
+          Right(())
+        catch
+          case e: Exception =>
+            println(s"  \u001b[33m[NOTE]\u001b[0m Homebrew installation skipped: ${e.getMessage}")
+            Right(())
+
+  private def installGh(ctx: Context): Either[CumulusError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[cumulus install-gh]\u001b[0m Checking/Installing GitHub CLI (PM: $pm)...")
+    if isAvailable("gh") then
+      println("  \u001b[32m[OK]\u001b[0m GitHub CLI (gh) already installed.")
+      Right(())
+    else
+      pm match
+        case PackageManager.Pacman =>
+          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "github-cli"))
+        case PackageManager.Dnf =>
+          runPkgInstall("sudo", Seq("dnf", "install", "-y", "gh"))
+        case PackageManager.Apt =>
+          runPkgInstall("sudo", Seq("apt-get", "install", "-y", "gh"))
+        case PackageManager.Brew =>
+          runPkgInstall("brew", Seq("install", "gh"))
+        case PackageManager.Unknown =>
+          getBrewBin(ctx) match
+            case Some(brewBin) =>
+              runPkgInstall(brewBin.toString, Seq("install", "gh"))
+            case None =>
+              println("  \u001b[33m[NOTE]\u001b[0m Manual installation of GitHub CLI (gh) recommended.")
+              Right(())
+
+  private def getCoursierBin(ctx: Context): Option[os.Path] =
+    val localBinCs = ctx.home / ".local" / "bin" / "cs"
+    val csShareBin = ctx.home / ".local" / "share" / "coursier" / "bin" / "cs"
+    if isAvailable("cs") then
+      try Some(os.Path(os.proc("which", "cs").call().out.trim()))
+      catch case _: Exception => Some(localBinCs)
+    else if isAvailable("coursier") then
+      try Some(os.Path(os.proc("which", "coursier").call().out.trim()))
+      catch case _: Exception => Some(localBinCs)
+    else if os.exists(localBinCs) then Some(localBinCs)
+    else if os.exists(csShareBin) then Some(csShareBin)
+    else None
+
+  private def installCoursier(ctx: Context): Either[CumulusError, Unit] =
+    println("\u001b[1;36m[cumulus install-coursier]\u001b[0m Checking/Installing Coursier...")
+    getCoursierBin(ctx) match
+      case Some(csPath) =>
+        println(s"  \u001b[32m[OK]\u001b[0m Coursier already installed at $csPath")
+        Right(())
+      case None =>
+        val binDir = ctx.home / ".local" / "bin"
+        os.makeDir.all(binDir)
+        val csDest = binDir / "cs"
+        val isMac = System.getProperty("os.name", "").toLowerCase.contains("mac")
+        val launcher = if isMac then "cs-x86_64-apple-darwin.gz" else "cs-x86_64-pc-linux.gz"
+        val url = s"https://github.com/coursier/launchers/raw/master/$launcher"
+        println(s"  \u001b[36m[INFO]\u001b[0m Downloading Coursier launcher from $url...")
+        try
+          val curlRes = os.proc("bash", "-c", s"curl -fL '$url' | gzip -d > '$csDest' && chmod +x '$csDest'").call(check = false)
+          if curlRes.exitCode == 0 then
+            println(s"  \u001b[32m[OK]\u001b[0m Coursier installed to $csDest")
+            os.proc(csDest.toString, "update").call(check = false)
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m Coursier download returned code ${curlRes.exitCode}")
+          Right(())
+        catch
+          case e: Exception =>
+            println(s"  \u001b[33m[NOTE]\u001b[0m Coursier installation skipped: ${e.getMessage}")
+            Right(())
+
   private def installNvim(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-nvim]\u001b[0m Provisioning Neovim & LSP dependencies (PM: $pm)...")
-    pm match
-      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "neovim"))
-      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
-      case _ => Right(println("  \u001b[32m[OK]\u001b[0m Neovim environment provisioned."))
+    println(s"\u001b[1;36m[cumulus install-nvim]\u001b[0m Provisioning Neovim & cumulus.neovim (PM: $pm)...")
+    
+    // 1. Install base Neovim editor
+    if !isAvailable("nvim") then
+      pm match
+        case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "neovim"))
+        case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
+        case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "neovim"))
+        case PackageManager.Brew => runPkgInstall("brew", Seq("install", "neovim"))
+        case _ =>
+          getBrewBin(ctx) match
+            case Some(brewBin) => runPkgInstall(brewBin.toString, Seq("install", "neovim"))
+            case None => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual neovim installation recommended."))
+    else
+      println("  \u001b[32m[OK]\u001b[0m Neovim editor already installed.")
+
+    // 2. Install cumulus.neovim via Coursier flow
+    installCoursier(ctx)
+    val csExe = getCoursierBin(ctx).map(_.toString).getOrElse("cs")
+    println("  \u001b[36m[INFO]\u001b[0m Installing/updating cumulus.neovim via Coursier flow...")
+    try
+      val res = os.proc(csExe, "install", "io.github.petrolal::cumulus.neovim", "--name", "cumulus-neovim").call(
+        stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false
+      )
+      if res.exitCode == 0 then
+        println("  \u001b[32m[OK]\u001b[0m cumulus.neovim installed successfully via Coursier.")
+      else
+        val fallbackRes = os.proc(csExe, "install", "io.github.petrolal::cumulus.neovim").call(
+          stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false
+        )
+        if fallbackRes.exitCode == 0 then
+          println("  \u001b[32m[OK]\u001b[0m cumulus.neovim installed successfully via Coursier.")
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m Coursier install for cumulus.neovim completed with code ${fallbackRes.exitCode}")
+      Right(())
+    catch
+      case e: Exception =>
+        println(s"  \u001b[33m[NOTE]\u001b[0m cumulus.neovim coursier installation skipped: ${e.getMessage}")
+        Right(())
 
   private def installTools(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
@@ -182,6 +318,9 @@ object ToolInstallers:
     println("\u001b[1;36m[cumulus install-all]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
       _ <- installSystemDeps(ctx)
+      _ <- installHomebrew(ctx)
+      _ <- installGh(ctx)
+      _ <- installCoursier(ctx)
       _ <- installApps(ctx)
       _ <- installFonts(ctx)
       _ <- installBrowser(ctx)

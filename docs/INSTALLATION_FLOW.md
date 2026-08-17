@@ -85,28 +85,28 @@ Coursier automatically:
 - Creates launch script in `~/.local/share/coursier/bin/cumulus`
 - Updates PATH (if configured)
 
-### Stage 3: Interactive Installer (5-15 minutes)
+### Stage 3: Full Setup & Tooling Provisioning (5-15 minutes)
 
-Run the interactive Scala-based installer:
+Run the Scala-based installer:
 
 ```bash
 cumulus install
 ```
 
-This launches an interactive menu with prompts for:
+This automates the complete configuration and environment provisioning:
 
-**System Dependencies:**
-- Confirm system packages are installed
-- Install any missing packages
+**Dotfiles & Symlinks:**
+- Symlink dotfiles to home directory (`~/.zshrc`, `~/.config/sway`, `~/.config/kitty`, `~/.config/waybar`, `~/.config/wofi`, `~/.config/mako`, etc.)
+- Create subcommand aliases in `~/.local/bin/cumulus-*`
+- Generate deployment manifest in `~/.local/share/cumulus/manifest.json`
 
-**Desktop Environment:**
-- Choose desktop theme (AWS, Azure, GCP, OCI)
-- Choose wallpaper mode
-
-**Configuration Deployment:**
-- Symlink dotfiles to home directory
-- Create subcommand aliases (~/.local/bin/cumulus-*)
-- Deploy configuration files
+**System & Developer Tooling:**
+- **Homebrew**: Ensures Homebrew package manager is installed (`cumulus install-brew`)
+- **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`cumulus install-gh`)
+- **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`cumulus install-coursier`)
+- **Neovim & `cumulus.neovim`**: Provisions Neovim editor and installs `cumulus.neovim` via Coursier (`cs install io.github.petrolal::cumulus.neovim --name cumulus-neovim`) (`cumulus install-nvim`)
+- **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`cumulus install-apps`, `cumulus install-fonts`)
+- **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`cumulus install-tools`)
 
 **System Health Check:**
 - Verify all symlinks
@@ -138,7 +138,7 @@ This launches an interactive menu with prompts for:
 │ cs install io.github.petrolal::cumulus  │
 │ - Download JAR from Maven Central       │
 │ - Resolve dependencies                  │
-│ - Create launch script                  │
+│ - Create launch script in ~/.local/bin  │
 └────────────────┬────────────────────────┘
                  │
                  ↓
@@ -146,13 +146,16 @@ This launches an interactive menu with prompts for:
                  │
                  ↓
 ┌─────────────────────────────────────────┐
-│ STAGE 3: INTERACTIVE INSTALLER          │
+│ STAGE 3: FULL SYSTEM PROVISIONING       │
 ├─────────────────────────────────────────┤
-│ cumulus install [options]               │
+│ cumulus install                         │
 │                                         │
-│ Interactive Scala-based installer:      │
-│ - Prompt for configuration choices      │
+│ Scala-based orchestrator:               │
 │ - Deploy symlinks & dotfiles            │
+│ - Provision Homebrew & GitHub CLI (gh)  │
+│ - Provision Coursier (cs)               │
+│ - Install Neovim & cumulus.neovim (cs)  │
+│ - Deploy fonts, desktop apps, TUI tools │
 │ - Run system health check               │
 │ - Complete full setup                   │
 └────────────────┬────────────────────────┘
@@ -161,7 +164,7 @@ This launches an interactive menu with prompts for:
         ✓ Installation Complete!
         ✓ Desktop Ready
         ✓ All symlinks deployed
-        ✓ All tools configured
+        ✓ cumulus.neovim configured
 ```
 
 ## Interactive Installation Options

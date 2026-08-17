@@ -114,12 +114,13 @@ Downloads the cumulus CLI binary:
 **Command:** `cs install io.github.petrolal::cumulus:0.1.0`
 **Time:** 1-2 minutes
 
-### Stage 3: Interactive Installer
+### Stage 3: Full Setup & Tooling Provisioning
 Scala-based CLI handles full setup:
-- Interactive configuration prompts
-- Symlink deployment
-- Desktop setup
-- Health checks
+- Symlink deployment & manifest tracking
+- Homebrew, GitHub CLI (`gh`), and Coursier (`cs`) provisioning
+- Neovim editor & `cumulus.neovim` installation via Coursier
+- Desktop apps, fonts, and TUI tooling installation
+- System health checks
 
 **Command:** `cumulus install`
 **Time:** 5-15 minutes
@@ -132,14 +133,14 @@ Scala-based CLI handles full setup:
 **Main entry point:** `src/main/scala/cumulus/Main.scala`
 
 **Subcommands:**
-- `install` - Full interactive setup (Stage 3)
+- `install` - Full setup (Stage 3)
 - `theme` - Desktop theme management
 - `healthcheck` - System verification
 - `lock` - Screen locker
 - `idle` - Auto-lock daemon
 - `screenshot` - Screen capture
 - `backup/restore` - Configuration snapshots
-- `install-*` - Tool-specific installers
+- `install-*` - Tool-specific installers (`install-brew`, `install-gh`, `install-coursier`, `install-nvim`, etc.)
 
 ### Bootstrap Script (bash)
 

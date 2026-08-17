@@ -179,16 +179,18 @@ cumulus.dotfiles/
 | Command | Purpose |
 |---------|---------|
 | `cumulus install` | Deploy dotfiles, create symlinks, run full installer setup |
-| `cumulus install-all` | Install system packages, desktop apps, fonts, and tooling |
+| `cumulus install-all` | Install system packages, Homebrew, gh, Coursier, apps, fonts, and tooling |
 | `cumulus install-deps` | Install system & build dependencies (sbt, gcc, git, etc.) |
+| `cumulus install-brew` | Install Homebrew package manager |
+| `cumulus install-gh` | Install GitHub CLI (`gh`) |
+| `cumulus install-coursier` | Install Coursier (`cs`) Scala application launcher |
 | `cumulus install-fonts` | Download and install JetBrainsMono Nerd Font |
 | `cumulus install-apps` | Install core desktop apps (sway, waybar, kitty, etc.) |
 | `cumulus install-browser` | Install web browser (chromium/firefox) |
 | `cumulus install-devops` | Install devops tooling (docker, terraform, kubectl) |
 | `cumulus install-zsh` | Install zsh + oh-my-zsh + plugins, set shell |
 | `cumulus install-sdkman` | Install SDKMAN! and JVM tooling |
-| `cumulus install-nvim` | Deploy Neovim configuration files |
-| `cumulus install-nvim-deps` | Install Neovim LSP servers, formatters, treesitter |
+| `cumulus install-nvim` | Provision Neovim editor & `cumulus.neovim` via Coursier |
 
 ### Desktop Management
 | Command | Purpose |

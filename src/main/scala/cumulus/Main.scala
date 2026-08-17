@@ -89,14 +89,16 @@ object Main:
       |  notify-config    configure installed apps to use system notifications
       |  sdd              token-efficient spec-driven development for AI workflows
       |  install-deps     install system & build dependencies (sbt, gcc, git, etc.)
+      |  install-brew     install Homebrew package manager
+      |  install-gh       install GitHub CLI (gh)
+      |  install-coursier install Coursier (cs) Scala application manager
       |  install-fonts    install the JetBrainsMono Nerd Font
       |  install-apps     install core desktop apps (sway/waybar/kitty/etc.)
       |  install-browser  install a web browser (chromium/firefox)
       |  install-devops   install devops tooling (docker/terraform/kubectl/etc.)
       |  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
       |  install-sdkman   install SDKMAN! and JVM tooling
-      |  install-nvim     install the Neovim config dependencies (deploy)
-      |  install-nvim-deps install Neovim + its plugin ecosystem dependencies
+      |  install-nvim     install Neovim & cumulus.neovim via Coursier flow
       |  install-tools    install TUI tools (spotify_player, bluetui, kalker, aerc)
       |  install-all      install all system packages, desktop apps, fonts, and tooling
       |  theme-picker     wofi GUI front-end for the theme command

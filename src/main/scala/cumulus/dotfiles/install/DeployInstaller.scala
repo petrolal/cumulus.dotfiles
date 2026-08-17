@@ -8,9 +8,10 @@ object DeployInstaller:
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
     "screenshot", "autotiling", "healthcheck", "backup", "restore", "update", "notify-config",
-    "sdd", "install", "deploy", "install-deps", "install-fonts", "install-apps", "install-browser",
-    "install-devops", "install-zsh", "install-sdkman", "install-nvim",
-    "install-nvim-deps", "install-tools", "install-all", "theme-picker", "whichkey", "wichkey"
+    "sdd", "install", "deploy", "install-deps", "install-brew", "install-homebrew",
+    "install-gh", "install-github-cli", "install-coursier", "install-cs",
+    "install-fonts", "install-apps", "install-browser", "install-devops", "install-zsh", "install-sdkman",
+    "install-nvim", "install-nvim-deps", "install-neovim", "install-tools", "install-all", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
