@@ -191,6 +191,17 @@ object ThemeEngine:
         |#network.disconnected {
         |    color: @red;
         |}
+        |
+        |#custom-notification.notification {
+        |    color: @accent;
+        |}
+        |
+        |#custom-notification.dnd-notification,
+        |#custom-notification.dnd-none,
+        |#custom-notification.dnd-inhibited-notification,
+        |#custom-notification.dnd-inhibited-none {
+        |    opacity: 0.6;
+        |}
         |""".stripMargin
     os.write.over(waybarStyleFile, waybarStyleContent)
     println(s"  \u001b[32m[OK]\u001b[0m Rendered Waybar style -> $waybarStyleFile")
