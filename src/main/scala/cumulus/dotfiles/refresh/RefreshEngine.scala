@@ -19,22 +19,27 @@ object RefreshEngine:
     try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
-    // Mako reload via systemctl
+    // SwayNC reload CSS & config
+    if isCommandAvailable("swaync-client") then
+      try
+        os.proc("swaync-client", "-rs").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        os.proc("swaync-client", "-R").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        println("  \u001b[32m[OK]\u001b[0m Reloaded SwayNC styling & config")
+      catch
+        case _: Exception => ()
+
+    // Mako reload via systemctl (legacy compatibility)
     try
-      os.proc("systemctl", "--user", "restart", "mako").call(check = false)
-      println("  [32m[OK][0m Restarted Mako with new theme colors")
+      os.proc("systemctl", "--user", "restart", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+      println("  \u001b[32m[OK]\u001b[0m Restarted Mako with new theme colors")
     catch
-      case _: Exception =>
-        // Fallback: kill and restart manually if systemd unavailable
-        try
-          os.proc("pkill", "-9", "mako").call(check = false)
-          Thread.sleep(200)
-          os.proc("mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
-        catch
-          case _: Exception => ()
+      case _: Exception => ()
 
     runOsColorscheme(ctx)
     Right(())
+
+  private def isCommandAvailable(cmd: String): Boolean =
+    try os.proc("which", cmd).call(check = false, stdout = os.Pipe, stderr = os.Pipe).exitCode == 0 catch case _: Exception => false
 
   def runOsColorscheme(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus os-colorscheme]\u001b[0m Syncing GNOME GTK color-scheme...")

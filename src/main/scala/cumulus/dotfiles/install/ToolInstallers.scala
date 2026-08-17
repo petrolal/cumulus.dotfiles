@@ -62,11 +62,11 @@ object ToolInstallers:
     println(s"\u001b[1;36m[cumulus install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "ttf-jetbrains-mono-nerd", "mako"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "ttf-jetbrains-mono-nerd", "sway-notification-center", "mako"))
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "mako"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "sway-notification-center", "mako"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "pulseaudio-utils", "fonts-jetbrains-mono", "mako"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 

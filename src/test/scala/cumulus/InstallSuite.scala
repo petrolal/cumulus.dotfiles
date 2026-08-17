@@ -25,6 +25,13 @@ class InstallSuite extends FunSuite:
     val zshrcLink = ctx.home / ".zshrc"
     assert(os.exists(zshrcLink) || os.isLink(zshrcLink))
 
+  test("DeployInstaller creates symlinks for swaync config"):
+    assume(!isCI)
+    val ctx = Context.discover().toOption.get
+    DeployInstaller.run(ctx, List("--links-only"))
+    val swayncLink = ctx.configDir / "swaync"
+    assert(os.exists(swayncLink) || os.isLink(swayncLink))
+
   test("DeployInstaller writes valid manifest JSON"):
     assume(!isCI)
     val ctx = Context.discover().toOption.get

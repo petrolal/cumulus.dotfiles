@@ -36,8 +36,8 @@ set $ws9 "9:scratch"
 # `cumulus-theme list` for Catppuccin and AWS/Azure/GCP/OCI choices.
 include colors.conf
 
-# Notification daemon (Mako) — lightweight Wayland-native notification manager.
-exec mako
+# Notification daemon (SwayNC) — Wayland-native notification center with history & control panel.
+exec swaync
 
 # Status bar
 exec waybar
@@ -188,6 +188,7 @@ bindsym $mod+Shift+f exec $term -e yazi
 bindsym $mod+Shift+m exec $term -e spotify_player
 bindsym $mod+Shift+u exec $term -e bluetui
 bindsym $mod+Shift+a exec $term -e aerc
+bindsym $mod+Shift+n exec swaync-client -t -sw
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'

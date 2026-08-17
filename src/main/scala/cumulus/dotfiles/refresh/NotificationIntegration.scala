@@ -9,14 +9,18 @@ object NotificationIntegration:
 
     val results = scala.collection.mutable.ListBuffer[String]()
 
-    // Enable mako systemd service
+    // Enable notification service if available
     try
-      os.proc("systemctl", "--user", "daemon-reload").call(check = false)
-      os.proc("systemctl", "--user", "enable", "mako").call(check = false)
-      os.proc("systemctl", "--user", "start", "mako").call(check = false)
-      results += "  [32m[OK][0m Mako systemd service enabled"
+      os.proc("systemctl", "--user", "daemon-reload").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+      if isCommandAvailable("swaync") then
+        os.proc("systemctl", "--user", "disable", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        results += "  \u001b[32m[OK]\u001b[0m SwayNC notification daemon configured"
+      else
+        os.proc("systemctl", "--user", "enable", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        os.proc("systemctl", "--user", "start", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        results += "  \u001b[32m[OK]\u001b[0m Mako systemd service enabled"
     catch
-      case _: Exception => results += "  [33m[NOTE][0m Mako systemd setup skipped"
+      case _: Exception => results += "  \u001b[33m[NOTE]\u001b[0m Notification daemon systemd setup skipped"
 
     // Configure Chromium/Chrome
     configureChromium(ctx) match

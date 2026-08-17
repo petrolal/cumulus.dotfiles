@@ -36,6 +36,7 @@ object DeployInstaller:
       (ctx.configDir / "waybar", ctx.dotfilesDir / "config" / "waybar"),
       (ctx.configDir / "wofi", ctx.dotfilesDir / "config" / "wofi"),
       (ctx.configDir / "rofi", ctx.dotfilesDir / "config" / "rofi"),
+      (ctx.configDir / "swaync", ctx.dotfilesDir / "config" / "swaync"),
       (ctx.configDir / "mako", ctx.dotfilesDir / "config" / "mako"),
       (ctx.configDir / "systemd" / "user", ctx.dotfilesDir / "config" / "systemd" / "user")
     )
