@@ -167,9 +167,17 @@ object ThemeEngine:
         |    padding: 0 8px;
         |    background-color: transparent;
         |    color: @text;
+        |    border-bottom: 2px solid transparent;
         |}
         |
-        |#workspaces button.focused {
+        |#workspaces button.focused,
+        |#workspaces button.active {
+        |    background-color: @mantle;
+        |    color: @accent;
+        |    border-bottom: 2px solid @accent;
+        |}
+        |
+        |#workspaces button:hover {
         |    background-color: @mantle;
         |    color: @accent;
         |    border-bottom: 2px solid @accent;
@@ -178,6 +186,7 @@ object ThemeEngine:
         |#workspaces button.urgent {
         |    background-color: @red;
         |    color: @base;
+        |    border-bottom: 2px solid @red;
         |}
         |
         |#clock,
@@ -192,6 +201,21 @@ object ThemeEngine:
         |    padding: 0 10px;
         |    margin: 0 2px;
         |    color: @text;
+        |    border-bottom: 2px solid transparent;
+        |}
+        |
+        |#clock:hover,
+        |#tray:hover,
+        |#network:hover,
+        |#bluetooth:hover,
+        |#pulseaudio:hover,
+        |#backlight:hover,
+        |#battery:hover,
+        |#custom-notification:hover,
+        |#mode:hover {
+        |    background-color: @mantle;
+        |    color: @accent;
+        |    border-bottom: 2px solid @accent;
         |}
         |
         |#battery.warning {

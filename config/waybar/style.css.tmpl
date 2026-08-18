@@ -32,16 +32,26 @@ tooltip label {
     padding: 0 8px;
     background-color: transparent;
     color: @@SUBTEXT0@@;
+    border-bottom: 2px solid transparent;
 }
 
-#workspaces button.focused {
+#workspaces button.focused,
+#workspaces button.active {
     background-color: @@SURFACE0@@;
     color: @@BLUE@@;
+    border-bottom: 2px solid @@BLUE@@;
+}
+
+#workspaces button:hover {
+    background-color: @@SURFACE0@@;
+    color: @@BLUE@@;
+    border-bottom: 2px solid @@BLUE@@;
 }
 
 #workspaces button.urgent {
     background-color: @@RED@@;
     color: @@BASE@@;
+    border-bottom: 2px solid @@RED@@;
 }
 
 #clock,
@@ -56,6 +66,21 @@ tooltip label {
     padding: 0 10px;
     margin: 0 2px;
     color: @@TEXT@@;
+    border-bottom: 2px solid transparent;
+}
+
+#clock:hover,
+#tray:hover,
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover,
+#backlight:hover,
+#battery:hover,
+#custom-notification:hover,
+#mode:hover {
+    background-color: @@SURFACE0@@;
+    color: @@BLUE@@;
+    border-bottom: 2px solid @@BLUE@@;
 }
 
 #battery.warning {

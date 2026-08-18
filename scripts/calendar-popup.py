@@ -3,6 +3,7 @@ import sys
 import os
 import signal
 import datetime
+import cairo
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -27,9 +28,77 @@ def is_already_running():
         pass
     return False
 
+def hex_to_rgb(h):
+    h = h.strip("#")
+    if len(h) == 3:
+        h = "".join(2 * c for c in h)
+    return tuple(int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+
+class BubblePointer(Gtk.DrawingArea):
+    def __init__(self, bg_color, border_color):
+        super().__init__()
+        self.bg_color = bg_color
+        self.border_color = border_color
+        self.set_size_request(26, 12)
+        self.connect("draw", self.on_draw)
+
+    def on_draw(self, widget, cr):
+        br, bg, bb = hex_to_rgb(self.border_color)
+        fr, fg, fb = hex_to_rgb(self.bg_color)
+        
+        w = float(widget.get_allocated_width())
+        h = float(widget.get_allocated_height())
+        
+        # Center the triangle caret
+        cx = w / 2.0
+        hw = 12.0 # half-width of the triangle base
+        
+        cr.set_line_width(2.0)
+        cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        
+        # Path: left base -> top tip -> right base
+        cr.move_to(cx - hw, h)
+        cr.line_to(cx, 2.0)
+        cr.line_to(cx + hw, h)
+        cr.close_path()
+        
+        # Fill with body background
+        cr.set_source_rgb(fr, fg, fb)
+        cr.fill_preserve()
+        
+        # Stroke with accent border
+        cr.set_source_rgb(br, bg, bb)
+        cr.stroke()
+        return False
+
 def main():
     if is_already_running():
         sys.exit(0)
+
+    # Load active theme colors
+    theme_css_path = os.path.expanduser("~/.config/waybar/theme.css")
+    base_color = "#071521"
+    accent_color = "#FF9900"
+    text_color = "#E0E6ED"
+    mantle_color = "#040D15"
+    subtext_color = "#8A99A8"
+
+    if os.path.exists(theme_css_path):
+        try:
+            with open(theme_css_path) as f:
+                for line in f:
+                    if "@define-color base" in line:
+                        base_color = line.split()[-1].strip("; ")
+                    elif "@define-color accent" in line:
+                        accent_color = line.split()[-1].strip("; ")
+                    elif "@define-color text" in line:
+                        text_color = line.split()[-1].strip("; ")
+                    elif "@define-color mantle" in line:
+                        mantle_color = line.split()[-1].strip("; ")
+                    elif "@define-color subtext0" in line:
+                        subtext_color = line.split()[-1].strip("; ")
+        except Exception:
+            pass
 
     # Initialize GTK window
     win = Gtk.Window()
@@ -42,29 +111,38 @@ def main():
     GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
     GtkLayerShell.set_namespace(win, "cumulus-calendar-popup")
     
-    # Anchor to TOP flush right against Waybar bottom edge
+    # Anchor to TOP centered directly under the clock
     GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
-    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 0)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 4)
     GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-    # Main solid background wrapper
-    main_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    main_container.set_name("calendar-popup")
-    main_container.set_margin_top(0)
-    main_container.set_margin_bottom(0)
-    main_container.set_margin_start(0)
-    main_container.set_margin_end(0)
-    win.add(main_container)
+    # Outer transparent layout
+    outer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    outer_box.set_name("bubble-outer")
+    win.add(outer_box)
+
+    # Top pointed arrow aligned center (pointing directly at the clock)
+    caret_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+    caret_box.set_halign(Gtk.Align.CENTER)
+    pointer = BubblePointer(base_color, accent_color)
+    caret_box.pack_start(pointer, False, False, 0)
+    outer_box.pack_start(caret_box, False, False, 0)
+
+    # Main bubble card container
+    bubble_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    bubble_card.set_name("calendar-bubble")
+    bubble_card.set_margin_top(0)
+    outer_box.pack_start(bubble_card, True, True, 0)
 
     # Content box with padding
     content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    content_box.set_margin_top(14)
+    content_box.set_margin_top(12)
     content_box.set_margin_bottom(16)
     content_box.set_margin_start(18)
     content_box.set_margin_end(18)
-    main_container.pack_start(content_box, True, True, 0)
+    bubble_card.pack_start(content_box, True, True, 0)
 
-    # Header with current time / date overview
+    # Header with formatted date
     now = datetime.datetime.now()
     header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
     
@@ -100,59 +178,28 @@ def main():
         return False
     win.connect("key-press-event", on_key_press)
 
-    # Dismiss when pointer leaves the window bounds and clicks outside
-    def on_leave(widget, event):
-        # Allow user to interact freely within the window
-        pass
-    win.connect("leave-notify-event", on_leave)
-
     # Dismiss when focus is lost to another application window
     def on_focus_out(widget, event):
-        # If focus moves entirely outside of this layer-surface window
         toplevel = win.get_toplevel()
         if not toplevel.has_toplevel_focus():
             GLib.timeout_add(150, lambda: Gtk.main_quit() if not win.has_toplevel_focus() else None)
         return False
     win.connect("focus-out-event", on_focus_out)
 
-    # Load CSS styling matching active desktop theme
+    # Load CSS styling
     css_provider = Gtk.CssProvider()
-    theme_css_path = os.path.expanduser("~/.config/waybar/theme.css")
-    base_color = "#071521"
-    accent_color = "#FF9900"
-    text_color = "#E0E6ED"
-    mantle_color = "#040D15"
-    crust_color = "#02070B"
-
-    if os.path.exists(theme_css_path):
-        try:
-            with open(theme_css_path) as f:
-                for line in f:
-                    if "@define-color base" in line:
-                        base_color = line.split()[-1].strip("; ")
-                    elif "@define-color accent" in line:
-                        accent_color = line.split()[-1].strip("; ")
-                    elif "@define-color text" in line:
-                        text_color = line.split()[-1].strip("; ")
-                    elif "@define-color mantle" in line:
-                        mantle_color = line.split()[-1].strip("; ")
-                    elif "@define-color crust" in line:
-                        crust_color = line.split()[-1].strip("; ")
-        except Exception:
-            pass
-
     custom_css = f"""
     window#calendar-window {{
         background-color: transparent;
     }}
-    #calendar-popup {{
+    #bubble-outer {{
+        background-color: transparent;
+    }}
+    #calendar-bubble {{
         background-color: {base_color};
-        border-left: 2px solid {accent_color};
-        border-right: 2px solid {accent_color};
-        border-bottom: 2px solid {accent_color};
-        border-top: none;
-        border-radius: 0 0 14px 14px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        border: 2px solid {accent_color};
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
     }}
     #calendar-header {{
         color: {accent_color};
@@ -177,7 +224,7 @@ def main():
         background-color: {mantle_color};
         color: {text_color};
         border: 1px solid {accent_color};
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 12px;
         font-family: "JetBrainsMono Nerd Font", sans-serif;
         font-size: 15px;
