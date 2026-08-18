@@ -29,9 +29,9 @@
   "hide-on-action": true,
   "script-fail-notify": true,
   "widgets": [
+    "calendar",
     "title",
     "dnd",
-    "calendar",
     "mpris",
     "notifications"
   ],

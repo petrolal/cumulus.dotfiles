@@ -29,28 +29,10 @@
     },
 
     "clock": {
-        "tooltip": true,
+        "tooltip": false,
         "format": "{:%a %d %b  %H:%M}",
-        "tooltip-format": "<span size='130%' font_weight='bold'>{:%B %Y}</span>\n\n<tt>{calendar}</tt>",
-        "calendar": {
-            "mode"          : "month",
-            "mode-mon-col"  : 3,
-            "weeks-pos"     : "right",
-            "on-scroll"     : 1,
-            "format": {
-                "months":     "<span color='#FF9900'><b>{}</b></span>",
-                "days":       "<span color='#E0E6ED'><b>{}</b></span>",
-                "weeks":      "<span color='#10B981'><b>W{}</b></span>",
-                "weekdays":   "<span color='#F59E0B'><b>{}</b></span>",
-                "today":      "<span color='#EF4444'><b><u>{}</u></b></span>"
-            }
-        },
-        "actions": {
-            "on-click": "swaync-client -t -sw",
-            "on-click-right": "mode",
-            "on-scroll-up": "shift_up",
-            "on-scroll-down": "shift_down"
-        }
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw"
     },
 
     // The system tray hosts NetworkManager applet (Wi-Fi + VPN state) and 1Password's tray icon.
