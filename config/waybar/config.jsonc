@@ -31,7 +31,7 @@
     "clock": {
         "tooltip": false,
         "format": "{:%a %d %b  %H:%M}",
-        "on-click": "/home/petrolal/cumulus.dotfiles/scripts/calendar-popup.py",
+        "on-click": "cumulus calendar",
         "on-click-right": "swaync-client -d -sw 2>/dev/null || true"
     },
 

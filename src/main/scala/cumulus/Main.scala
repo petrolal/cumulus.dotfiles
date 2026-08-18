@@ -52,7 +52,7 @@ object Main:
       case "lock" => cumulus.dotfiles.sysutils.SysUtils.runLock(ctx)
       case "idle" => cumulus.dotfiles.sysutils.SysUtils.runIdle(ctx)
       case "screenshot" => cumulus.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
-      case "calendar" => cumulus.dotfiles.sysutils.SysUtils.runCalendar(ctx)
+      case "calendar" => cumulus.dotfiles.calendar.CalendarPopup.run(ctx, args)
       case "theme" => cumulus.dotfiles.theme.ThemeEngine.run(ctx, args)
       case "runtime-refresh" => cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
       case "os-colorscheme" => cumulus.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
