@@ -105,3 +105,37 @@
     color: #E0E6ED;
     opacity: 0.8;
 }
+
+.widget-calendar {
+    background-color: #040D15;
+    border: 1px solid #FF9900;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 8px;
+}
+
+.widget-calendar > calendar {
+    background-color: transparent;
+    color: #E0E6ED;
+}
+
+.widget-calendar > calendar:selected {
+    background-color: #FF9900;
+    color: #071521;
+    border-radius: 4px;
+}
+
+.widget-calendar > calendar.header {
+    color: #FF9900;
+    font-weight: bold;
+}
+
+.widget-calendar > calendar.button {
+    color: #E0E6ED;
+    background: transparent;
+}
+
+.widget-calendar > calendar.button:hover {
+    background-color: #FF9900;
+    color: #071521;
+}

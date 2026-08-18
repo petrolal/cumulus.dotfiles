@@ -149,6 +149,19 @@ object ThemeEngine:
         |    color: @text;
         |}
         |
+        |tooltip {
+        |    background-color: @base;
+        |    color: @text;
+        |    border: 1px solid @accent;
+        |    border-radius: 6px;
+        |    padding: 8px;
+        |}
+        |
+        |tooltip label {
+        |    color: @text;
+        |    padding: 4px;
+        |}
+        |
         |#workspaces button {
         |    padding: 0 8px;
         |    background-color: transparent;
@@ -514,6 +527,40 @@ object ThemeEngine:
          |.widget-mpris-subtitle {
          |    color: ${palette.text};
          |    opacity: 0.8;
+         |}
+         |
+         |.widget-calendar {
+         |    background-color: ${palette.mantle};
+         |    border: 1px solid ${palette.accent};
+         |    border-radius: 6px;
+         |    padding: 8px;
+         |    margin: 8px;
+         |}
+         |
+         |.widget-calendar > calendar {
+         |    background-color: transparent;
+         |    color: ${palette.text};
+         |}
+         |
+         |.widget-calendar > calendar:selected {
+         |    background-color: ${palette.accent};
+         |    color: ${palette.base};
+         |    border-radius: 4px;
+         |}
+         |
+         |.widget-calendar > calendar.header {
+         |    color: ${palette.accent};
+         |    font-weight: bold;
+         |}
+         |
+         |.widget-calendar > calendar.button {
+         |    color: ${palette.text};
+         |    background: transparent;
+         |}
+         |
+         |.widget-calendar > calendar.button:hover {
+         |    background-color: ${palette.accent};
+         |    color: ${palette.base};
          |}
          |""".stripMargin
     os.write.over(swayncFile, swayncContent)
