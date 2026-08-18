@@ -100,12 +100,12 @@ def main():
 
     popup_card.pack_start(header_box, False, False, 0)
 
-    # GTK Calendar widget
+    # GTK Calendar widget with clean symmetrical 7-column layout
     cal = Gtk.Calendar()
     cal.set_property("show-heading", True)
     cal.set_property("show-day-names", True)
-    cal.set_property("show-week-numbers", True)
-    cal.set_property("show-details", True)
+    cal.set_property("show-week-numbers", False)
+    cal.set_property("show-details", False)
     cal.set_name("calendar-widget")
     popup_card.pack_start(cal, True, True, 0)
 
@@ -135,14 +135,15 @@ def main():
         background-color: {base_color};
         border: 2px solid {accent_color};
         border-radius: 8px;
-        padding: 14px;
+        padding: 12px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
     }}
     #calendar-header {{
         color: {accent_color};
-        font-family: "JetBrainsMono Nerd Font", sans-serif;
+        font-family: "JetBrainsMono Nerd Font", monospace;
         font-size: 14px;
         font-weight: bold;
+        padding-left: 4px;
     }}
     #calendar-close-btn {{
         background-color: transparent;
@@ -162,8 +163,8 @@ def main():
         color: {text_color};
         border: 1px solid {accent_color};
         border-radius: 6px;
-        padding: 10px;
-        font-family: "JetBrainsMono Nerd Font", sans-serif;
+        padding: 8px;
+        font-family: "JetBrainsMono Nerd Font", monospace;
         font-size: 14px;
     }}
     calendar:selected {{
@@ -175,7 +176,7 @@ def main():
     calendar.header {{
         color: {accent_color};
         font-weight: bold;
-        font-size: 15px;
+        font-size: 14px;
         padding-bottom: 6px;
     }}
     calendar.button {{
