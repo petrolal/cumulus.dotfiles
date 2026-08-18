@@ -278,7 +278,7 @@ def main():
         font-weight: bold;
     }}
     #nav-btn,
-    #nav-btn label {
+    #nav-btn label {{
         background-color: transparent;
         color: {accent_color};
         border: none;
@@ -287,12 +287,12 @@ def main():
         font-size: 16px;
         font-weight: bold;
         padding: 0 8px;
-    }
+    }}
     #nav-btn:hover,
-    #nav-btn:hover label {
+    #nav-btn:hover label {{
         background-color: {accent_color};
         color: {base_color};
-    }
+    }}
     #cal-grid {{
         background-color: {mantle_color};
         border: 1px solid {accent_color};
