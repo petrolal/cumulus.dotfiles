@@ -389,7 +389,7 @@ object ThemeEngine:
     // 8. Apply wallpaper live via Sway output bg
     if activeWallpaper.nonEmpty then
       try
-        os.proc("swaymsg", "output", "*", "bg", activeWallpaper, "fill").call(check = false)
+        os.proc("timeout", "2", "swaymsg", "output", "*", "bg", activeWallpaper, "fill").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
         println(s"  \u001b[32m[OK]\u001b[0m Applied wallpaper via Sway -> $activeWallpaper")
       catch
         case _: Exception => ()

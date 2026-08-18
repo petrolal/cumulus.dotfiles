@@ -31,7 +31,7 @@
     "clock": {
         "tooltip": false,
         "format": "{:%a %d %b  %H:%M}",
-        "on-click": "swaync-client -t -sw",
+        "on-click": "cumulus calendar",
         "on-click-right": "swaync-client -d -sw"
     },
 
@@ -106,7 +106,7 @@
             "dnd-inhibited-none": "󰂛"
         },
         "return-type": "json",
-        "exec-if": "which swaync-client",
+        "exec-if": "which swaync-client >/dev/null 2>&1 && pgrep -x swaync >/dev/null 2>&1",
         "exec": "swaync-client -swb",
         "on-click": "swaync-client -t -sw",
         "on-click-right": "swaync-client -d -sw",

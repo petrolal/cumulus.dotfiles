@@ -131,5 +131,38 @@ object SysUtils:
     catch
       case _: Exception => () // Silently fail if notification daemon unavailable
 
+  def runCalendar(ctx: Context): Either[CumulusError, Unit] =
+    if isCommandAvailable("swaync-client") && isProcessRunning("swaync") then
+      try
+        os.proc("swaync-client", "-t", "-sw").call(check = false)
+        Right(())
+      catch
+        case _: Exception => runFallbackCalendar(ctx)
+    else
+      runFallbackCalendar(ctx)
+
+  private def isProcessRunning(name: String): Boolean =
+    try os.proc("pgrep", "-x", name).call(check = false).exitCode == 0 catch case _: Exception => false
+
+  private def runFallbackCalendar(ctx: Context): Either[CumulusError, Unit] =
+    try
+      if isCommandAvailable("kitty") then
+        os.proc(
+          "kitty",
+          "--class=cumulus-calendar",
+          "--title=Calendar",
+          "-o", "font_size=15",
+          "-o", "remember_window_size=no",
+          "-o", "initial_window_width=680",
+          "-o", "initial_window_height=440",
+          "sh", "-c", "cal -3; echo ''; read -n 1 -s -r -p '  [Press any key or Escape to close]' || true"
+        ).spawn()
+        Right(())
+      else
+        println("  \u001b[33m[NOTE]\u001b[0m Calendar tool not available.")
+        Right(())
+    catch
+      case e: Exception => Left(CommandError(s"Calendar popup failed: ${e.getMessage}"))
+
   private def isCommandAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false

@@ -8,29 +8,29 @@ object RefreshEngine:
     println("\u001b[1;36m[cumulus refresh]\u001b[0m Triggering runtime app reloads...")
 
     // Sway reload
-    try os.proc("swaymsg", "reload").call(check = false) catch case _: Exception => ()
+    try os.proc("timeout", "2", "swaymsg", "reload").call(check = false, stdout = os.Pipe, stderr = os.Pipe) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent swaymsg reload")
 
     // Kitty reload
-    try os.proc("killall", "-SIGUSR1", "kitty").call(check = false) catch case _: Exception => ()
+    try os.proc("timeout", "2", "killall", "-SIGUSR1", "kitty").call(check = false, stdout = os.Pipe, stderr = os.Pipe) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR1 to Kitty instances")
 
     // Waybar reload (SIGUSR2 reloads config & CSS stylesheet without hiding bar)
-    try os.proc("killall", "-SIGUSR2", "waybar").call(check = false) catch case _: Exception => ()
+    try os.proc("timeout", "2", "killall", "-SIGUSR2", "waybar").call(check = false, stdout = os.Pipe, stderr = os.Pipe) catch case _: Exception => ()
     println("  \u001b[32m[OK]\u001b[0m Sent SIGUSR2 to Waybar instances")
 
     // SwayNC reload CSS & config
     if isCommandAvailable("swaync-client") then
       try
-        os.proc("swaync-client", "-rs").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
-        os.proc("swaync-client", "-R").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        os.proc("timeout", "2", "swaync-client", "-rs").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+        os.proc("timeout", "2", "swaync-client", "-R").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
         println("  \u001b[32m[OK]\u001b[0m Reloaded SwayNC styling & config")
       catch
         case _: Exception => ()
 
     // Mako reload via systemctl (legacy compatibility)
     try
-      os.proc("systemctl", "--user", "restart", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
+      os.proc("timeout", "2", "systemctl", "--user", "restart", "mako").call(check = false, stdout = os.Pipe, stderr = os.Pipe)
       println("  \u001b[32m[OK]\u001b[0m Restarted Mako with new theme colors")
     catch
       case _: Exception => ()

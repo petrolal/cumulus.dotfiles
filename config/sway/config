@@ -37,10 +37,13 @@ set $ws9 "9:scratch"
 include colors.conf
 
 # Notification daemon (SwayNC) — Wayland-native notification center with history & control panel.
-exec swaync
+exec_always pgrep -x swaync >/dev/null || swaync
 
 # Status bar
-exec waybar
+exec_always pgrep -x waybar >/dev/null || waybar
+
+# Floating calendar popup rule
+for_window [app_id="cumulus-calendar"] floating enable, resize set 680 440, move position center
 
 # System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
 # connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
@@ -173,12 +176,6 @@ assign [app_id="kitty" title="infra"] $ws7
 # 8: misc
 assign [app_id="telegramdesktop"] $ws8
 assign [class="TelegramDesktop"] $ws8
-
-# Floating windows & Waybar/SwayNC rules
-no_focus [app_id="waybar"]
-for_window [app_id="waybar"] floating enable
-for_window [app_id="swaync-control-center"] floating enable
-for_window [app_id="swaync-notification-window"] floating enable
 
 ### ────────────────────────────────────────────────────────────────
 ### Key bindings — stock Sway defaults (overrides previous ML4W custom set)
