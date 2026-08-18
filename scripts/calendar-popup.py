@@ -2,6 +2,7 @@
 import sys
 import os
 import signal
+import datetime
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -34,55 +35,62 @@ def main():
     win = Gtk.Window()
     win.set_title("Cumulus Calendar")
     win.set_resizable(False)
-    win.set_app_paintable(True)
-    win.set_name("calendar-popup")
+    win.set_name("calendar-window")
 
     # Layer Shell configuration
     GtkLayerShell.init_for_window(win)
     GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
     GtkLayerShell.set_namespace(win, "cumulus-calendar-popup")
     
-    # Anchor to TOP and centered beneath the top bar
+    # Anchor to TOP and flush right below the 32px Waybar
     GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
-    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 40) # just below the 32px Waybar
-    
-    # Keyboard mode to intercept Escape and clicks outside
-    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 32)
+    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-    # Container box
-    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-    box.set_margin_top(12)
-    box.set_margin_bottom(12)
-    box.set_margin_start(16)
-    box.set_margin_end(16)
-    win.add(box)
+    # Main solid background wrapper
+    main_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    main_container.set_name("calendar-popup")
+    main_container.set_margin_top(0)
+    main_container.set_margin_bottom(0)
+    main_container.set_margin_start(0)
+    main_container.set_margin_end(0)
+    win.add(main_container)
+
+    # Content box with padding
+    content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    content_box.set_margin_top(14)
+    content_box.set_margin_bottom(16)
+    content_box.set_margin_start(18)
+    content_box.set_margin_end(18)
+    main_container.pack_start(content_box, True, True, 0)
 
     # Header with current time / date overview
-    import datetime
     now = datetime.datetime.now()
+    header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+    
     header_label = Gtk.Label()
-    header_label.set_markup(f"<span size='130%' font_weight='bold'>{now.strftime('%A, %B %d, %Y')}</span>")
+    header_label.set_markup(f"<span size='125%' font_weight='bold'>{now.strftime('%A, %d %B %Y')}</span>")
     header_label.set_name("calendar-header")
-    box.pack_start(header_label, False, False, 4)
+    header_label.set_xalign(0.0)
+    header_box.pack_start(header_label, True, True, 0)
+
+    # Close button
+    close_btn = Gtk.Button(label="✕")
+    close_btn.set_name("calendar-close-btn")
+    close_btn.set_relief(Gtk.ReliefStyle.NONE)
+    close_btn.connect("clicked", lambda b: Gtk.main_quit())
+    header_box.pack_end(close_btn, False, False, 0)
+
+    content_box.pack_start(header_box, False, False, 0)
 
     # GTK Calendar widget
     cal = Gtk.Calendar()
     cal.set_property("show-heading", True)
     cal.set_property("show-day-names", True)
     cal.set_property("show-week-numbers", True)
+    cal.set_property("show-details", True)
     cal.set_name("calendar-widget")
-    box.pack_start(cal, True, True, 4)
-
-    # Close on focus-out / click outside / blur once focus is acquired
-    import time
-    start_time = time.time()
-
-    def on_focus_out(widget, event):
-        # Ignore spurious events in the first 250ms of window presentation
-        if time.time() - start_time > 0.25:
-            Gtk.main_quit()
-        return False
-    win.connect("focus-out-event", on_focus_out)
+    content_box.pack_start(cal, True, True, 0)
 
     # Close on Escape key
     def on_key_press(widget, event):
@@ -92,6 +100,21 @@ def main():
         return False
     win.connect("key-press-event", on_key_press)
 
+    # Dismiss when pointer leaves the window bounds and clicks outside
+    def on_leave(widget, event):
+        # Allow user to interact freely within the window
+        pass
+    win.connect("leave-notify-event", on_leave)
+
+    # Dismiss when focus is lost to another application window
+    def on_focus_out(widget, event):
+        # If focus moves entirely outside of this layer-surface window
+        toplevel = win.get_toplevel()
+        if not toplevel.has_toplevel_focus():
+            GLib.timeout_add(150, lambda: Gtk.main_quit() if not win.has_toplevel_focus() else None)
+        return False
+    win.connect("focus-out-event", on_focus_out)
+
     # Load CSS styling matching active desktop theme
     css_provider = Gtk.CssProvider()
     theme_css_path = os.path.expanduser("~/.config/waybar/theme.css")
@@ -99,6 +122,7 @@ def main():
     accent_color = "#FF9900"
     text_color = "#E0E6ED"
     mantle_color = "#040D15"
+    crust_color = "#02070B"
 
     if os.path.exists(theme_css_path):
         try:
@@ -112,48 +136,75 @@ def main():
                         text_color = line.split()[-1].strip("; ")
                     elif "@define-color mantle" in line:
                         mantle_color = line.split()[-1].strip("; ")
+                    elif "@define-color crust" in line:
+                        crust_color = line.split()[-1].strip("; ")
         except Exception:
             pass
 
     custom_css = f"""
-    window#calendar-popup {{
+    window#calendar-window {{
+        background-color: transparent;
+    }}
+    #calendar-popup {{
         background-color: {base_color};
-        border: 2px solid {accent_color};
-        border-radius: 10px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        border-left: 2px solid {accent_color};
+        border-right: 2px solid {accent_color};
+        border-bottom: 2px solid {accent_color};
+        border-top: none;
+        border-radius: 0 0 14px 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }}
     #calendar-header {{
         color: {accent_color};
-        padding: 4px 8px;
+        font-family: "JetBrainsMono Nerd Font", sans-serif;
+        font-size: 15px;
+        font-weight: bold;
+    }}
+    #calendar-close-btn {{
+        color: {text_color};
+        font-size: 14px;
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background-color: transparent;
+        border: none;
+    }}
+    #calendar-close-btn:hover {{
+        background-color: {accent_color};
+        color: {base_color};
     }}
     calendar {{
         background-color: {mantle_color};
         color: {text_color};
         border: 1px solid {accent_color};
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px;
         font-family: "JetBrainsMono Nerd Font", sans-serif;
         font-size: 15px;
     }}
     calendar:selected {{
         background-color: {accent_color};
         color: {base_color};
+        font-weight: bold;
         border-radius: 6px;
     }}
     calendar.header {{
         color: {accent_color};
         font-weight: bold;
         font-size: 16px;
+        padding-bottom: 8px;
     }}
     calendar.button {{
         color: {text_color};
+        padding: 4px 8px;
+        border-radius: 4px;
     }}
     calendar.button:hover {{
         background-color: {accent_color};
         color: {base_color};
     }}
     calendar:indeterminate {{
-        color: rgba(224, 230, 237, 0.4);
+        color: rgba(224, 230, 237, 0.35);
     }}
     calendar.highlight {{
         color: {accent_color};
