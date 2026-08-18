@@ -205,14 +205,32 @@ object ThemeEngine:
         |}
         |
         |#clock:hover,
+        |#clock:active,
+        |#clock.active,
         |#tray:hover,
         |#network:hover,
+        |#network:active,
+        |#network.active,
         |#bluetooth:hover,
+        |#bluetooth:active,
+        |#bluetooth.active,
         |#pulseaudio:hover,
+        |#pulseaudio:active,
+        |#pulseaudio.active,
         |#backlight:hover,
+        |#backlight:active,
+        |#backlight.active,
         |#battery:hover,
+        |#battery:active,
+        |#battery.active,
         |#custom-notification:hover,
-        |#mode:hover {
+        |#custom-notification:active,
+        |#custom-notification.active,
+        |#custom-notification.open,
+        |#custom-notification.open-window,
+        |#mode:hover,
+        |#mode:active,
+        |#mode.active {
         |    background-color: @mantle;
         |    color: @accent;
         |    border-bottom: 2px solid @accent;

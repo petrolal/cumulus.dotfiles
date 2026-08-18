@@ -53,20 +53,21 @@ class BubblePointer(Gtk.DrawingArea):
         cx = w / 2.0
         hw = 12.0 # half-width of the triangle base
         
-        cr.set_line_width(2.0)
-        cr.set_line_join(cairo.LINE_JOIN_ROUND)
-        
-        # Path: left base -> top tip -> right base
-        cr.move_to(cx - hw, h)
+        # 1. Fill the triangle
+        cr.move_to(cx - hw, h + 2.0)
         cr.line_to(cx, 2.0)
-        cr.line_to(cx + hw, h)
+        cr.line_to(cx + hw, h + 2.0)
         cr.close_path()
-        
-        # Fill with body background
         cr.set_source_rgb(fr, fg, fb)
-        cr.fill_preserve()
+        cr.fill()
         
-        # Stroke with accent border
+        # 2. Stroke ONLY the two diagonal edges (no bottom dividing line)
+        cr.set_line_width(2.0)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
+        cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        cr.move_to(cx - hw, h + 2.0)
+        cr.line_to(cx, 2.0)
+        cr.line_to(cx + hw, h + 2.0)
         cr.set_source_rgb(br, bg, bb)
         cr.stroke()
         return False
@@ -131,7 +132,7 @@ def main():
     # Main bubble card container
     bubble_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
     bubble_card.set_name("calendar-bubble")
-    bubble_card.set_margin_top(0)
+    bubble_card.set_margin_top(-2)
     outer_box.pack_start(bubble_card, True, True, 0)
 
     # Content box with padding
