@@ -29,6 +29,7 @@
     },
 
     "clock": {
+        "tooltip": true,
         "format": "{:%a %d %b  %H:%M}",
         "tooltip-format": "<span size='130%' font_weight='bold'>{:%B %Y}</span>\n\n<tt>{calendar}</tt>",
         "calendar": {
