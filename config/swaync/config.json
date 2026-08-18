@@ -31,6 +31,7 @@
   "widgets": [
     "title",
     "dnd",
+    "calendar",
     "mpris",
     "notifications"
   ],
@@ -42,6 +43,9 @@
     },
     "dnd": {
       "text": "Do Not Disturb"
+    },
+    "calendar": {
+      "show-week-numbers": true
     },
     "mpris": {
       "image-size": 64,

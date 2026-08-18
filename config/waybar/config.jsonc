@@ -30,7 +30,7 @@
 
     "clock": {
         "format": "{:%a %d %b  %H:%M}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "tooltip-format": "<span size='130%' font_weight='bold'>{:%B %Y}</span>\n\n<tt>{calendar}</tt>",
         "calendar": {
             "mode"          : "month",
             "mode-mon-col"  : 3,

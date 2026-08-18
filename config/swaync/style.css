@@ -109,30 +109,37 @@
 .widget-calendar {
     background-color: #040D15;
     border: 1px solid #FF9900;
-    border-radius: 6px;
-    padding: 8px;
+    border-radius: 8px;
+    padding: 12px;
     margin: 8px;
+    font-size: 14px;
 }
 
 .widget-calendar > calendar {
     background-color: transparent;
     color: #E0E6ED;
+    font-size: 14px;
+    padding: 4px;
 }
 
 .widget-calendar > calendar:selected {
     background-color: #FF9900;
     color: #071521;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .widget-calendar > calendar.header {
     color: #FF9900;
     font-weight: bold;
+    font-size: 15px;
+    padding: 6px;
 }
 
 .widget-calendar > calendar.button {
     color: #E0E6ED;
     background: transparent;
+    border-radius: 4px;
+    padding: 4px 8px;
 }
 
 .widget-calendar > calendar.button:hover {

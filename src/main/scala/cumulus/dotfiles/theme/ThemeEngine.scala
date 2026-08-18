@@ -152,14 +152,15 @@ object ThemeEngine:
         |tooltip {
         |    background-color: @base;
         |    color: @text;
-        |    border: 1px solid @accent;
-        |    border-radius: 6px;
-        |    padding: 8px;
+        |    border: 2px solid @accent;
+        |    border-radius: 8px;
+        |    padding: 12px 16px;
         |}
         |
         |tooltip label {
         |    color: @text;
-        |    padding: 4px;
+        |    padding: 6px 12px;
+        |    font-size: 15px;
         |}
         |
         |#workspaces button {
@@ -532,30 +533,37 @@ object ThemeEngine:
          |.widget-calendar {
          |    background-color: ${palette.mantle};
          |    border: 1px solid ${palette.accent};
-         |    border-radius: 6px;
-         |    padding: 8px;
+         |    border-radius: 8px;
+         |    padding: 12px;
          |    margin: 8px;
+         |    font-size: 14px;
          |}
          |
          |.widget-calendar > calendar {
          |    background-color: transparent;
          |    color: ${palette.text};
+         |    font-size: 14px;
+         |    padding: 4px;
          |}
          |
          |.widget-calendar > calendar:selected {
          |    background-color: ${palette.accent};
          |    color: ${palette.base};
-         |    border-radius: 4px;
+         |    border-radius: 6px;
          |}
          |
          |.widget-calendar > calendar.header {
          |    color: ${palette.accent};
          |    font-weight: bold;
+         |    font-size: 15px;
+         |    padding: 6px;
          |}
          |
          |.widget-calendar > calendar.button {
          |    color: ${palette.text};
          |    background: transparent;
+         |    border-radius: 4px;
+         |    padding: 4px 8px;
          |}
          |
          |.widget-calendar > calendar.button:hover {
