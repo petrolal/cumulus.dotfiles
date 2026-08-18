@@ -262,7 +262,30 @@ def main():
         border-radius: 4px;
         border: none;
     }}
-    #calendar-close-btn:hover {{
+    button,
+    button:backdrop,
+    button:focus,
+    button:active {{
+        background-image: none;
+        box-shadow: none;
+        outline: none;
+    }}
+    #calendar-close-btn,
+    button#calendar-close-btn {{
+        background: transparent;
+        background-color: transparent;
+        background-image: none;
+        box-shadow: none;
+        color: {text_color};
+        font-size: 12px;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: none;
+    }}
+    #calendar-close-btn:hover,
+    button#calendar-close-btn:hover {{
+        background: {red_color};
         background-color: {red_color};
         color: {base_color};
     }}
@@ -277,20 +300,34 @@ def main():
         font-family: "JetBrainsMono Nerd Font", monospace;
         font-weight: bold;
     }}
-    #nav-btn,
-    #nav-btn label {{
+    button#nav-btn,
+    button#nav-btn:backdrop,
+    button#nav-btn:focus,
+    #nav-btn {{
+        background: transparent;
         background-color: transparent;
-        color: {accent_color};
+        background-image: none;
+        box-shadow: none;
         border: none;
         border-radius: 4px;
+        padding: 0 8px;
+    }}
+    button#nav-btn label,
+    #nav-btn label {{
+        color: {accent_color};
         font-family: "JetBrainsMono Nerd Font", monospace;
         font-size: 16px;
         font-weight: bold;
-        padding: 0 8px;
     }}
-    #nav-btn:hover,
-    #nav-btn:hover label {{
+    button#nav-btn:hover,
+    #nav-btn:hover {{
+        background: {accent_color};
         background-color: {accent_color};
+        background-image: none;
+        box-shadow: none;
+    }}
+    button#nav-btn:hover label,
+    #nav-btn:hover label {{
         color: {base_color};
     }}
     #cal-grid {{
@@ -307,7 +344,12 @@ def main():
     }}
     #day-cube,
     #day-cube-today,
-    #day-cube-selected {{
+    #day-cube-selected,
+    button#day-cube,
+    button#day-cube-today,
+    button#day-cube-selected {{
+        background-image: none;
+        box-shadow: none;
         border-radius: 6px;
         padding: 0;
         margin: 0;
@@ -315,30 +357,40 @@ def main():
         font-family: "JetBrainsMono Nerd Font", monospace;
         font-size: 13px;
     }}
-    #day-cube {{
+    #day-cube,
+    button#day-cube {{
+        background: transparent;
         background-color: transparent;
         color: {text_color};
     }}
-    #day-cube:hover {{
+    #day-cube:hover,
+    button#day-cube:hover {{
         background-color: rgba(255, 153, 0, 0.25);
         color: {accent_color};
     }}
-    #day-cube-today {{
+    #day-cube-today,
+    button#day-cube-today {{
+        background: transparent;
         background-color: transparent;
         color: {accent_color};
         border: 1px solid {accent_color};
         font-weight: bold;
     }}
-    #day-cube-today:hover {{
+    #day-cube-today:hover,
+    button#day-cube-today:hover {{
+        background: {accent_color};
         background-color: {accent_color};
         color: {base_color};
     }}
-    #day-cube-selected {{
+    #day-cube-selected,
+    button#day-cube-selected {{
+        background: {accent_color};
         background-color: {accent_color};
         color: {base_color};
         font-weight: bold;
     }}
-    #day-cube-selected label {{
+    #day-cube-selected label,
+    button#day-cube-selected label {{
         color: {base_color};
         font-weight: bold;
     }}
