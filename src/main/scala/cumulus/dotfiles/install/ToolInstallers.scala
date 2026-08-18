@@ -23,6 +23,7 @@ object ToolInstallers:
       case "install-fonts" => installFonts(ctx)
       case "install-apps" => installApps(ctx)
       case "install-browser" => installBrowser(ctx)
+      case "install-swaync" | "install-notifications" => installSwaync(ctx)
       case "install-devops" => installDevops(ctx)
       case "install-zsh" => installZsh(ctx)
       case "install-sdkman" => installSdkman(ctx)
@@ -79,6 +80,26 @@ object ToolInstallers:
       case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "firefox"))
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "--cask", "chromium"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Browser provisioned."))
+
+  private def installSwaync(ctx: Context): Either[CumulusError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[cumulus install-swaync]\u001b[0m Checking/Installing SwayNC (PM: $pm)...")
+    if isAvailable("swaync") || isAvailable("swaync-client") then
+      println("  \u001b[32m[OK]\u001b[0m SwayNC already installed.")
+      Right(())
+    else
+      pm match
+        case PackageManager.Pacman =>
+          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "swaync"))
+        case PackageManager.Dnf =>
+          runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway-notification-center"))
+        case PackageManager.Apt =>
+          runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway-notification-center"))
+        case PackageManager.Brew =>
+          runPkgInstall("brew", Seq("install", "sway-notification-center"))
+        case _ =>
+          println("  \u001b[33m[NOTE]\u001b[0m Manual installation of swaync required for current OS.")
+          Right(())
 
   private def installDevops(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
@@ -377,6 +398,7 @@ object ToolInstallers:
       _ <- installGh(ctx)
       _ <- installCoursier(ctx)
       _ <- installApps(ctx)
+      _ <- installSwaync(ctx)
       _ <- installFonts(ctx)
       _ <- installBrowser(ctx)
       _ <- installDevops(ctx)

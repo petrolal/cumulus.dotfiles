@@ -94,6 +94,7 @@ object Main:
       |  install-coursier install Coursier (cs) Scala application manager
       |  install-fonts    install the JetBrainsMono Nerd Font
       |  install-apps     install core desktop apps (sway/waybar/kitty/etc.)
+      |  install-swaync   install SwayNC notification daemon & control center
       |  install-browser  install a web browser (chromium/firefox)
       |  install-devops   install devops & cloud tooling (docker/terraform/ansible/aws/gcp/oci/kubectl/etc.)
       |  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
