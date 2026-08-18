@@ -42,9 +42,9 @@ def main():
     GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
     GtkLayerShell.set_namespace(win, "cumulus-calendar-popup")
     
-    # Anchor to TOP and flush right below the 32px Waybar
+    # Anchor to TOP flush right against Waybar bottom edge
     GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
-    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 32)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 0)
     GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
     # Main solid background wrapper
