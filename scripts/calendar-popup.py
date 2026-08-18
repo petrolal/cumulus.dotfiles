@@ -3,7 +3,6 @@ import sys
 import os
 import signal
 import datetime
-import cairo
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -28,50 +27,6 @@ def is_already_running():
         pass
     return False
 
-def hex_to_rgb(h):
-    h = h.strip("#")
-    if len(h) == 3:
-        h = "".join(2 * c for c in h)
-    return tuple(int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4))
-
-class BubblePointer(Gtk.DrawingArea):
-    def __init__(self, bg_color, border_color):
-        super().__init__()
-        self.bg_color = bg_color
-        self.border_color = border_color
-        self.set_size_request(26, 12)
-        self.connect("draw", self.on_draw)
-
-    def on_draw(self, widget, cr):
-        br, bg, bb = hex_to_rgb(self.border_color)
-        fr, fg, fb = hex_to_rgb(self.bg_color)
-        
-        w = float(widget.get_allocated_width())
-        h = float(widget.get_allocated_height())
-        
-        # Center the triangle caret
-        cx = w / 2.0
-        hw = 12.0 # half-width of the triangle base
-        
-        # 1. Fill the triangle
-        cr.move_to(cx - hw, h + 2.0)
-        cr.line_to(cx, 2.0)
-        cr.line_to(cx + hw, h + 2.0)
-        cr.close_path()
-        cr.set_source_rgb(fr, fg, fb)
-        cr.fill()
-        
-        # 2. Stroke ONLY the two diagonal edges (no bottom dividing line)
-        cr.set_line_width(2.0)
-        cr.set_line_cap(cairo.LINE_CAP_ROUND)
-        cr.set_line_join(cairo.LINE_JOIN_ROUND)
-        cr.move_to(cx - hw, h + 2.0)
-        cr.line_to(cx, 2.0)
-        cr.line_to(cx + hw, h + 2.0)
-        cr.set_source_rgb(br, bg, bb)
-        cr.stroke()
-        return False
-
 def main():
     if is_already_running():
         sys.exit(0)
@@ -82,7 +37,7 @@ def main():
     accent_color = "#FF9900"
     text_color = "#E0E6ED"
     mantle_color = "#040D15"
-    subtext_color = "#8A99A8"
+    red_color = "#EF4444"
 
     if os.path.exists(theme_css_path):
         try:
@@ -96,8 +51,8 @@ def main():
                         text_color = line.split()[-1].strip("; ")
                     elif "@define-color mantle" in line:
                         mantle_color = line.split()[-1].strip("; ")
-                    elif "@define-color subtext0" in line:
-                        subtext_color = line.split()[-1].strip("; ")
+                    elif "@define-color red" in line:
+                        red_color = line.split()[-1].strip("; ")
         except Exception:
             pass
 
@@ -112,55 +67,38 @@ def main():
     GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
     GtkLayerShell.set_namespace(win, "cumulus-calendar-popup")
     
-    # Anchor to TOP centered directly under the clock
+    # Anchor to TOP centered directly under the bar with matching 6px notification margin
     GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
-    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 4)
+    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 6)
     GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-    # Outer transparent layout
-    outer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    outer_box.set_name("bubble-outer")
-    win.add(outer_box)
-
-    # Top pointed arrow aligned center (pointing directly at the clock)
-    caret_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-    caret_box.set_halign(Gtk.Align.CENTER)
-    pointer = BubblePointer(base_color, accent_color)
-    caret_box.pack_start(pointer, False, False, 0)
-    outer_box.pack_start(caret_box, False, False, 0)
-
-    # Main bubble card container
-    bubble_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    bubble_card.set_name("calendar-bubble")
-    bubble_card.set_margin_top(-2)
-    outer_box.pack_start(bubble_card, True, True, 0)
-
-    # Content box with padding
-    content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    content_box.set_margin_top(12)
-    content_box.set_margin_bottom(16)
-    content_box.set_margin_start(18)
-    content_box.set_margin_end(18)
-    bubble_card.pack_start(content_box, True, True, 0)
+    # Main popup card with identical margin, padding, border radius to notifications
+    popup_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    popup_card.set_name("calendar-card")
+    popup_card.set_margin_top(0)
+    popup_card.set_margin_bottom(0)
+    popup_card.set_margin_start(0)
+    popup_card.set_margin_end(0)
+    win.add(popup_card)
 
     # Header with formatted date
     now = datetime.datetime.now()
     header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
     
     header_label = Gtk.Label()
-    header_label.set_markup(f"<span size='125%' font_weight='bold'>{now.strftime('%A, %d %B %Y')}</span>")
+    header_label.set_markup(f"<span size='120%' font_weight='bold'>{now.strftime('%A, %d %B %Y')}</span>")
     header_label.set_name("calendar-header")
     header_label.set_xalign(0.0)
     header_box.pack_start(header_label, True, True, 0)
 
-    # Close button
+    # Close button matching notification close-button
     close_btn = Gtk.Button(label="✕")
     close_btn.set_name("calendar-close-btn")
     close_btn.set_relief(Gtk.ReliefStyle.NONE)
     close_btn.connect("clicked", lambda b: Gtk.main_quit())
     header_box.pack_end(close_btn, False, False, 0)
 
-    content_box.pack_start(header_box, False, False, 0)
+    popup_card.pack_start(header_box, False, False, 0)
 
     # GTK Calendar widget
     cal = Gtk.Calendar()
@@ -169,7 +107,7 @@ def main():
     cal.set_property("show-week-numbers", True)
     cal.set_property("show-details", True)
     cal.set_name("calendar-widget")
-    content_box.pack_start(cal, True, True, 0)
+    popup_card.pack_start(cal, True, True, 0)
 
     # Close on Escape key
     def on_key_press(widget, event):
@@ -187,64 +125,62 @@ def main():
         return False
     win.connect("focus-out-event", on_focus_out)
 
-    # Load CSS styling
+    # Load CSS styling matching notifications & control center exactly
     css_provider = Gtk.CssProvider()
     custom_css = f"""
     window#calendar-window {{
         background-color: transparent;
     }}
-    #bubble-outer {{
-        background-color: transparent;
-    }}
-    #calendar-bubble {{
+    #calendar-card {{
         background-color: {base_color};
         border: 2px solid {accent_color};
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
+        border-radius: 8px;
+        padding: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
     }}
     #calendar-header {{
         color: {accent_color};
         font-family: "JetBrainsMono Nerd Font", sans-serif;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: bold;
     }}
     #calendar-close-btn {{
-        color: {text_color};
-        font-size: 14px;
-        font-weight: bold;
-        padding: 2px 8px;
-        border-radius: 6px;
         background-color: transparent;
+        color: {text_color};
+        font-size: 13px;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 4px;
         border: none;
     }}
     #calendar-close-btn:hover {{
-        background-color: {accent_color};
+        background-color: {red_color};
         color: {base_color};
     }}
     calendar {{
         background-color: {mantle_color};
         color: {text_color};
         border: 1px solid {accent_color};
-        border-radius: 10px;
-        padding: 12px;
+        border-radius: 6px;
+        padding: 10px;
         font-family: "JetBrainsMono Nerd Font", sans-serif;
-        font-size: 15px;
+        font-size: 14px;
     }}
     calendar:selected {{
         background-color: {accent_color};
         color: {base_color};
         font-weight: bold;
-        border-radius: 6px;
+        border-radius: 4px;
     }}
     calendar.header {{
         color: {accent_color};
         font-weight: bold;
-        font-size: 16px;
-        padding-bottom: 8px;
+        font-size: 15px;
+        padding-bottom: 6px;
     }}
     calendar.button {{
         color: {text_color};
-        padding: 4px 8px;
+        padding: 2px 6px;
         border-radius: 4px;
     }}
     calendar.button:hover {{
