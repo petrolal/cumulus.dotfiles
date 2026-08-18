@@ -46,8 +46,8 @@ def main():
     GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
     GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 40) # just below the 32px Waybar
     
-    # Keyboard mode to intercept Escape and clicks
-    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
+    # Keyboard mode to intercept Escape and clicks outside
+    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.EXCLUSIVE)
 
     # Container box
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -73,9 +73,14 @@ def main():
     cal.set_name("calendar-widget")
     box.pack_start(cal, True, True, 4)
 
-    # Close on focus-out / click outside / blur
+    # Close on focus-out / click outside / blur once focus is acquired
+    import time
+    start_time = time.time()
+
     def on_focus_out(widget, event):
-        Gtk.main_quit()
+        # Ignore spurious events in the first 250ms of window presentation
+        if time.time() - start_time > 0.25:
+            Gtk.main_quit()
         return False
     win.connect("focus-out-event", on_focus_out)
 
