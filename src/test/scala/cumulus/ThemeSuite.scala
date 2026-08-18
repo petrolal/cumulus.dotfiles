@@ -45,6 +45,7 @@ class ThemeSuite extends FunSuite:
     assert(os.exists(ctx.configDir / "wofi" / "theme.css"))
     assert(os.exists(ctx.configDir / "wofi" / "style.css"))
     assert(os.exists(ctx.configDir / "rofi" / "theme.rasi"))
+    assert(os.exists(ctx.configDir / "swaync" / "style.css"))
 
   test("ThemeEngine.run applies all supported themes"):
     // TODO: This test times out due to Sway IPC calls - skip for now
