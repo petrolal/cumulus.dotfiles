@@ -31,8 +31,8 @@
     "clock": {
         "tooltip": false,
         "format": "{:%a %d %b  %H:%M}",
-        "on-click": "cumulus calendar",
-        "on-click-right": "swaync-client -d -sw"
+        "on-click": "swaync-client -t -sw 2>/dev/null || kitty --class=cumulus-calendar --title=Calendar -o font_size=15 -o remember_window_size=no -o initial_window_width=680 -o initial_window_height=440 sh -c 'cal -3; echo \"\"; read -n 1 -s -r -p \"  [Press any key to close]\" || true'",
+        "on-click-right": "swaync-client -d -sw 2>/dev/null || true"
     },
 
     // The system tray hosts NetworkManager applet (Wi-Fi + VPN state) and 1Password's tray icon.
