@@ -24,7 +24,7 @@ depends=(
   'helm'
   'neovim'
   'ttf-jetbrains-mono-nerd'
-  'sway-notification-center'
+  'swaync'
   'mako'
   'zsh'
 )

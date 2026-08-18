@@ -41,7 +41,7 @@ install_system_deps() {
         base-devel git curl wget \
         zsh fontconfig \
         sway waybar kitty wofi swaylock swayidle grim slurp \
-        brightnessctl libpulse sway-notification-center mako \
+        brightnessctl libpulse swaync mako \
         chromium firefox \
         neovim \
         docker \
