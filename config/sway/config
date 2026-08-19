@@ -90,6 +90,8 @@ output HDMI-* position 1920 0
 ### ────────────────────────────────────────────────────────────────
 ### Input configuration
 ### ────────────────────────────────────────────────────────────────
+seat * shortcuts_inhibitor disable
+
 input type:keyboard {
     xkb_layout us
     xkb_variant intl
@@ -261,10 +263,6 @@ bindsym $mod+question exec ~/.local/bin/cumulus-whichkey
 bindsym $mod+slash exec ~/.local/bin/cumulus-whichkey
 bindsym $mod+Shift+slash exec ~/.local/bin/cumulus-whichkey
 bindsym $mod+Shift+question exec ~/.local/bin/cumulus-whichkey
-bindcode $mod+61 exec ~/.local/bin/cumulus-whichkey
-bindcode $mod+Shift+61 exec ~/.local/bin/cumulus-whichkey
-bindcode $mod+193 exec ~/.local/bin/cumulus-whichkey
-bindcode $mod+Shift+193 exec ~/.local/bin/cumulus-whichkey
 
 
 # Display configuration — wdisplays GUI for multi-monitor setup
