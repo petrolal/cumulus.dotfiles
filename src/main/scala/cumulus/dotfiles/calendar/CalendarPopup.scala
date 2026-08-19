@@ -55,7 +55,7 @@ object CalendarPopup:
       |
       |gi.require_version("Gtk", "3.0")
       |gi.require_version("GtkLayerShell", "0.1")
-      |from gi.repository import Gtk, Gdk, GtkLayerShell, GLib
+      |from gi.repository import Gtk, Gdk, GtkLayerShell, GLib, Pango
       |
       |class CustomCalendar(Gtk.Box):
       |    def __init__(self, theme_colors):
@@ -87,7 +87,7 @@ object CalendarPopup:
       |        
       |        self.pack_start(nav_box, False, False, 0)
       |        
-      |        # Calendar Grid
+      |        # Fixed Calendar Grid (7 columns x 6 rows)
       |        self.grid = Gtk.Grid()
       |        self.grid.set_name("cal-grid")
       |        self.grid.set_column_homogeneous(True)
@@ -96,7 +96,109 @@ object CalendarPopup:
       |        self.grid.set_row_spacing(4)
       |        self.pack_start(self.grid, True, True, 0)
       |        
+      |        weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+      |        for col, wd in enumerate(weekdays):
+      |            lbl = Gtk.Label()
+      |            lbl.set_markup(f"<span weight='bold' size='90%'>{wd}</span>")
+      |            lbl.set_name("weekday-header")
+      |            lbl.set_xalign(0.5)
+      |            lbl.set_yalign(0.5)
+      |            lbl.set_size_request(34, 26)
+      |            self.grid.attach(lbl, col, 0, 1, 1)
+      |            
+      |        self.day_buttons = []
+      |        for row in range(6):
+      |            row_btns = []
+      |            for col in range(7):
+      |                btn = Gtk.Button()
+      |                btn.set_relief(Gtk.ReliefStyle.NONE)
+      |                btn.set_size_request(34, 30)
+      |                lbl = Gtk.Label(label="")
+      |                lbl.set_xalign(0.5)
+      |                lbl.set_yalign(0.5)
+      |                btn.add(lbl)
+      |                btn.connect("clicked", self.on_day_clicked)
+      |                self.grid.attach(btn, col, row + 1, 1, 1)
+      |                row_btns.append(btn)
+      |            self.day_buttons.append(row_btns)
+      |        
+      |        # Diff / Info Box (fixed size)
+      |        self.diff_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+      |        self.diff_box.set_name("cal-diff")
+      |        self.diff_box.set_size_request(300, 50)
+      |        
+      |        self.diff_title = Gtk.Label()
+      |        self.diff_title.set_name("cal-diff-title")
+      |        self.diff_title.set_xalign(0.5)
+      |        self.diff_title.set_ellipsize(Pango.EllipsizeMode.END)
+      |        self.diff_box.pack_start(self.diff_title, False, False, 0)
+      |        
+      |        self.diff_detail = Gtk.Label()
+      |        self.diff_detail.set_name("cal-diff-detail")
+      |        self.diff_detail.set_xalign(0.5)
+      |        self.diff_detail.set_ellipsize(Pango.EllipsizeMode.END)
+      |        self.diff_box.pack_start(self.diff_detail, False, False, 0)
+      |        
+      |        self.pack_start(self.diff_box, False, False, 0)
+      |        
       |        self.render_calendar()
+      |
+      |    def on_day_clicked(self, btn):
+      |        if hasattr(btn, "_day") and btn._day > 0:
+      |            self.selected_date = (self.view_year, self.view_month, btn._day)
+      |            self.render_calendar()
+      |
+      |    def calculate_diff(self, d_today, d_sel):
+      |        sel_fmt = d_sel.strftime("%a, %d %b %Y")
+      |        delta = (d_sel - d_today).days
+      |        if delta == 0:
+      |            rel_str = "Today"
+      |            day_of_year = d_sel.timetuple().tm_yday
+      |            is_leap = calendar.isleap(d_sel.year)
+      |            total_days = 366 if is_leap else 365
+      |            week_num = d_sel.isocalendar()[1]
+      |            quarter = (d_sel.month - 1) // 3 + 1
+      |            self.diff_title.set_markup(f"<span weight='bold'>{sel_fmt}</span> ({rel_str})")
+      |            self.diff_detail.set_markup(f"<span size='88%'><b>Day:</b> {day_of_year}/{total_days}  •  <b>Week:</b> {week_num}  •  <b>Quarter:</b> Q{quarter}</span>")
+      |            return
+      |
+      |        abs_days = abs(delta)
+      |        is_future = delta > 0
+      |        rel_str = f"in {abs_days}d" if is_future else f"{abs_days}d ago"
+      |        
+      |        # Weeks & remaining days
+      |        weeks = abs_days // 7
+      |        rem_w_days = abs_days % 7
+      |        if weeks > 0 and rem_w_days > 0:
+      |            weeks_str = f"{weeks}w {rem_w_days}d"
+      |        elif weeks > 0:
+      |            weeks_str = f"{weeks}w"
+      |        else:
+      |            weeks_str = f"{rem_w_days}d"
+      |
+      |        # Months & remaining days
+      |        start_d, end_d = (d_today, d_sel) if is_future else (d_sel, d_today)
+      |        months = (end_d.year - start_d.year) * 12 + (end_d.month - start_d.month)
+      |        if end_d.day < start_d.day:
+      |            months -= 1
+      |        
+      |        int_m = start_d.month + months
+      |        int_y = start_d.year + (int_m - 1) // 12
+      |        int_m = ((int_m - 1) % 12) + 1
+      |        max_d = calendar.monthrange(int_y, int_m)[1]
+      |        anchor = datetime.date(int_y, int_m, min(start_d.day, max_d))
+      |        m_rem_days = (end_d - anchor).days
+      |        
+      |        if months > 0 and m_rem_days > 0:
+      |            months_str = f"{months}mo {m_rem_days}d"
+      |        elif months > 0:
+      |            months_str = f"{months}mo"
+      |        else:
+      |            months_str = f"{abs_days}d"
+      |
+      |        days_str = f"{abs_days}d"
+      |        self.diff_title.set_markup(f"<span weight='bold'>{sel_fmt}</span> ({rel_str})")
+      |        self.diff_detail.set_markup(f"<span size='88%'><b>Days:</b> {days_str}  •  <b>Weeks:</b> {weeks_str}  •  <b>Months:</b> {months_str}</span>")
       |
       |    def prev_month(self, btn):
       |        if self.view_month == 1:
@@ -115,58 +217,45 @@ object CalendarPopup:
       |        self.render_calendar()
       |
       |    def render_calendar(self):
-      |        for child in self.grid.get_children():
-      |            self.grid.remove(child)
-      |            
       |        month_name = datetime.date(self.view_year, self.view_month, 1).strftime("%B %Y")
-      |        self.month_label.set_markup(f"<span font_weight='bold' size='115%'>{month_name}</span>")
+      |        self.month_label.set_markup(f"<span weight='bold' size='115%'>{month_name}</span>")
       |        
-      |        weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-      |        for col, wd in enumerate(weekdays):
-      |            lbl = Gtk.Label()
-      |            lbl.set_markup(f"<span font_weight='bold' size='90%'>{wd}</span>")
-      |            lbl.set_name("weekday-header")
-      |            lbl.set_xalign(0.5)
-      |            lbl.set_yalign(0.5)
-      |            lbl.set_size_request(34, 26)
-      |            self.grid.attach(lbl, col, 0, 1, 1)
-      |            
+      |        d_today = datetime.date(self.now.year, self.now.month, self.now.day)
+      |        d_sel = datetime.date(self.selected_date[0], self.selected_date[1], self.selected_date[2])
+      |        r_start = min(d_today, d_sel)
+      |        r_end = max(d_today, d_sel)
+      |        
       |        cal_matrix = calendar.monthcalendar(self.view_year, self.view_month)
-      |        for row, week in enumerate(cal_matrix):
-      |            for col, day in enumerate(week):
+      |        while len(cal_matrix) < 6:
+      |            cal_matrix.append([0]*7)
+      |            
+      |        for row in range(6):
+      |            for col in range(7):
+      |                day = cal_matrix[row][col]
+      |                btn = self.day_buttons[row][col]
+      |                lbl = btn.get_child()
       |                if day == 0:
-      |                    lbl = Gtk.Label(label="")
-      |                    lbl.set_size_request(34, 30)
-      |                    self.grid.attach(lbl, col, row + 1, 1, 1)
+      |                    btn._day = 0
+      |                    lbl.set_text("")
+      |                    btn.set_sensitive(False)
+      |                    btn.set_name("day-cube")
       |                else:
-      |                    btn = Gtk.Button()
-      |                    btn.set_relief(Gtk.ReliefStyle.NONE)
-      |                    btn.set_size_request(34, 30)
-      |                    
-      |                    lbl = Gtk.Label()
+      |                    btn._day = day
       |                    lbl.set_text(str(day))
-      |                    lbl.set_xalign(0.5)
-      |                    lbl.set_yalign(0.5)
-      |                    btn.add(lbl)
-      |                    
-      |                    is_today = (self.view_year == self.now.year and self.view_month == self.now.month and day == self.now.day)
-      |                    is_selected = (self.view_year == self.selected_date[0] and self.view_month == self.selected_date[1] and day == self.selected_date[2])
-      |                    
-      |                    if is_selected:
+      |                    btn.set_sensitive(True)
+      |                    cur_d = datetime.date(self.view_year, self.view_month, day)
+      |                    if cur_d == d_sel:
       |                        btn.set_name("day-cube-selected")
-      |                    elif is_today:
+      |                    elif cur_d == d_today:
       |                        btn.set_name("day-cube-today")
+      |                    elif r_start < cur_d < r_end:
+      |                        btn.set_name("day-cube-range")
       |                    else:
       |                        btn.set_name("day-cube")
-      |                        
-      |                    def on_day_click(b, y=self.view_year, m=self.view_month, d=day):
-      |                        self.selected_date = (y, m, d)
-      |                        self.render_calendar()
-      |                        
-      |                    btn.connect("clicked", on_day_click)
-      |                    self.grid.attach(btn, col, row + 1, 1, 1)
       |                    
+      |        self.calculate_diff(d_today, d_sel)
       |        self.grid.show_all()
+      |        self.diff_box.show_all()
       |
       |def main():
       |    parser = argparse.ArgumentParser()
@@ -186,25 +275,34 @@ object CalendarPopup:
       |
       |    if args.theme_file and os.path.exists(args.theme_file):
       |        try:
-            with open(args.theme_file) as f:
-                for line in f:
-                    if "@define-color base" in line:
-                        base_color = line.split()[-1].strip("; ")
-                    elif "@define-color accent" in line:
-                        accent_color = line.split()[-1].strip("; ")
-                    elif "@define-color text" in line:
-                        text_color = line.split()[-1].strip("; ")
-                    elif "@define-color mantle" in line:
-                        mantle_color = line.split()[-1].strip("; ")
-                    elif "@define-color red" in line:
-                        red_color = line.split()[-1].strip("; ")
-        except Exception:
-            pass
+      |            with open(args.theme_file) as f:
+      |                for line in f:
+      |                    if "@define-color base" in line:
+      |                        base_color = line.split()[-1].strip("; ")
+      |                    elif "@define-color accent" in line:
+      |                        accent_color = line.split()[-1].strip("; ")
+      |                    elif "@define-color text" in line:
+      |                        text_color = line.split()[-1].strip("; ")
+      |                    elif "@define-color mantle" in line:
+      |                        mantle_color = line.split()[-1].strip("; ")
+      |                    elif "@define-color red" in line:
+      |                        red_color = line.split()[-1].strip("; ")
+      |        except Exception:
+      |            pass
+      |
+      |    def hex_to_rgba(hex_color, alpha=0.25):
+      |        h = hex_color.lstrip("#")
+      |        if len(h) == 6:
+      |            r, g, b = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+      |            return f"rgba({r}, {g}, {b}, {alpha})"
+      |        return f"rgba(255, 153, 0, {alpha})"
+      |
+      |    range_bg = hex_to_rgba(accent_color, 0.25)
       |
       |    win = Gtk.Window()
       |    win.set_title("Cumulus Calendar")
       |    win.set_resizable(False)
-      |    win.set_name("calendar-window")
+      |    win.set_size_request(340, 430)
       |
       |    GtkLayerShell.init_for_window(win)
       |    GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
@@ -215,13 +313,14 @@ object CalendarPopup:
       |
       |    popup_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
       |    popup_card.set_name("calendar-card")
+      |    popup_card.set_size_request(340, 430)
       |    win.add(popup_card)
       |
       |    now = datetime.datetime.now()
       |    header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
       |    
       |    header_label = Gtk.Label()
-      |    header_label.set_markup(f"<span size='115%' font_weight='bold'>{now.strftime('%A, %d %B %Y')}</span>")
+      |    header_label.set_markup(f"<span size='115%' weight='bold'>{now.strftime('%A, %d %B %Y')}</span>")
       |    header_label.set_name("calendar-header")
       |    header_label.set_xalign(0.0)
       |    header_box.pack_start(header_label, True, True, 0)
@@ -260,6 +359,8 @@ object CalendarPopup:
       |        border: 2px solid {accent_color};
       |        border-radius: 8px;
       |        padding: 12px 14px;
+      |        min-width: 340px;
+      |        min-height: 430px;
       |        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
       |    }}
       |    #calendar-header {{
@@ -351,9 +452,11 @@ object CalendarPopup:
       |    #day-cube,
       |    #day-cube-today,
       |    #day-cube-selected,
+      |    #day-cube-range,
       |    button#day-cube,
       |    button#day-cube-today,
-      |    button#day-cube-selected {{
+      |    button#day-cube-selected,
+      |    button#day-cube-range {{
       |        background-image: none;
       |        box-shadow: none;
       |        border-radius: 6px;
@@ -371,8 +474,30 @@ object CalendarPopup:
       |    }}
       |    #day-cube:hover,
       |    button#day-cube:hover {{
-      |        background-color: rgba(255, 153, 0, 0.25);
+      |        background-color: {range_bg};
       |        color: {accent_color};
+      |    }}
+      |    #day-cube-range,
+      |    button#day-cube-range {{
+      |        background: {range_bg};
+      |        background-color: {range_bg};
+      |        color: {accent_color};
+      |        border-radius: 6px;
+      |    }}
+      |    #day-cube-range label,
+      |    button#day-cube-range label {{
+      |        color: {accent_color};
+      |        font-weight: bold;
+      |    }}
+      |    #day-cube-range:hover,
+      |    button#day-cube-range:hover {{
+      |        background: {accent_color};
+      |        background-color: {accent_color};
+      |        color: {base_color};
+      |    }}
+      |    #day-cube-range:hover label,
+      |    button#day-cube-range:hover label {{
+      |        color: {base_color};
       |    }}
       |    #day-cube-today,
       |    button#day-cube-today {{
@@ -399,6 +524,22 @@ object CalendarPopup:
       |    button#day-cube-selected label {{
       |        color: {base_color};
       |        font-weight: bold;
+      |    }}
+      |    #cal-diff {{
+      |        background-color: {mantle_color};
+      |        border: 1px solid {accent_color};
+      |        border-radius: 6px;
+      |        padding: 6px 8px;
+      |    }}
+      |    #cal-diff-title {{
+      |        color: {accent_color};
+      |        font-family: "JetBrainsMono Nerd Font", monospace;
+      |        font-size: 11px;
+      |    }}
+      |    #cal-diff-detail {{
+      |        color: {text_color};
+      |        font-family: "JetBrainsMono Nerd Font", monospace;
+      |        font-size: 11px;
       |    }}
       |    '''
       |    css_provider.load_from_data(custom_css.encode("utf-8"))
