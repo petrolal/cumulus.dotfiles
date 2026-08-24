@@ -57,7 +57,7 @@
         "format-connected": "  {device_alias}",
         "format-disabled": "",
         "tooltip-format": "{controller_alias}: {status}",
-        "on-click": "blueman-manager"
+        "on-click": "kitty -e bluetui"
     },
 
     "pulseaudio": {
@@ -67,7 +67,7 @@
             "default": ["", "", ""]
         },
         "scroll-step": 5,
-        "on-click": "pavucontrol",
+        "on-click": "kitty -e ncpamixer",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
     },
 

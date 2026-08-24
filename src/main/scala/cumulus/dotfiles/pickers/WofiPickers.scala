@@ -185,6 +185,7 @@ object WofiPickers:
       case a if a.contains("kitty -e yazi") => "File manager (yazi)"
       case a if a.contains("kitty -e spotify_player") => "Spotify player TUI"
       case a if a.contains("kitty -e bluetui") => "Bluetooth manager (bluetui)"
+      case a if a.contains("kitty -e ncpamixer") => "Audio mixer (ncpamixer)"
       case a if a.contains("kitty -e aerc") => "Email client (aerc)"
       case a if a.contains("google-chrome-stable") => "Google Chrome"
       case a if a.contains("wdisplays") => "Display configuration (wdisplays)"
@@ -221,8 +222,9 @@ object WofiPickers:
     "Mod4+v                   → Split vertical",
     "Mod4+b                   → Split horizontal",
     "Mod4+Shift+f             → File manager (yazi)",
-    "Mod4+Shift+m             → Spotify player TUI",
+    "Mod4+Shift+m             → Spotify (spotify_player)",
     "Mod4+Shift+u             → Bluetooth manager (bluetui)",
+    "Mod4+Shift+v             → Audio mixer (ncpamixer)",
     "Mod4+Shift+a             → Email client (aerc)",
     "Mod4+Shift+n             → Toggle notification center",
     "Mod4+Shift+t             → Theme and wallpaper picker",

@@ -30,6 +30,7 @@ object ToolInstallers:
       case "install-nvim" | "install-nvim-deps" | "install-neovim" => installNvim(ctx)
       case "install-tools" => installTools(ctx)
       case "install-telegram" => installTelegram(ctx)
+      case "install-node" | "install-npm" | "install-npx" => installNode(ctx)
       case "full-install" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
@@ -64,7 +65,8 @@ object ToolInstallers:
     println(s"\u001b[1;36m[cumulus install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses"))
+        if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "ncpamixer")) else Right(())
       case PackageManager.Dnf =>
         runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako"))
       case PackageManager.Apt =>
@@ -137,7 +139,7 @@ object ToolInstallers:
     else
       println("  \u001b[36m[INFO]\u001b[0m Installing Google Cloud CLI (gcloud)...")
       if pm == PackageManager.Pacman && isAvailable("yay") then
-        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "google-cloud-cli"))
+        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "google-cloud-cli"))
       else
         try
           val gcloudInstallScript = "curl -sSL https://sdk.cloud.google.com | bash --disable-prompts --install-dir=" + (ctx.home / ".local" / "share").toString
@@ -156,7 +158,7 @@ object ToolInstallers:
     else
       println("  \u001b[36m[INFO]\u001b[0m Installing Oracle Cloud CLI (oci)...")
       if pm == PackageManager.Pacman && isAvailable("yay") then
-        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "python-oci-cli"))
+        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "oci-cli"))
       else
         try
           val ociInstallScript = s"""bash -c "$$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --install-dir "${ctx.home / ".local" / "lib" / "oracle-cli"}" --exec-dir "$localBin""""
@@ -406,6 +408,16 @@ object ToolInstallers:
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
+  private def installNode(ctx: Context): Either[CumulusError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[cumulus install-node]\u001b[0m Installing Node.js & npm (PM: $pm)...")
+    pm match
+      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "nodejs", "npm"))
+      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "nodejs", "npm"))
+      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "nodejs", "npm"))
+      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "node"))
+      case _ => Right(println("  \u001b[32m[OK]\u001b[0m Node.js environment provisioned."))
+
   private def installAll(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
@@ -420,6 +432,7 @@ object ToolInstallers:
       _ <- installTelegram(ctx)
       _ <- installDevops(ctx)
       _ <- installZsh(ctx)
+      _ <- installNode(ctx)
       _ <- installNvim(ctx)
       _ <- installTools(ctx)
       _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)

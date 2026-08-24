@@ -48,7 +48,6 @@ for_window [app_id="cumulus-calendar"] floating enable, resize set 680 440, move
 # System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
 # connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
 exec nm-applet --indicator
-exec blueman-applet
 
 # 1Password — starts minimized to tray, unlocks against the already-running gnome-keyring/PAM session.
 exec 1password --silent
@@ -139,10 +138,10 @@ workspace $ws9
 # as a fallback for apps still running under XWayland (IntelliJ, some Electron builds).
 
 # 1: web
-assign [app_id="microsoft-edge"] $ws1
-assign [class="Microsoft-edge"] $ws1
-assign [app_id="firefox"] $ws1
-assign [class="firefox"] $ws1
+# assign [app_id="microsoft-edge"] $ws1
+# assign [class="Microsoft-edge"] $ws1
+# assign [app_id="firefox"] $ws1
+# assign [class="firefox"] $ws1
 
 # 2: code
 assign [class="jetbrains-idea"] $ws2
@@ -151,7 +150,7 @@ assign [app_id="code"] $ws2
 assign [class="Code"] $ws2
 
 # 3: term
-assign [app_id="kitty"] $ws3
+# assign [app_id="kitty"] $ws3
 
 # 4: containers
 assign [app_id="docker-desktop"] $ws4
@@ -192,6 +191,7 @@ bindsym $mod+Shift+b exec google-chrome-stable
 bindsym $mod+Shift+f exec $term -e yazi
 bindsym $mod+Shift+m exec $term -e spotify_player
 bindsym $mod+Shift+u exec $term -e bluetui
+bindsym $mod+Shift+v exec $term -e ncpamixer
 bindsym $mod+Shift+a exec $term -e aerc
 bindsym $mod+Shift+n exec swaync-client -t -sw
 floating_modifier $mod normal
