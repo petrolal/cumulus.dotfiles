@@ -13,7 +13,7 @@ Stage 1: Bootstrap (Java + Coursier)
     ↓
 Stage 2: Coursier (Download cumulus binary)
     ↓
-    cs install io.github.petrolal::cumulus:0.1.0
+    cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
     ↓
 Stage 3: Interactive Installer (Full system setup)
     ↓
@@ -29,7 +29,7 @@ Stage 3: Interactive Installer (Full system setup)
 bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
 
 # 2. Install cumulus binary from Maven Central
-cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 
 # 3. Run interactive installer
 cumulus install
@@ -70,10 +70,10 @@ Once Java & Coursier are installed, download the cumulus CLI:
 
 ```bash
 # Install from Maven Central
-cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 
 # Or latest version
-cs install io.github.petrolal::cumulus --name cumulus
+cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus
 
 # Verify installation
 cumulus --version
@@ -104,7 +104,7 @@ This automates the complete configuration and environment provisioning:
 - **Homebrew**: Ensures Homebrew package manager is installed (`cumulus install-brew`)
 - **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`cumulus install-gh`)
 - **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`cumulus install-coursier`)
-- **Neovim & `cumulus.neovim`**: Provisions Neovim editor and installs `cumulus.neovim` via Coursier (`cs install io.github.petrolal::cumulus.neovim --name cumulus-neovim`) (`cumulus install-nvim`)
+- **Neovim & `cumulus.neovim`**: Provisions Neovim editor and installs `cumulus.neovim` via Coursier (`cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus.neovim --name cumulus-neovim`) (`cumulus install-nvim`)
 - **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`cumulus install-apps`, `cumulus install-fonts`)
 - **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`cumulus install-tools`)
 
@@ -135,7 +135,7 @@ This automates the complete configuration and environment provisioning:
 ┌─────────────────────────────────────────┐
 │ STAGE 2: COURSIER                       │
 ├─────────────────────────────────────────┤
-│ cs install io.github.petrolal::cumulus  │
+│ cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus  │
 │ - Download JAR from Maven Central       │
 │ - Resolve dependencies                  │
 │ - Create launch script in ~/.local/bin  │
@@ -301,12 +301,12 @@ echo $PATH | grep "$HOME/.local/bin"
 
 **Standard (recommended):**
 ```bash
-cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 ```
 
 **Latest version:**
 ```bash
-cs install io.github.petrolal::cumulus --name cumulus
+cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus
 ```
 
 **Fat JAR (for testing before Maven Central sync):**
@@ -332,7 +332,7 @@ ls -la ~/.local/share/coursier/bin/
 
 **Customize installation location:**
 ```bash
-cs install io.github.petrolal::cumulus:0.1.0 --install-dir ~/my-bin
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/my-bin/cumulus
 export PATH="~/my-bin:$PATH"
 ```
 
@@ -391,7 +391,7 @@ Maven Central deployment may be in progress (10-30 mins). Try:
 
 ```bash
 # Wait a few minutes, then try again
-cs install io.github.petrolal::cumulus:0.1.0
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 
 # Or install from local JAR if available
 cd ~/cumulus.dotfiles
@@ -443,11 +443,11 @@ CUMULUS_SKIP_SYSTEM_DEPS=1 cumulus install
 
 ```bash
 # Install cumulus to custom location
-cs install io.github.petrolal::cumulus:0.1.0 --install-dir ~/my-local-bin/
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/my-local-bin/cumulus
 
 # Or use custom Coursier cache
 export COURSIER_CACHE=~/.coursier-custom
-cs install io.github.petrolal::cumulus:0.1.0
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 ```
 
 ### CI/CD Automated Installation
@@ -461,7 +461,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/ma
 
 # Non-interactive installation
 export PATH="$HOME/.local/bin:$PATH"
-cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 cumulus install --quiet
 ```
 

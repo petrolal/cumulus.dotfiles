@@ -30,7 +30,7 @@ object ToolInstallers:
       case "install-nvim" | "install-nvim-deps" | "install-neovim" => installNvim(ctx)
       case "install-tools" => installTools(ctx)
       case "install-telegram" => installTelegram(ctx)
-      case "install-all" => installAll(ctx)
+      case "full-install" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
   private def installSystemDeps(ctx: Context): Either[CumulusError, Unit] =
@@ -407,7 +407,7 @@ object ToolInstallers:
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
   private def installAll(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus install-all]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
+    println("\u001b[1;36m[cumulus full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
       _ <- installSystemDeps(ctx)
       _ <- installHomebrew(ctx)

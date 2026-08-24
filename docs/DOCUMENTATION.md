@@ -111,7 +111,7 @@ Downloads the cumulus CLI binary:
 - Resolves dependencies
 - Creates launch script
 
-**Command:** `cs install io.github.petrolal::cumulus:0.1.0`
+**Command:** `cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus`
 **Time:** 1-2 minutes
 
 ### Stage 3: Full Setup & Tooling Provisioning

@@ -65,6 +65,7 @@ object Main:
       case "update" => cumulus.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)
       case "install" | "deploy" => cumulus.dotfiles.install.DeployInstaller.run(ctx, args)
       case name if name.startsWith("install-") => cumulus.dotfiles.install.ToolInstallers.runTool(name, ctx, args)
+      case "full-install" => cumulus.dotfiles.install.ToolInstallers.runTool("full-install", ctx, args)
       case other => Left(UnknownCommandError(other))
 
   val UmbrellaHelp: String =
@@ -102,7 +103,7 @@ object Main:
       |  install-sdkman   install SDKMAN! and JVM tooling
       |  install-nvim     install Neovim & cumulus.neovim via Coursier flow
       |  install-tools    install TUI tools (spotify_player, bluetui, kalker, aerc)
-      |  install-all      install all system packages, desktop apps, fonts, and tooling
+      |  full-install     install all system packages, desktop apps, fonts, and tooling
       |  theme-picker     wofi GUI front-end for the theme command
       |  whichkey         wofi cheatsheet of the live sway keybindings
       |

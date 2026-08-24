@@ -54,7 +54,7 @@ class InstallSuite extends FunSuite:
     val tasks = Seq(
       "install-deps", "install-brew", "install-gh", "install-coursier",
       "install-fonts", "install-apps", "install-swaync", "install-browser", "install-devops",
-      "install-zsh", "install-sdkman", "install-nvim", "install-tools", "install-all"
+      "install-zsh", "install-sdkman", "install-nvim", "install-tools", "full-install"
     )
     tasks.foreach { task =>
       assert(DeployInstaller.Subcommands.contains(task))

@@ -51,7 +51,7 @@ libraryDependencies ++= Seq(
 
 Compile / mainClass := Some("cumulus.Main")
 
-// Coursier configuration - makes `cs install io.github.petrolal::cumulus` work
+// Coursier configuration - makes `cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus` work
 // scriptClasspath := Seq("*")  // Requires sbt-coursier plugin
 
 // Package JAR with all dependencies (fat JAR)

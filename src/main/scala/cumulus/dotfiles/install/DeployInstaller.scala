@@ -11,7 +11,7 @@ object DeployInstaller:
     "sdd", "install", "deploy", "install-deps", "install-brew", "install-homebrew",
     "install-gh", "install-github-cli", "install-coursier", "install-cs",
     "install-fonts", "install-apps", "install-swaync", "install-notifications", "install-browser", "install-devops", "install-zsh", "install-sdkman",
-    "install-nvim", "install-nvim-deps", "install-neovim", "install-tools", "install-telegram", "install-all", "theme-picker", "whichkey", "wichkey"
+    "install-nvim", "install-nvim-deps", "install-neovim", "install-tools", "install-telegram", "full-install", "theme-picker", "whichkey", "wichkey"
   )
 
   def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
@@ -140,9 +140,9 @@ object DeployInstaller:
     cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, activePalette.name)
 
     if !args.contains("--links-only") then
-      println("\n[1;32m[cumulus install-all][0m Installing all system dependencies, desktop apps, fonts, and tooling...")
+      println("\n[1;32m[cumulus full-install][0m Installing all system dependencies, desktop apps, fonts, and tooling...")
       for
-        _ <- ToolInstallers.runTool("install-all", ctx, args)
+        _ <- ToolInstallers.runTool("full-install", ctx, args)
         _ <- cumulus.dotfiles.validate.Validator.run(ctx, args)
       yield ()
     else

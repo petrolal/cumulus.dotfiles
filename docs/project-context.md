@@ -179,7 +179,7 @@ cumulus.dotfiles/
 | Command | Purpose |
 |---------|---------|
 | `cumulus install` | Deploy dotfiles, create symlinks, run full installer setup |
-| `cumulus install-all` | Install system packages, Homebrew, gh, Coursier, apps, fonts, and tooling |
+| `cumulus full-install` | Install system packages, Homebrew, gh, Coursier, apps, fonts, and tooling |
 | `cumulus install-deps` | Install system & build dependencies (sbt, gcc, git, etc.) |
 | `cumulus install-brew` | Install Homebrew package manager |
 | `cumulus install-gh` | Install GitHub CLI (`gh`) |
@@ -296,7 +296,7 @@ All modules have corresponding unit test suites in `src/test/scala/cumulus/`:
 ### Installation Methods
 1. **From Maven Central (Recommended)**:
    ```bash
-   cs install io.github.petrolal::cumulus:0.1.0 --name cumulus
+   cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
    ```
 
 2. **From GitHub Releases (Native Binary)**:
