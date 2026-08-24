@@ -49,7 +49,7 @@
         "format-disconnected": "󰖪 disconnected",
         "format-linked": "󰈁 {ifname} (no IP)",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
-        "on-click": "kitty -e wlctl"
+        "on-click": "kitty -e impala"
     },
 
     "bluetooth": {
