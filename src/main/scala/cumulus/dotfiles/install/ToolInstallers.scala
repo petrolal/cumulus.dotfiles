@@ -29,6 +29,7 @@ object ToolInstallers:
       case "install-sdkman" => installSdkman(ctx)
       case "install-nvim" | "install-nvim-deps" | "install-neovim" => installNvim(ctx)
       case "install-tools" => installTools(ctx)
+      case "install-telegram" => installTelegram(ctx)
       case "install-all" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
@@ -390,6 +391,21 @@ object ToolInstallers:
 
     Right(())
 
+  private def installTelegram(ctx: Context): Either[CumulusError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[cumulus install-telegram]\u001b[0m Installing/Updating Telegram Desktop (PM: $pm)...")
+    pm match
+      case PackageManager.Pacman =>
+        runPkgInstall("sudo", Seq("pacman", "-S", "--noconfirm", "telegram-desktop"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "telegram-desktop"))
+      case PackageManager.Apt =>
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "telegram-desktop"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "--cask", "telegram-desktop"))
+      case _ =>
+        Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
+
   private def installAll(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus install-all]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
@@ -401,6 +417,7 @@ object ToolInstallers:
       _ <- installSwaync(ctx)
       _ <- installFonts(ctx)
       _ <- installBrowser(ctx)
+      _ <- installTelegram(ctx)
       _ <- installDevops(ctx)
       _ <- installZsh(ctx)
       _ <- installNvim(ctx)
@@ -416,7 +433,18 @@ object ToolInstallers:
         println(s"  \u001b[32m[OK]\u001b[0m Package installation complete.")
         Right(())
       else
-        println(s"  \u001b[33m[NOTE]\u001b[0m Package manager returned code ${res.exitCode}")
+        println(s"  \u001b[33m[WARN]\u001b[0m Batch installation returned code ${res.exitCode}. Attempting individual fallback...")
+        val knownNonPackages = Set("pacman", "dnf", "apt-get", "apt", "brew", "yay", "install")
+        val (flagsAndCmds, potentialPackages) = args.partition(arg => arg.startsWith("-") || knownNonPackages.contains(arg))
+        
+        for pkg <- potentialPackages do
+          val singleCmd: Seq[os.Shellable] = (cmd +: flagsAndCmds :+ pkg).map(s => (s: os.Shellable))
+          val singleRes = os.proc(singleCmd*).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+          if singleRes.exitCode == 0 then
+            println(s"  \u001b[32m[OK]\u001b[0m Installed: $pkg")
+          else
+            println(s"  \u001b[31m[FAIL]\u001b[0m Could not install: $pkg (code ${singleRes.exitCode})")
+            
         Right(())
     catch
       case e: Exception =>
