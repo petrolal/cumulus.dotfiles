@@ -40,6 +40,22 @@ This repo is the source of truth for configuration files — they are **symlinke
 
 ---
 
+## Local Secrets & Environment Variables
+
+If you have API keys, tokens, or environment variables that shouldn't be checked into version control, `cumulus` supports a local secrets file out of the box.
+
+Simply create a file at `~/.secrets.zsh` in your home directory:
+
+```zsh
+# ~/.secrets.zsh
+export GH_PAT="your_github_token"
+export TF_VAR_google_credentials="..."
+```
+
+This file is automatically sourced by `zsh/zsh_config/40-environment.zsh` if it exists, keeping your credentials completely separate from the tracked git repository while still loading them on shell startup.
+
+---
+
 ## Installation & Usage
 
 ### Quick Start (3 Commands)

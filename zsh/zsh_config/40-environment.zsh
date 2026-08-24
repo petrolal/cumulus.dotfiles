@@ -22,3 +22,9 @@ export LC_ALL=en_US.UTF-8
 # Wayland-first hints for apps launched from a terminal inside Sway
 export MOZ_ENABLE_WAYLAND=1
 export NIXOS_OZONE_WL=1
+
+
+# Load local secrets (outside version control)
+if [ -f "$HOME/.secrets.zsh" ]; then
+  source "$HOME/.secrets.zsh"
+fi

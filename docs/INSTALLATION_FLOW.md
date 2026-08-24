@@ -487,6 +487,16 @@ cumulus install
 
 ## Post-Installation Management
 
+### Managing Local Secrets (API Keys)
+
+If you have API keys (GitHub, Terraform) or private environment variables, do not put them in the tracked `zsh_config/` directory.
+
+Create `~/.secrets.zsh` in your home folder:
+```bash
+echo 'export GH_PAT="your-key-here"' >> ~/.secrets.zsh
+```
+This file is automatically sourced by `zsh/zsh_config/40-environment.zsh` on startup but remains outside of version control.
+
 ### Update SDKMan & Java
 
 ```bash
