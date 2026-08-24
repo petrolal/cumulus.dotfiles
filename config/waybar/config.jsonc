@@ -49,7 +49,7 @@
         "format-disconnected": "󰖪 disconnected",
         "format-linked": "󰈁 {ifname} (no IP)",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
-        "on-click": "nm-connection-editor"
+        "on-click": "kitty -e wlctl"
     },
 
     "bluetooth": {

@@ -315,7 +315,7 @@ object ToolInstallers:
 
   private def installTools(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, kalker, aerc)...")
+    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, wlctl, kalker, aerc)...")
 
     val cargoHomeBin = ctx.home / ".cargo" / "bin"
     def cargoAvailable(): Boolean =
@@ -367,6 +367,15 @@ object ToolInstallers:
       runCargo("bluetui")
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping bluetui installation.")
+
+    // 2.5. wlctl Network TUI (cargo)
+    if isAvailable("wlctl") || os.exists(cargoHomeBin / "wlctl") then
+      println("  \u001b[32m[OK]\u001b[0m wlctl already installed.")
+    else if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing wlctl via cargo...")
+      runCargo("wlctl")
+    else
+      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping wlctl installation.")
 
     // 3. kalker Calculator TUI (cargo / pacman)
     if isAvailable("kalker") || os.exists(cargoHomeBin / "kalker") then

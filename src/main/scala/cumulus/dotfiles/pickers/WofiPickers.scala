@@ -185,6 +185,7 @@ object WofiPickers:
       case a if a.contains("kitty -e yazi") => "File manager (yazi)"
       case a if a.contains("kitty -e spotify_player") => "Spotify player TUI"
       case a if a.contains("kitty -e bluetui") => "Bluetooth manager (bluetui)"
+      case a if a.contains("kitty -e wlctl") => "Network manager (wlctl)"
       case a if a.contains("kitty -e ncpamixer") => "Audio mixer (ncpamixer)"
       case a if a.contains("kitty -e aerc") => "Email client (aerc)"
       case a if a.contains("google-chrome-stable") => "Google Chrome"
