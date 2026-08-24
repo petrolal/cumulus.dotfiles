@@ -44,27 +44,27 @@
     },
 
     "network": {
-        "format-wifi": "  {essid} ({signalStrength}%)",
-        "format-ethernet": "  {ifname}",
-        "format-disconnected": "⚠ disconnected",
-        "format-linked": "  {ifname} (no IP)",
+        "format-wifi": "󰖩 {essid} ({signalStrength}%)",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": "󰖪 disconnected",
+        "format-linked": "󰈁 {ifname} (no IP)",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
         "on-click": "nm-connection-editor"
     },
 
     "bluetooth": {
-        "format": "  {status}",
-        "format-connected": "  {device_alias}",
-        "format-disabled": "",
+        "format": "󰂯 {status}",
+        "format-connected": "󰂱 {device_alias}",
+        "format-disabled": "󰂲",
         "tooltip-format": "{controller_alias}: {status}",
         "on-click": "kitty -e bluetui"
     },
 
     "pulseaudio": {
-        "format": "{icon}  {volume}%",
-        "format-muted": "  muted",
+        "format": "{icon} {volume}%",
+        "format-muted": "󰖏 muted",
         "format-icons": {
-            "default": ["", "", ""]
+            "default": ["󰕿", "󰖀", "󰕾"]
         },
         "scroll-step": 5,
         "on-click": "kitty -e ncpamixer",
@@ -72,8 +72,8 @@
     },
 
     "backlight": {
-        "format": "{icon}  {percent}%",
-        "format-icons": ["", "", "", "", ""],
+        "format": "{icon} {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
         "on-scroll-up": "brightnessctl set +5%",
         "on-scroll-down": "brightnessctl set 5%-"
     },
@@ -85,9 +85,9 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon}  {capacity}%",
-        "format-charging": "  {capacity}%",
-        "format-icons": ["", "", "", "", ""]
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
 
     // Bridges Waybar to SwayNC (notification center): click to open the notification panel,
