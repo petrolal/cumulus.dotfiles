@@ -90,6 +90,15 @@ jobs:
           VERSION="${TAG_NAME#v}"
           echo "Publishing version: $VERSION"
           export CI_VERSION="$VERSION"
+          
+          # If the secret is the raw ASCII armored key, base64 encode it
+          if echo "$PGP_SECRET" | grep -q "BEGIN PGP PRIVATE KEY BLOCK"; then
+            export PGP_SECRET=$(echo "$PGP_SECRET" | base64 -w 0)
+          else
+            # Ensure it is a clean base64 string without spaces or newlines
+            export PGP_SECRET=$(echo "$PGP_SECRET" | tr -d '\n\r ')
+          fi
+          
           sbt ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
