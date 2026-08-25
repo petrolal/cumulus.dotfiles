@@ -40,8 +40,6 @@ graalvm-build/
 .agent/
 .agents/
 .claude/
-_bmad/
-_bmad-output/
 .cumulus-sdd/*
 AGENTS.md
 CLAUDE.md
