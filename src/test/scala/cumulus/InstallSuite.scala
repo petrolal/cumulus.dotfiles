@@ -54,10 +54,10 @@ class InstallSuite extends FunSuite:
     val tasks = Seq(
       "install-deps", "install-brew", "install-gh", "install-coursier",
       "install-fonts", "install-apps", "install-swaync", "install-browser", "install-devops",
-      "install-zsh", "install-sdkman", "install-nvim", "install-tools", "full-install"
+      "install-zsh", "install-sdkman", "install-tools", "full-install"
     )
     tasks.foreach { task =>
-      assert(DeployInstaller.Subcommands.contains(task))
+      assert(DeployInstaller.Subcommands.contains(task), s"Missing task: $task")
     }
 
   test("ToolInstallers.runTool rejects invalid tools"):

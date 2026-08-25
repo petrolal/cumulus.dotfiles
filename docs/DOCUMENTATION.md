@@ -118,7 +118,6 @@ Downloads the cumulus CLI binary:
 Scala-based CLI handles full setup:
 - Symlink deployment & manifest tracking
 - Homebrew, GitHub CLI (`gh`), and Coursier (`cs`) provisioning
-- Neovim editor & `cumulus.neovim` installation via Coursier
 - Desktop apps, fonts, and TUI tooling installation
 - System health checks
 
@@ -140,7 +139,7 @@ Scala-based CLI handles full setup:
 - `idle` - Auto-lock daemon
 - `screenshot` - Screen capture
 - `backup/restore` - Configuration snapshots
-- `install-*` - Tool-specific installers (`install-brew`, `install-gh`, `install-coursier`, `install-nvim`, etc.)
+- `install-*` - Tool-specific installers (`install-brew`, `install-gh`, `install-coursier`, `install-fonts`, etc.)
 
 ### Bootstrap Script (bash)
 

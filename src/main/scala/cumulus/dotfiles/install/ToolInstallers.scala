@@ -27,7 +27,6 @@ object ToolInstallers:
       case "install-devops" => installDevops(ctx)
       case "install-zsh" => installZsh(ctx)
       case "install-sdkman" => installSdkman(ctx)
-      case "install-nvim" | "install-nvim-deps" | "install-neovim" => installNvim(ctx)
       case "install-tools" => installTools(ctx)
       case "install-telegram" => installTelegram(ctx)
       case "install-node" | "install-npm" | "install-npx" => installNode(ctx)
@@ -65,12 +64,12 @@ object ToolInstallers:
     println(s"\u001b[1;36m[cumulus install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim"))
         if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "ncpamixer")) else Right(())
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
@@ -303,15 +302,6 @@ object ToolInstallers:
             println(s"  \u001b[33m[NOTE]\u001b[0m Coursier installation skipped: ${e.getMessage}")
             Right(())
 
-  private def installNvim(ctx: Context): Either[CumulusError, Unit] =
-    val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-nvim]\u001b[0m Provisioning Neovim & LSP dependencies (PM: $pm)...")
-    pm match
-      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "neovim"))
-      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "neovim"))
-      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "neovim"))
-      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "neovim"))
-      case _ => Right(println("  \u001b[32m[OK]\u001b[0m Neovim environment provisioned."))
 
   private def installTools(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
@@ -441,7 +431,6 @@ object ToolInstallers:
       _ <- installDevops(ctx)
       _ <- installZsh(ctx)
       _ <- installNode(ctx)
-      _ <- installNvim(ctx)
       _ <- installTools(ctx)
       _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
     yield ()

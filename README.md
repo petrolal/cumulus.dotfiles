@@ -69,7 +69,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/ma
 # Stage 2: Install cumulus binary from Maven Central
 cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 
-# Stage 3: Run installer (full setup: symlinks, Homebrew, GitHub CLI, Coursier, Neovim & cumulus.neovim)
+# Stage 3: Run installer (full setup: symlinks, Homebrew, GitHub CLI, Coursier, Desktop Apps)
 cumulus install
 ```
 
@@ -104,11 +104,10 @@ Stage 3: Installer & Provisioning (Full system setup via Scala CLI)
     ↓ cumulus install
     ├── Symlink dotfiles (~/.config, ~/.zshrc)
     ├── Provision Homebrew, GitHub CLI (gh), Coursier (cs)
-    ├── Install Neovim & cumulus.neovim via Coursier (cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus.neovim)
     ├── Install Desktop Apps, Fonts, TUI tools & Devops tooling
     └── Run System Healthcheck
     ↓
-COMPLETE! All dotfiles symlinked, tooling & cumulus.neovim configured
+COMPLETE! All dotfiles symlinked and tooling configured
 ```
 
 See [docs/INSTALLATION_FLOW.md](docs/INSTALLATION_FLOW.md) for detailed walkthrough.
@@ -181,7 +180,6 @@ All desktop automation, installers, maintenance, and system utilities are built 
 | `cumulus install-brew` | Install Homebrew package manager |
 | `cumulus install-gh` | Install GitHub CLI (`gh`) |
 | `cumulus install-coursier` | Install Coursier (`cs`) Scala application launcher |
-| `cumulus install-nvim` | Provision Neovim editor & `cumulus.neovim` via Coursier |
 | `cumulus install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
 | `cumulus full-install` | Install system dependencies, Homebrew, gh, Coursier, apps, fonts, and tooling |
 

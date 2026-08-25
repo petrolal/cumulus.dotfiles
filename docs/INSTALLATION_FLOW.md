@@ -104,7 +104,6 @@ This automates the complete configuration and environment provisioning:
 - **Homebrew**: Ensures Homebrew package manager is installed (`cumulus install-brew`)
 - **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`cumulus install-gh`)
 - **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`cumulus install-coursier`)
-- **Neovim & `cumulus.neovim`**: Provisions Neovim editor and installs `cumulus.neovim` via Coursier (`cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus.neovim --name cumulus-neovim`) (`cumulus install-nvim`)
 - **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`cumulus install-apps`, `cumulus install-fonts`)
 - **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`cumulus install-tools`)
 
@@ -154,7 +153,6 @@ This automates the complete configuration and environment provisioning:
 │ - Deploy symlinks & dotfiles            │
 │ - Provision Homebrew & GitHub CLI (gh)  │
 │ - Provision Coursier (cs)               │
-│ - Install Neovim & cumulus.neovim (cs)  │
 │ - Deploy fonts, desktop apps, TUI tools │
 │ - Run system health check               │
 │ - Complete full setup                   │
@@ -164,7 +162,6 @@ This automates the complete configuration and environment provisioning:
         ✓ Installation Complete!
         ✓ Desktop Ready
         ✓ All symlinks deployed
-        ✓ cumulus.neovim configured
 ```
 
 ## Interactive Installation Options

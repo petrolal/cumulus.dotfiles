@@ -101,7 +101,6 @@ object Main:
       |  install-devops   install devops & cloud tooling (docker/terraform/ansible/aws/gcp/oci/kubectl/etc.)
       |  install-zsh      install zsh + oh-my-zsh + plugins and set the shell
       |  install-sdkman   install SDKMAN! and JVM tooling
-      |  install-nvim     install Neovim & cumulus.neovim via Coursier flow
       |  install-tools    install TUI tools (spotify_player, bluetui, kalker, aerc)
       |  full-install     install all system packages, desktop apps, fonts, and tooling
       |  theme-picker     wofi GUI front-end for the theme command

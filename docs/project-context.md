@@ -190,7 +190,7 @@ cumulus.dotfiles/
 | `cumulus install-devops` | Install devops tooling (docker, terraform, kubectl) |
 | `cumulus install-zsh` | Install zsh + oh-my-zsh + plugins, set shell |
 | `cumulus install-sdkman` | Install SDKMAN! and JVM tooling |
-| `cumulus install-nvim` | Provision Neovim editor & `cumulus.neovim` via Coursier |
+| `cumulus install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
 
 ### Desktop Management
 | Command | Purpose |
