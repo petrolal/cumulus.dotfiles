@@ -30,6 +30,7 @@ object ToolInstallers:
       case "install-tools" => installTools(ctx)
       case "install-telegram" => installTelegram(ctx)
       case "install-node" | "install-npm" | "install-npx" => installNode(ctx)
+      case "install-yazi" => installYazi(ctx)
       case "full-install" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
@@ -65,11 +66,11 @@ object ToolInstallers:
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim"))
-        if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "ncpamixer")) else Right(())
+        if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "ncpamixer", "onlyoffice-bin")) else Right(())
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
@@ -86,22 +87,18 @@ object ToolInstallers:
   private def installSwaync(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
     println(s"\u001b[1;36m[cumulus install-swaync]\u001b[0m Checking/Installing SwayNC (PM: $pm)...")
-    if isAvailable("swaync") || isAvailable("swaync-client") then
-      println("  \u001b[32m[OK]\u001b[0m SwayNC already installed.")
-      Right(())
-    else
-      pm match
-        case PackageManager.Pacman =>
-          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "swaync"))
-        case PackageManager.Dnf =>
-          runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway-notification-center"))
-        case PackageManager.Apt =>
-          runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway-notification-center"))
-        case PackageManager.Brew =>
-          runPkgInstall("brew", Seq("install", "sway-notification-center"))
-        case _ =>
-          println("  \u001b[33m[NOTE]\u001b[0m Manual installation of swaync required for current OS.")
-          Right(())
+    pm match
+      case PackageManager.Pacman =>
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "swaync"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway-notification-center"))
+      case PackageManager.Apt =>
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway-notification-center"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "sway-notification-center"))
+      case _ =>
+        println("  \u001b[33m[NOTE]\u001b[0m Manual installation of swaync required for current OS.")
+        Right(())
 
   private def installDevops(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
@@ -133,42 +130,36 @@ object ToolInstallers:
           println(s"  \u001b[33m[NOTE]\u001b[0m kubectl download skipped: ${e.getMessage}")
 
     // Google Cloud CLI (gcloud)
-    if isAvailable("gcloud") || os.exists(localBin / "gcloud") then
-      println("  \u001b[32m[OK]\u001b[0m Google Cloud CLI (gcloud) already installed.")
+    println("  \u001b[36m[INFO]\u001b[0m Installing/Updating Google Cloud CLI (gcloud)...")
+    if pm == PackageManager.Pacman && isAvailable("yay") then
+      runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "google-cloud-cli"))
     else
-      println("  \u001b[36m[INFO]\u001b[0m Installing Google Cloud CLI (gcloud)...")
-      if pm == PackageManager.Pacman && isAvailable("yay") then
-        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "google-cloud-cli"))
-      else
-        try
-          val gcloudInstallScript = "curl -sSL https://sdk.cloud.google.com | bash --disable-prompts --install-dir=" + (ctx.home / ".local" / "share").toString
-          val res = os.proc("bash", "-c", gcloudInstallScript).call(check = false)
-          if res.exitCode == 0 then
-            println("  \u001b[32m[OK]\u001b[0m Google Cloud CLI installed.")
-          else
-            println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI install exited with code ${res.exitCode}")
-        catch
-          case e: Exception =>
-            println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI installation skipped: ${e.getMessage}")
+      try
+        val gcloudInstallScript = "curl -sSL https://sdk.cloud.google.com | bash --disable-prompts --install-dir=" + (ctx.home / ".local" / "share").toString
+        val res = os.proc("bash", "-c", gcloudInstallScript).call(check = false)
+        if res.exitCode == 0 then
+          println("  \u001b[32m[OK]\u001b[0m Google Cloud CLI installed.")
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI install exited with code ${res.exitCode}")
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m Google Cloud CLI installation skipped: ${e.getMessage}")
 
     // Oracle Cloud Infrastructure CLI (oci)
-    if isAvailable("oci") || os.exists(localBin / "oci") then
-      println("  \u001b[32m[OK]\u001b[0m Oracle Cloud CLI (oci) already installed.")
+    println("  \u001b[36m[INFO]\u001b[0m Installing/Updating Oracle Cloud CLI (oci)...")
+    if pm == PackageManager.Pacman && isAvailable("yay") then
+      runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "oci-cli"))
     else
-      println("  \u001b[36m[INFO]\u001b[0m Installing Oracle Cloud CLI (oci)...")
-      if pm == PackageManager.Pacman && isAvailable("yay") then
-        runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "oci-cli"))
-      else
-        try
-          val ociInstallScript = s"""bash -c "$$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --install-dir "${ctx.home / ".local" / "lib" / "oracle-cli"}" --exec-dir "$localBin""""
-          val res = os.proc("bash", "-c", ociInstallScript).call(check = false)
-          if res.exitCode == 0 then
-            println("  \u001b[32m[OK]\u001b[0m Oracle Cloud CLI (oci) installed.")
-          else
-            println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI install exited with code ${res.exitCode}")
-        catch
-          case e: Exception =>
-            println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI installation skipped: ${e.getMessage}")
+      try
+        val ociInstallScript = s"""bash -c "$$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --install-dir "${ctx.home / ".local" / "lib" / "oracle-cli"}" --exec-dir "$localBin""""
+        val res = os.proc("bash", "-c", ociInstallScript).call(check = false)
+        if res.exitCode == 0 then
+          println("  \u001b[32m[OK]\u001b[0m Oracle Cloud CLI (oci) installed.")
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI install exited with code ${res.exitCode}")
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m Oracle Cloud CLI installation skipped: ${e.getMessage}")
 
     Right(println("  \u001b[32m[OK]\u001b[0m DevOps and Cloud CLI tools provisioned."))
 
@@ -186,7 +177,8 @@ object ToolInstallers:
     println("\u001b[1;36m[cumulus install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
     val sdkmanDir = ctx.home / ".sdkman"
     if os.exists(sdkmanDir) then
-      println("  \u001b[32m[OK]\u001b[0m SDKMAN! already installed at ~/.sdkman.")
+      println("  \u001b[36m[INFO]\u001b[0m Updating SDKMAN!...")
+      os.proc("bash", "-c", s"source ${sdkmanDir}/bin/sdkman-init.sh && sdk selfupdate force").call(check = false)
       Right(())
     else
       try
@@ -219,7 +211,9 @@ object ToolInstallers:
     println("\u001b[1;36m[cumulus install-brew]\u001b[0m Checking/Installing Homebrew...")
     getBrewBin(ctx) match
       case Some(brewPath) =>
-        println(s"  \u001b[32m[OK]\u001b[0m Homebrew already installed at $brewPath")
+        println(s"  \u001b[36m[INFO]\u001b[0m Updating Homebrew at $brewPath...")
+        os.proc(brewPath.toString, "update").call(check = false)
+        os.proc(brewPath.toString, "upgrade").call(check = false)
         Right(())
       case None =>
         println("  \u001b[36m[INFO]\u001b[0m Installing Homebrew via official non-interactive installer...")
@@ -241,26 +235,22 @@ object ToolInstallers:
   private def installGh(ctx: Context): Either[CumulusError, Unit] =
     val pm = detectPackageManager()
     println(s"\u001b[1;36m[cumulus install-gh]\u001b[0m Checking/Installing GitHub CLI (PM: $pm)...")
-    if isAvailable("gh") then
-      println("  \u001b[32m[OK]\u001b[0m GitHub CLI (gh) already installed.")
-      Right(())
-    else
-      pm match
-        case PackageManager.Pacman =>
-          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "github-cli"))
-        case PackageManager.Dnf =>
-          runPkgInstall("sudo", Seq("dnf", "install", "-y", "gh"))
-        case PackageManager.Apt =>
-          runPkgInstall("sudo", Seq("apt-get", "install", "-y", "gh"))
-        case PackageManager.Brew =>
-          runPkgInstall("brew", Seq("install", "gh"))
-        case PackageManager.Unknown =>
-          getBrewBin(ctx) match
-            case Some(brewBin) =>
-              runPkgInstall(brewBin.toString, Seq("install", "gh"))
-            case None =>
-              println("  \u001b[33m[NOTE]\u001b[0m Manual installation of GitHub CLI (gh) recommended.")
-              Right(())
+    pm match
+      case PackageManager.Pacman =>
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "github-cli"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "gh"))
+      case PackageManager.Apt =>
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "gh"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "gh"))
+      case PackageManager.Unknown =>
+        getBrewBin(ctx) match
+          case Some(brewBin) =>
+            runPkgInstall(brewBin.toString, Seq("install", "gh"))
+          case None =>
+            println("  \u001b[33m[NOTE]\u001b[0m Manual installation of GitHub CLI (gh) recommended.")
+            Right(())
 
   private def getCoursierBin(ctx: Context): Option[os.Path] =
     val localBinCs = ctx.home / ".local" / "bin" / "cs"
@@ -279,7 +269,8 @@ object ToolInstallers:
     println("\u001b[1;36m[cumulus install-coursier]\u001b[0m Checking/Installing Coursier...")
     getCoursierBin(ctx) match
       case Some(csPath) =>
-        println(s"  \u001b[32m[OK]\u001b[0m Coursier already installed at $csPath")
+        println(s"  \u001b[36m[INFO]\u001b[0m Updating Coursier at $csPath...")
+        os.proc(csPath.toString, "update").call(check = false)
         Right(())
       case None =>
         val binDir = ctx.home / ".local" / "bin"
@@ -341,53 +332,43 @@ object ToolInstallers:
         case _ => ()
 
     // 1. spotify_player TUI (cargo)
-    if isAvailable("spotify_player") || os.exists(cargoHomeBin / "spotify_player") then
-      println("  \u001b[32m[OK]\u001b[0m spotify_player already installed.")
-    else if cargoAvailable() then
-      println("  \u001b[36m[INFO]\u001b[0m Installing spotify_player via cargo...")
+    if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing/Updating spotify_player via cargo...")
       runCargo("spotify_player", Seq("--features", "daemon,pulseaudio-backend,rodio-backend"))
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping spotify_player installation.")
 
     // 2. bluetui Bluetooth TUI (cargo)
-    if isAvailable("bluetui") || os.exists(cargoHomeBin / "bluetui") then
-      println("  \u001b[32m[OK]\u001b[0m bluetui already installed.")
-    else if cargoAvailable() then
-      println("  \u001b[36m[INFO]\u001b[0m Installing bluetui via cargo...")
+    if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing/Updating bluetui via cargo...")
       runCargo("bluetui")
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping bluetui installation.")
 
     // 2.5. impala Network TUI (cargo)
-    if isAvailable("impala") || os.exists(cargoHomeBin / "impala") then
-      println("  \u001b[32m[OK]\u001b[0m impala already installed.")
-    else if cargoAvailable() then
-      println("  \u001b[36m[INFO]\u001b[0m Installing impala via cargo...")
+    if cargoAvailable() then
+      println("  \u001b[36m[INFO]\u001b[0m Installing/Updating impala via cargo...")
       runCargo("impala")
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping impala installation.")
+
     // 3. kalker Calculator TUI (cargo / pacman)
-    if isAvailable("kalker") || os.exists(cargoHomeBin / "kalker") then
-      println("  \u001b[32m[OK]\u001b[0m kalker calculator already installed.")
-    else if pm == PackageManager.Pacman then
+    if pm == PackageManager.Pacman then
       runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "kalker"))
     else if cargoAvailable() then
-      println("  \u001b[36m[INFO]\u001b[0m Installing kalker calculator via cargo...")
+      println("  \u001b[36m[INFO]\u001b[0m Installing/Updating kalker calculator via cargo...")
       runCargo("kalker")
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping kalker installation.")
 
     // 4. aerc Email Client TUI (package manager)
-    if isAvailable("aerc") then
-      println("  \u001b[32m[OK]\u001b[0m aerc email client already installed.")
-    else
-      println("  \u001b[36m[INFO]\u001b[0m Installing aerc email client...")
-      pm match
-        case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
-        case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "aerc"))
-        case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "aerc"))
-        case PackageManager.Brew => runPkgInstall("brew", Seq("install", "aerc"))
-        case _ => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual installation of aerc required for this system."))
+    println("  \u001b[36m[INFO]\u001b[0m Installing/Updating aerc email client...")
+    pm match
+      case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
+      case PackageManager.Apt => runPkgInstall("sudo", Seq("apt-get", "install", "-y", "aerc"))
+      case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "aerc"))
+      case PackageManager.Brew => runPkgInstall("brew", Seq("install", "aerc"))
+      case _ => Right(println("  \u001b[33m[NOTE]\u001b[0m Manual installation of aerc required for this system."))
 
     Right(())
 
@@ -416,6 +397,42 @@ object ToolInstallers:
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "node"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Node.js environment provisioned."))
 
+  private def installYazi(ctx: Context): Either[CumulusError, Unit] =
+    println(s"\u001b[1;36m[cumulus install-yazi]\u001b[0m Installing yazi file manager (latest) & plugins...")
+    val cargoHomeBin = ctx.home / ".cargo" / "bin"
+    def cargoAvailable(): Boolean =
+      isAvailable("cargo") || os.exists(cargoHomeBin / "cargo")
+
+    if !cargoAvailable() then
+      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping yazi installation.")
+      Right(())
+    else
+      val cargoExe = if isAvailable("cargo") then "cargo" else (cargoHomeBin / "cargo").toString
+      try
+        // Always install latest from cargo
+        val res = os.proc(cargoExe, "install", "--locked", "yazi-fm", "yazi-cli").call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+        if res.exitCode == 0 then
+          println(s"  \u001b[32m[OK]\u001b[0m yazi installed successfully.")
+          
+          // Install requested plugins
+          val yaExe = if isAvailable("ya") then "ya" else (cargoHomeBin / "ya").toString
+          val plugins = Seq("yazi-rs/plugins:git", "yazi-rs/plugins:full-border", "yazi-rs/plugins:starship", "yazi-rs/plugins:mount")
+          for plugin <- plugins do
+            val pluginRes = os.proc(yaExe, "pack", "-a", plugin).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+            if pluginRes.exitCode == 0 then
+              println(s"  \u001b[32m[OK]\u001b[0m Installed plugin: $plugin")
+            else
+              println(s"  \u001b[33m[NOTE]\u001b[0m Failed to install plugin: $plugin (code ${pluginRes.exitCode})")
+              
+          Right(())
+        else
+          println(s"  \u001b[33m[NOTE]\u001b[0m yazi cargo install exited with code ${res.exitCode}")
+          Right(())
+      catch
+        case e: Exception =>
+          println(s"  \u001b[33m[NOTE]\u001b[0m yazi installation skipped: ${e.getMessage}")
+          Right(())
+
   private def installAll(ctx: Context): Either[CumulusError, Unit] =
     println("\u001b[1;36m[cumulus full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
@@ -432,6 +449,7 @@ object ToolInstallers:
       _ <- installZsh(ctx)
       _ <- installNode(ctx)
       _ <- installTools(ctx)
+      _ <- installYazi(ctx)
       _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
     yield ()
 
