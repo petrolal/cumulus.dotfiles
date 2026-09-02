@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.theme.{Palette, ThemeEngine}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.theme.{Palette, ThemeEngine}
 import munit.FunSuite
 
 class ThemeSuite extends FunSuite:

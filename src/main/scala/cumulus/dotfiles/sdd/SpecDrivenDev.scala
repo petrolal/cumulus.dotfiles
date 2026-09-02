@@ -1,11 +1,11 @@
-package cumulus.dotfiles.sdd
+package polyomino.dotfiles.sdd
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 object SpecDrivenDev:
-  def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println("[1;36m[cumulus sdd][0m Generating AI spec-driven development context...")
+  def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
+    println("[1;36m[polyomino sdd][0m Generating AI spec-driven development context...")
 
     val targetFile = args.headOption.getOrElse("project-context.md")
     val projectContext = if targetFile.startsWith("/") then

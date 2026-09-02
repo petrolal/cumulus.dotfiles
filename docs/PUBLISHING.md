@@ -1,6 +1,6 @@
 # Publishing Guide: Maven Central, AUR & GitHub Releases
 
-Complete guide for publishing cumulus-dotfiles to Maven Central, AUR (Arch Linux), and GitHub Releases.
+Complete guide for publishing polyomino-dotfiles to Maven Central, AUR (Arch Linux), and GitHub Releases.
 
 ## Quick Start (TL;DR)
 
@@ -29,7 +29,7 @@ Complete guide for publishing cumulus-dotfiles to Maven Central, AUR (Arch Linux
 git push origin master --tags
 
 # 4. Wait for pipeline to complete
-# Monitor: https://github.com/petrolal/cumulus-dotfiles/actions
+# Monitor: https://github.com/petrolal/polyomino-dotfiles/actions
 ```
 
 ## What Gets Published
@@ -37,21 +37,21 @@ git push origin master --tags
 ### Maven Central
 ```bash
 # Scala/Java developers can depend on:
-"io.github.petrolal" %% "cumulus-dotfiles" % "1.0.0"
+"io.github.petrolal" %% "polyomino-dotfiles" % "1.0.0"
 ```
 
 ### AUR (Arch Linux)
 ```bash
 # Arch users install with:
-yay -S cumulus-dotfiles
+yay -S polyomino-dotfiles
 # or
-sudo pacman -S cumulus-dotfiles
+sudo pacman -S polyomino-dotfiles
 ```
 
 ### GitHub Releases
 ```bash
 # Direct download of native binary:
-https://github.com/petrolal/cumulus-dotfiles/releases/download/v1.0.0/cumulus
+https://github.com/petrolal/polyomino-dotfiles/releases/download/v1.0.0/polyomino
 ```
 
 ---
@@ -106,12 +106,12 @@ https://github.com/petrolal/cumulus-dotfiles/releases/download/v1.0.0/cumulus
 ```scala
 ThisBuild / organization := "io.github.petrolal"
 ThisBuild / versionScheme := Some("semver-spec")
-ThisBuild / homepage := Some(url("https://github.com/petrolal/cumulus-dotfiles"))
+ThisBuild / homepage := Some(url("https://github.com/petrolal/polyomino-dotfiles"))
 ThisBuild / licenses := List("MIT" -> url("https://opensource.org/licenses/MIT"))
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/petrolal/cumulus-dotfiles"),
-    "scm:git@github.com:petrolal/cumulus-dotfiles.git"
+    url("https://github.com/petrolal/polyomino-dotfiles"),
+    "scm:git@github.com:petrolal/polyomino-dotfiles.git"
   )
 )
 ThisBuild / developers := List(
@@ -127,7 +127,7 @@ ThisBuild / developers := List(
 #### Coursier Configuration in build.sbt
 
 ```scala
-Compile / mainClass := Some("cumulus.Main")
+Compile / mainClass := Some("polyomino.Main")
 assembly / assemblyJarName := s"${name.value}-${version.value}-assembly.jar"
 scriptClasspath := Seq("*")
 ```
@@ -194,12 +194,12 @@ credentials += Credentials(
 ```bash
 # Test locally first
 cd /tmp
-git clone https://github.com/petrolal/cumulus-dotfiles.git
-cd cumulus-dotfiles
+git clone https://github.com/petrolal/polyomino-dotfiles.git
+cd polyomino-dotfiles
 makepkg -si
 
 # Push to AUR
-git remote add aur ssh://aur@aur.archlinux.org/cumulus-dotfiles.git
+git remote add aur ssh://aur@aur.archlinux.org/polyomino-dotfiles.git
 git push aur master
 ```
 
@@ -245,7 +245,7 @@ Always use `v` prefix:
 
 - [ ] Clean build succeeds: `sbt clean compile test`
 - [ ] Native image builds: `sbt nativeImage`
-- [ ] Binary works locally: `./target/native-image/cumulus --version`
+- [ ] Binary works locally: `./target/native-image/polyomino --version`
 - [ ] Manual testing completed on target system
 
 ### Version Management
@@ -267,7 +267,7 @@ Always use `v` prefix:
 ### Post-Push Verification
 
 - [ ] GitHub Actions workflow triggered
-  - Check: https://github.com/petrolal/cumulus-dotfiles/actions
+  - Check: https://github.com/petrolal/polyomino-dotfiles/actions
 - [ ] Maven Central build passed
 - [ ] Native image build passed
 - [ ] GitHub Release created with binary artifact
@@ -278,15 +278,15 @@ Always use `v` prefix:
 #### Maven Central
 - [ ] Artifact appears on Maven Central
   - Search: https://search.maven.org/
-  - Look for: `io.github.petrolal:cumulus-dotfiles:X.Y.Z`
+  - Look for: `io.github.petrolal:polyomino-dotfiles:X.Y.Z`
 
 #### AUR
 - [ ] Package appears on AUR
-  - Check: https://aur.archlinux.org/packages/cumulus-dotfiles/
+  - Check: https://aur.archlinux.org/packages/polyomino-dotfiles/
   - Verify PKGBUILD version updated
 
 #### GitHub
-- [ ] Release published: https://github.com/petrolal/cumulus-dotfiles/releases
+- [ ] Release published: https://github.com/petrolal/polyomino-dotfiles/releases
 - [ ] Binary artifact available for download
 - [ ] Release notes populated (automatic from commit messages)
 
@@ -370,14 +370,14 @@ Usually means you're publishing same version twice. Options:
 
 **Manual publish fallback:**
 ```bash
-git remote add aur ssh://aur@aur.archlinux.org/cumulus-dotfiles.git
+git remote add aur ssh://aur@aur.archlinux.org/polyomino-dotfiles.git
 git push aur master:master
 ```
 
 ### GitHub Release Creation Fails
 
 1. Verify `GITHUB_TOKEN` in secrets (auto-created, usually works)
-2. Check native image binary exists: `ls -la target/native-image/cumulus`
+2. Check native image binary exists: `ls -la target/native-image/polyomino`
 3. Verify binary is not too large (GitHub has limits)
 
 ---
@@ -394,7 +394,7 @@ gh run list -L 1
 gh run view <RUN_ID> --log
 
 # Or visit web UI:
-# https://github.com/petrolal/cumulus-dotfiles/actions
+# https://github.com/petrolal/polyomino-dotfiles/actions
 ```
 
 ### Check Sonatype Staging
@@ -411,10 +411,10 @@ sbt sonatypeRepositoryProfile
 
 ```bash
 # Search Maven Central
-curl -s https://search.maven.org/solrsearch/select?q=io.github.petrolal:cumulus | jq .
+curl -s https://search.maven.org/solrsearch/select?q=io.github.petrolal:polyomino | jq .
 
 # Or use web UI:
-# https://search.maven.org/search?q=cumulus-dotfiles
+# https://search.maven.org/search?q=polyomino-dotfiles
 ```
 
 ---
@@ -445,14 +445,14 @@ git push origin master --tags
 
 ### Maven Central
 - Search: https://search.maven.org/
-- Direct link: https://repo.maven.apache.org/maven2/io/github/petrolal/cumulus-dotfiles/
+- Direct link: https://repo.maven.apache.org/maven2/io/github/petrolal/polyomino-dotfiles/
 
 ### AUR
-- Check: https://aur.archlinux.org/packages/cumulus-dotfiles/
-- Install: `yay -S cumulus-dotfiles`
+- Check: https://aur.archlinux.org/packages/polyomino-dotfiles/
+- Install: `yay -S polyomino-dotfiles`
 
 ### GitHub Releases
-- Check: https://github.com/petrolal/cumulus-dotfiles/releases
+- Check: https://github.com/petrolal/polyomino-dotfiles/releases
 
 ---
 
@@ -490,7 +490,7 @@ Next steps:
      git push origin master
      git push origin --tags
   3. Watch CI/CD pipeline:
-     https://github.com/petrolal/cumulus-dotfiles/actions
+     https://github.com/petrolal/polyomino-dotfiles/actions
 
 $ git push origin master --tags
 
@@ -503,7 +503,7 @@ $ git push origin master --tags
 
 # Wait 10-30 minutes for Maven Central sync
 # Then verify:
-# https://search.maven.org/search?q=cumulus-dotfiles
+# https://search.maven.org/search?q=polyomino-dotfiles
 ```
 
 ---
@@ -523,13 +523,13 @@ $ git push origin master --tags
 git push origin master --tags
 
 # Monitor
-open https://github.com/petrolal/cumulus-dotfiles/actions
+open https://github.com/petrolal/polyomino-dotfiles/actions
 
 # Check Maven Central (after 15-30 mins)
-open https://search.maven.org/search?q=cumulus-dotfiles
+open https://search.maven.org/search?q=polyomino-dotfiles
 
 # Check AUR
-open https://aur.archlinux.org/packages/cumulus-dotfiles/
+open https://aur.archlinux.org/packages/polyomino-dotfiles/
 ```
 
 ---

@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.calendar.CalendarPopup
-import cumulus.dotfiles.context.Context
+import polyomino.dotfiles.calendar.CalendarPopup
+import polyomino.dotfiles.context.Context
 import munit.FunSuite
 
 class CalendarSuite extends FunSuite:
@@ -16,7 +16,7 @@ class CalendarSuite extends FunSuite:
 
   test("CalendarPopup extracts theme color tokens"):
     val ctx = Context.discover().toOption.get
-    val palette = cumulus.dotfiles.theme.ThemeEngine.getActivePalette(ctx)
+    val palette = polyomino.dotfiles.theme.ThemeEngine.getActivePalette(ctx)
     assert(palette.name.nonEmpty)
     assert(palette.base.startsWith("#"))
     assert(palette.accent.startsWith("#"))

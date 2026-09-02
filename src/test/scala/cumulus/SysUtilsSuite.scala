@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.sysutils.SysUtils
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.sysutils.SysUtils
 import munit.FunSuite
 
 class SysUtilsSuite extends FunSuite:

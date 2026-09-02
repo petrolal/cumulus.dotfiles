@@ -1,10 +1,10 @@
-# project-context.md — cumulus.dotfiles AI Context & System Architecture
+# project-context.md — polyomino.dotfiles AI Context & System Architecture
 
 ## Project Overview & Purpose
 
-`cumulus.dotfiles` is a lightweight, high-performance desktop environment tooling suite designed for Sway/Wayland Linux desktop environments. It manages dynamic window autotiling, desktop theme switching across application surfaces, system health validation, config snapshot maintenance, and automated machine provisioning.
+`polyomino.dotfiles` is a lightweight, high-performance desktop environment tooling suite designed for Sway/Wayland Linux desktop environments. It manages dynamic window autotiling, desktop theme switching across application surfaces, system health validation, config snapshot maintenance, and automated machine provisioning.
 
-The suite follows a **Multi-Call Binary Architecture**: all sub-commands compile into a single executable umbrella (`cumulus`) via GraalVM native image. Sub-command invocations like `cumulus-theme` or `cumulus-autotiling` are handled via filesystem symlinks pointing to `cumulus`. The main binary inspects `argv[0]` or the first argument to route execution to the target submodule.
+The suite follows a **Multi-Call Binary Architecture**: all sub-commands compile into a single executable umbrella (`polyomino`) via GraalVM native image. Sub-command invocations like `polyomino-theme` or `polyomino-autotiling` are handled via filesystem symlinks pointing to `polyomino`. The main binary inspects `argv[0]` or the first argument to route execution to the target submodule.
 
 ---
 
@@ -38,10 +38,10 @@ The suite follows a **Multi-Call Binary Architecture**: all sub-commands compile
 ### Build Configuration (build.sbt)
 ```scala
 scalaVersion := "3.5.2"
-name := "cumulus"
+name := "polyomino"
 organization := "io.github.petrolal"
 version := "0.1.0"
-Compile / mainClass := Some("cumulus.Main")
+Compile / mainClass := Some("polyomino.Main")
 
 // Maven Central publishing via Sonatype Central Portal
 publishMavenStyle := true
@@ -57,7 +57,7 @@ nativeImageOptions ++= Seq(
 
 // Fat JAR assembly for Maven Central
 assembly / assemblyJarName := s"${name.value}-${version.value}-assembly.jar"
-assembly / mainClass := Some("cumulus.Main")
+assembly / mainClass := Some("polyomino.Main")
 
 // Package manifest for Coursier compatibility
 packageBin / packageOptions += Package.ManifestAttributes(...)
@@ -68,18 +68,18 @@ packageBin / packageOptions += Package.ManifestAttributes(...)
 ## Architectural Invariants & Patterns
 
 ### 1. Single Multi-Call Native Executable
-- All modules (`autotiling`, `theme`, `refresh`, `sysutils`, `maintenance`, `install`, `pickers`, `sdd`, `validate`) compile into a single native binary (`cumulus`)
+- All modules (`autotiling`, `theme`, `refresh`, `sysutils`, `maintenance`, `install`, `pickers`, `sdd`, `validate`) compile into a single native binary (`polyomino`)
 - Binary size optimized via GraalVM native-image compilation (~40-60 MB)
 - Startup latency: 15-50 ms
 - Memory RSS: Under 60 MB peak RAM
-- Command aliases (`cumulus-<subcommand>`) are symlinks in `~/.local/bin` pointing to the single `cumulus` binary
+- Command aliases (`polyomino-<subcommand>`) are symlinks in `~/.local/bin` pointing to the single `polyomino` binary
 
 ### 2. Non-Reflective System I/O
 - Process execution and file manipulation use `os-lib` (direct POSIX syscalls)
 - JSON parsing uses `uPickle` derive macros (compile-time code generation, zero reflection)
 - No reflection configuration (`reflect-config.json`) required for GraalVM native-image
 
-### 3. Error Handling via Either[CumulusError, T]
+### 3. Error Handling via Either[PolyominoError, T]
 - Functional error propagation using `Either` monad
 - No exceptions at module boundaries
 - Typed error domain: `CommandError`, `ConfigError`, `ProcessExecutionError`, `UnknownCommandError`
@@ -101,13 +101,13 @@ packageBin / packageOptions += Package.ManifestAttributes(...)
 ## Module Structure & Responsibility Map
 
 ```
-cumulus.dotfiles/
-├── src/main/scala/cumulus/
+polyomino.dotfiles/
+├── src/main/scala/polyomino/
 │   ├── Main.scala                          # Entry point, command dispatch router
 │   │
 │   └── dotfiles/
 │       ├── context/Context.scala           # XDG path discovery, environment setup
-│       ├── error/CumulusError.scala        # Error domain types (Either-based)
+│       ├── error/PolyominoError.scala        # Error domain types (Either-based)
 │       │
 │       ├── autotiling/
 │       │   └── AutotilingDaemon.scala      # Sway IPC listener, Fibonacci spiral window layout
@@ -139,7 +139,7 @@ cumulus.dotfiles/
 │       └── validate/
 │           └── Validator.scala             # Read-only health check of system setup
 │
-├── src/test/scala/cumulus/
+├── src/test/scala/polyomino/
 │   ├── *Suite.scala                        # Unit tests for each module (munit)
 │
 ├── build.sbt                               # sbt build configuration
@@ -158,7 +158,7 @@ cumulus.dotfiles/
 
 ## Desktop Surface Integrations
 
-`cumulus.dotfiles` coordinates state and configuration files across the following desktop components:
+`polyomino.dotfiles` coordinates state and configuration files across the following desktop components:
 
 | Component | Integration Method | Purpose |
 |-----------|-------------------|---------|
@@ -178,48 +178,48 @@ cumulus.dotfiles/
 ### Installation & System Setup
 | Command | Purpose |
 |---------|---------|
-| `cumulus install` | Deploy dotfiles, create symlinks, run full installer setup |
-| `cumulus full-install` | Install system packages, Homebrew, gh, Coursier, apps, fonts, and tooling |
-| `cumulus install-deps` | Install system & build dependencies (sbt, gcc, git, etc.) |
-| `cumulus install-brew` | Install Homebrew package manager |
-| `cumulus install-gh` | Install GitHub CLI (`gh`) |
-| `cumulus install-coursier` | Install Coursier (`cs`) Scala application launcher |
-| `cumulus install-fonts` | Download and install JetBrainsMono Nerd Font |
-| `cumulus install-apps` | Install core desktop apps (sway, waybar, kitty, etc.) |
-| `cumulus install-browser` | Install web browser (chromium/firefox) |
-| `cumulus install-devops` | Install devops tooling (docker, terraform, kubectl) |
-| `cumulus install-zsh` | Install zsh + oh-my-zsh + plugins, set shell |
-| `cumulus install-sdkman` | Install SDKMAN! and JVM tooling |
-| `cumulus install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
+| `polyomino install` | Deploy dotfiles, create symlinks, run full installer setup |
+| `polyomino full-install` | Install system packages, Homebrew, gh, Coursier, apps, fonts, and tooling |
+| `polyomino install-deps` | Install system & build dependencies (sbt, gcc, git, etc.) |
+| `polyomino install-brew` | Install Homebrew package manager |
+| `polyomino install-gh` | Install GitHub CLI (`gh`) |
+| `polyomino install-coursier` | Install Coursier (`cs`) Scala application launcher |
+| `polyomino install-fonts` | Download and install JetBrainsMono Nerd Font |
+| `polyomino install-apps` | Install core desktop apps (sway, waybar, kitty, etc.) |
+| `polyomino install-browser` | Install web browser (chromium/firefox) |
+| `polyomino install-devops` | Install devops tooling (docker, terraform, kubectl) |
+| `polyomino install-zsh` | Install zsh + oh-my-zsh + plugins, set shell |
+| `polyomino install-sdkman` | Install SDKMAN! and JVM tooling |
+| `polyomino install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
 
 ### Desktop Management
 | Command | Purpose |
 |---------|---------|
-| `cumulus theme` | Apply desktop theme flavor + wallpaper mode live |
-| `cumulus theme-picker` | Wofi GUI menu to select and apply themes |
-| `cumulus runtime-refresh` | Trigger live reload signals across running apps |
-| `cumulus os-colorscheme` | Sync GNOME/GTK dark/light color-scheme setting |
-| `cumulus autotiling` | Background daemon: Fibonacci spiral window autotiling |
-| `cumulus lock` | Lock screen via swaylock with active theme colors |
-| `cumulus idle` | Launch swayidle daemon (auto-lock, DPMS, suspend) |
-| `cumulus screenshot` | Capture screen (full/region/window) to file and clipboard |
-| `cumulus whichkey` | Wofi GUI cheatsheet of live Sway keybindings |
+| `polyomino theme` | Apply desktop theme flavor + wallpaper mode live |
+| `polyomino theme-picker` | Wofi GUI menu to select and apply themes |
+| `polyomino runtime-refresh` | Trigger live reload signals across running apps |
+| `polyomino os-colorscheme` | Sync GNOME/GTK dark/light color-scheme setting |
+| `polyomino autotiling` | Background daemon: Fibonacci spiral window autotiling |
+| `polyomino lock` | Lock screen via swaylock with active theme colors |
+| `polyomino idle` | Launch swayidle daemon (auto-lock, DPMS, suspend) |
+| `polyomino screenshot` | Capture screen (full/region/window) to file and clipboard |
+| `polyomino whichkey` | Wofi GUI cheatsheet of live Sway keybindings |
 
 ### Maintenance & Validation
 | Command | Purpose |
 |---------|---------|
-| `cumulus healthcheck` | Read-only health check: configs, tools, fonts, env vars |
-| `cumulus backup` | Create timestamped `.tar.gz` archive of dotfiles |
-| `cumulus restore` | Restore snapshot created by `cumulus backup` |
-| `cumulus update` | Git pull dotfiles repository and re-run installer |
-| `cumulus sdd` | Generate token-efficient AI context and specs |
+| `polyomino healthcheck` | Read-only health check: configs, tools, fonts, env vars |
+| `polyomino backup` | Create timestamped `.tar.gz` archive of dotfiles |
+| `polyomino restore` | Restore snapshot created by `polyomino backup` |
+| `polyomino update` | Git pull dotfiles repository and re-run installer |
+| `polyomino sdd` | Generate token-efficient AI context and specs |
 
 ---
 
 ## Command Dispatch Flow
 
 ```
-cumulus [COMMAND] [ARGS...]
+polyomino [COMMAND] [ARGS...]
     ↓
 Main.main(args) / dispatch(args)
     ↓
@@ -227,7 +227,7 @@ Parse argv[0] or argv[1] to extract command name
     ↓
 Context.discover() → Either[ConfigError, Context]
     ↓
-dispatchModule(cmd, ctx, args) → Either[CumulusError, Unit]
+dispatchModule(cmd, ctx, args) → Either[PolyominoError, Unit]
     ↓
 Route to module:
   - "theme" → ThemeEngine.run()
@@ -237,7 +237,7 @@ Route to module:
   - "lock" → SysUtils.runLock()
   - etc.
     ↓
-Execute, catch Either[CumulusError, _]
+Execute, catch Either[PolyominoError, _]
     ↓
 Format error with ANSI colors or exit cleanly
 ```
@@ -267,7 +267,7 @@ Format error with ANSI colors or exit cleanly
 
 ## Testing Strategy
 
-All modules have corresponding unit test suites in `src/test/scala/cumulus/`:
+All modules have corresponding unit test suites in `src/test/scala/polyomino/`:
 - `MainSuite.scala` — Command dispatch, argv parsing
 - `AutotilingSuite.scala` — Fibonacci layout calculations
 - `InstallSuite.scala` — Symlink creation, path validation
@@ -279,7 +279,7 @@ All modules have corresponding unit test suites in `src/test/scala/cumulus/`:
 
 **Test framework**: munit (lightweight, compile-time friendly)
 
-**Execution**: `sbt test` or `sbt 'testOnly cumulus.AutotilingSuite'`
+**Execution**: `sbt test` or `sbt 'testOnly polyomino.AutotilingSuite'`
 
 ---
 
@@ -287,34 +287,34 @@ All modules have corresponding unit test suites in `src/test/scala/cumulus/`:
 
 ### Maven Central
 - Published via Sonatype Central Portal
-- Coordinates: `io.github.petrolal:cumulus:0.1.0`
+- Coordinates: `io.github.petrolal:polyomino:0.1.0`
 - Artifact types:
-  - JAR: `cumulus-0.1.0.jar` (with dependencies in manifest)
-  - Fat JAR: `cumulus-0.1.0-assembly.jar` (all deps bundled)
+  - JAR: `polyomino-0.1.0.jar` (with dependencies in manifest)
+  - Fat JAR: `polyomino-0.1.0-assembly.jar` (all deps bundled)
   - Native image: Built via GitHub Actions, attached to GitHub Releases
 
 ### Installation Methods
 1. **From Maven Central (Recommended)**:
    ```bash
-   cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+   cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
    ```
 
 2. **From GitHub Releases (Native Binary)**:
    ```bash
-   curl -L https://github.com/petrolal/cumulus.dotfiles/releases/download/v0.1.0/cumulus -o ~/.local/bin/cumulus
-   chmod +x ~/.local/bin/cumulus
+   curl -L https://github.com/petrolal/polyomino.dotfiles/releases/download/v0.1.0/polyomino -o ~/.local/bin/polyomino
+   chmod +x ~/.local/bin/polyomino
    ```
 
 3. **From Source**:
    ```bash
-   git clone https://github.com/petrolal/cumulus.dotfiles.git
-   cd cumulus.dotfiles
+   git clone https://github.com/petrolal/polyomino.dotfiles.git
+   cd polyomino.dotfiles
    sbt nativeImage
-   cp target/native-image/cumulus ~/.local/bin/
+   cp target/native-image/polyomino ~/.local/bin/
    ```
 
 ### AUR Package
-- Arch Linux users: `yay -S cumulus-dotfiles`
+- Arch Linux users: `yay -S polyomino-dotfiles`
 - PKGBUILD manages binary download and symlink creation
 
 ---
@@ -367,8 +367,8 @@ All modules have corresponding unit test suites in `src/test/scala/cumulus/`:
 - **Sway IPC Documentation**: https://man.archlinux.org/man/sway-ipc.7.en
 - **Sway Configuration**: https://man.archlinux.org/man/sway.5.en
 - **XDG Base Directory Specification**: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-- **GitHub Repository**: https://github.com/petrolal/cumulus.dotfiles
-- **Maven Central**: https://search.maven.org/search?q=io.github.petrolal:cumulus
+- **GitHub Repository**: https://github.com/petrolal/polyomino.dotfiles
+- **Maven Central**: https://search.maven.org/search?q=io.github.petrolal:polyomino
 
 ---
 

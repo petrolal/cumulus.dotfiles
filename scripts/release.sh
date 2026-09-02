@@ -17,7 +17,7 @@ BUILD_FILE="$REPO_ROOT/build.sbt"
 CURRENT_VERSION=$(grep 'version := ' "$BUILD_FILE" | head -1 | sed -E 's/.*version := "([^"]+)".*/\1/')
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  cumulus-dotfiles Release Helper                              ║${NC}"
+echo -e "${BLUE}║  polyomino-dotfiles Release Helper                              ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
 echo
 echo "Current version: ${GREEN}$CURRENT_VERSION${NC}"
@@ -111,7 +111,7 @@ echo "  2. Push to GitHub:"
 echo "     ${YELLOW}git push origin master${NC}"
 echo "     ${YELLOW}git push origin --tags${NC}"
 echo "  3. Watch CI/CD pipeline:"
-echo "     https://github.com/petrolal/cumulus-dotfiles/actions"
+echo "     https://github.com/petrolal/polyomino-dotfiles/actions"
 echo
 echo "This will automatically:"
 echo "  • Build and test with GraalVM"

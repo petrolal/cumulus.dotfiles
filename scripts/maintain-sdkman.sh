@@ -15,7 +15,7 @@ BLUE='\033[1;36m'
 NC='\033[0m' # No Color
 
 print_header() {
-  echo -e "${BLUE}[cumulus-sdkman]${NC} $1"
+  echo -e "${BLUE}[polyomino-sdkman]${NC} $1"
 }
 
 print_ok() {

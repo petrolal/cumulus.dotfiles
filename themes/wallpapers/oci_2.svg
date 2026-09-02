@@ -78,7 +78,7 @@
           font-family="'Fira Code', 'Courier New', monospace"
           font-size="44"
           font-weight="700"
-          letter-spacing="10">cumulus.px</text>
+          letter-spacing="10">polyomino.px</text>
 
     <text x="0" y="40"
           fill="#9CA3AF"

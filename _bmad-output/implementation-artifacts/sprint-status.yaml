@@ -29,12 +29,12 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-25-2026 03:50
-last_updated: 08-25-2026 03:50
-project: cumulus.dotfiles
+last_updated: 09-02-2026 19:53
+project: polyomino.dotfiles
 project_key: NOKEY
 tracking_system: file-system
 story_location: 
-  /home/petrolal/cumulus.dotfiles/_bmad-output/implementation-artifacts
+  /home/petrolal/polyomino.dotfiles/_bmad-output/implementation-artifacts
 development_status:
   epic-1: backlog
   1-1-core-cli-scaffolding-native-image-build: backlog
@@ -45,9 +45,31 @@ development_status:
 
   epic-2: backlog
   2-1-jvm-spring-boot-tooling-setup: backlog
-  2-2-cloud-native-cumulus-desktop-theme-engine: backlog
+  2-2-cloud-native-polyomino-desktop-theme-engine: backlog
   epic-2-retrospective: optional
 
   epic-3: backlog
   3-1-read-only-system-health-diagnostics: backlog
   epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-define-central-semantic-tokens: backlog
+  4-2-map-tokens-into-waybar-css-and-sway-window-configurations: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-refactor-waybar-into-3-detached-floating-segments: backlog
+  5-2-implement-geometric-puzzle-polyomino-workspace-indicators: backlog
+  5-3-configure-center-navigation-clock-capsule: backlog
+  5-4-style-right-side-hardware-capsules-and-trailing-polyomino-pi: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-enforce-window-gaps-and-corner-rounding: backlog
+  6-2-set-border-highlights: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-implement-the-isometric-wireframe-rubik-s-cube-ascii-graphic: backlog
+  7-2-configure-custom-fastfetch-display-fields: backlog
+  epic-7-retrospective: optional

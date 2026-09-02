@@ -1,11 +1,11 @@
-package cumulus.dotfiles.refresh
+package polyomino.dotfiles.refresh
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 object NotificationIntegration:
-  def configureApps(ctx: Context): Either[CumulusError, Unit] =
-    println("[1;36m[cumulus notify-config][0m Configuring apps for system notifications...")
+  def configureApps(ctx: Context): Either[PolyominoError, Unit] =
+    println("[1;36m[polyomino notify-config][0m Configuring apps for system notifications...")
 
     val results = scala.collection.mutable.ListBuffer[String]()
 
@@ -45,7 +45,7 @@ object NotificationIntegration:
     println("[1;32m[SUCCESS][0m Application notification integration complete!")
     Right(())
 
-  private def configureChromium(ctx: Context): Either[CumulusError, Unit] =
+  private def configureChromium(ctx: Context): Either[PolyominoError, Unit] =
     try
       val binDir = ctx.home / ".local" / "bin"
       os.makeDir.all(binDir)
@@ -76,7 +76,7 @@ exec /usr/bin/google-chrome --enable-features=UseOsNotificationCenter "$@"
   private def isCommandAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false
 
-  private def configureSlack(ctx: Context): Either[CumulusError, Unit] =
+  private def configureSlack(ctx: Context): Either[PolyominoError, Unit] =
     val slackConfigDir = ctx.home / ".config" / "Slack"
     if os.exists(slackConfigDir) then
       try
@@ -95,7 +95,7 @@ exec /usr/bin/google-chrome --enable-features=UseOsNotificationCenter "$@"
     else
       Left(CommandError("Slack not installed", 1))
 
-  private def configureDiscord(ctx: Context): Either[CumulusError, Unit] =
+  private def configureDiscord(ctx: Context): Either[PolyominoError, Unit] =
     val discordConfigDir = ctx.home / ".config" / "discord"
     if os.exists(discordConfigDir) then
       try

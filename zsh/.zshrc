@@ -2,7 +2,7 @@
 #
 # All actual configuration (history, completion, keybindings, aliases,
 # environment, tool integrations) lives as separate files under
-# ~/.config/cumulus/zsh_config/*.zsh — see scripts/install-zsh.sh and the
+# ~/.config/polyomino/zsh_config/*.zsh — see scripts/install-zsh.sh and the
 # repo README. Files are sourced in alphabetical/numeric order, so:
 #   - to add your own customizations, just drop a new *.zsh file in that
 #     directory (e.g. 50-my-stuff.zsh) — no need to touch this file.
@@ -14,8 +14,8 @@ ZSH_THEME="cloud"
 plugins=(git)
 [ -s "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
 
-# ── Load modular config from ~/.config/cumulus/zsh_config/ ──
-ZSH_CONFIG_DIR="$HOME/.config/cumulus/zsh_config"
+# ── Load modular config from ~/.config/polyomino/zsh_config/ ──
+ZSH_CONFIG_DIR="$HOME/.config/polyomino/zsh_config"
 if [ -d "$ZSH_CONFIG_DIR" ]; then
   for _zsh_config_file in "$ZSH_CONFIG_DIR"/*.zsh(N); do
     source "$_zsh_config_file"

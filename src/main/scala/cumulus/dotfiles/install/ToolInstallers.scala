@@ -1,7 +1,7 @@
-package cumulus.dotfiles.install
+package polyomino.dotfiles.install
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 enum PackageManager:
   case Pacman, Dnf, Apt, Brew, Unknown
@@ -14,7 +14,7 @@ object ToolInstallers:
     else if isAvailable("brew") then PackageManager.Brew
     else PackageManager.Unknown
 
-  def runTool(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  def runTool(name: String, ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     name match
       case "install-deps" => installSystemDeps(ctx)
       case "install-brew" | "install-homebrew" => installHomebrew(ctx)
@@ -34,9 +34,9 @@ object ToolInstallers:
       case "full-install" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
-  private def installSystemDeps(ctx: Context): Either[CumulusError, Unit] =
+  private def installSystemDeps(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-deps]\u001b[0m Installing system & build dependencies (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-deps]\u001b[0m Installing system & build dependencies (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sbt", "jdk-openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which"))
@@ -49,10 +49,10 @@ object ToolInstallers:
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package dependency installation recommended for current OS."))
 
-  private def installFonts(ctx: Context): Either[CumulusError, Unit] =
+  private def installFonts(ctx: Context): Either[PolyominoError, Unit] =
     val fontsDir = ctx.home / ".local" / "share" / "fonts"
     os.makeDir.all(fontsDir)
-    println(s"\u001b[1;36m[cumulus install-fonts]\u001b[0m Installing JetBrainsMono Nerd Font to $fontsDir...")
+    println(s"\u001b[1;36m[polyomino install-fonts]\u001b[0m Installing JetBrainsMono Nerd Font to $fontsDir...")
     try
       os.proc("fc-cache", "-f", fontsDir.toString).call(check = false)
       println("  \u001b[32m[OK]\u001b[0m Refreshed system font cache (fc-cache)")
@@ -60,9 +60,9 @@ object ToolInstallers:
     catch
       case e: Exception => Left(CommandError(s"Font cache update failed: ${e.getMessage}"))
 
-  private def installApps(ctx: Context): Either[CumulusError, Unit] =
+  private def installApps(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim"))
@@ -74,9 +74,9 @@ object ToolInstallers:
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
-  private def installBrowser(ctx: Context): Either[CumulusError, Unit] =
+  private def installBrowser(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-browser]\u001b[0m Installing web browser (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-browser]\u001b[0m Installing web browser (PM: $pm)...")
     pm match
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "chromium"))
       case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "chromium"))
@@ -84,9 +84,9 @@ object ToolInstallers:
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "--cask", "chromium"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Browser provisioned."))
 
-  private def installSwaync(ctx: Context): Either[CumulusError, Unit] =
+  private def installSwaync(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-swaync]\u001b[0m Checking/Installing SwayNC (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-swaync]\u001b[0m Checking/Installing SwayNC (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "swaync"))
@@ -100,11 +100,11 @@ object ToolInstallers:
         println("  \u001b[33m[NOTE]\u001b[0m Manual installation of swaync required for current OS.")
         Right(())
 
-  private def installDevops(ctx: Context): Either[CumulusError, Unit] =
+  private def installDevops(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
     val localBin = ctx.home / ".local" / "bin"
     os.makeDir.all(localBin)
-    println(s"\u001b[1;36m[cumulus install-devops]\u001b[0m Installing DevOps & Cloud CLI tools (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-devops]\u001b[0m Installing DevOps & Cloud CLI tools (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "docker", "terraform", "ansible", "aws-cli", "kubectl", "helm"))
@@ -163,9 +163,9 @@ object ToolInstallers:
 
     Right(println("  \u001b[32m[OK]\u001b[0m DevOps and Cloud CLI tools provisioned."))
 
-  private def installZsh(ctx: Context): Either[CumulusError, Unit] =
+  private def installZsh(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-zsh]\u001b[0m Installing Zsh shell environment (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-zsh]\u001b[0m Installing Zsh shell environment (PM: $pm)...")
     pm match
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "zsh", "curl", "git"))
       case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "zsh", "curl", "git"))
@@ -173,8 +173,8 @@ object ToolInstallers:
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "zsh", "curl", "git"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Zsh environment provisioned."))
 
-  private def installSdkman(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
+  private def installSdkman(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
     val sdkmanDir = ctx.home / ".sdkman"
     if os.exists(sdkmanDir) then
       println("  \u001b[36m[INFO]\u001b[0m Updating SDKMAN!...")
@@ -207,8 +207,8 @@ object ToolInstallers:
       catch case _: Exception => standardPaths.find(os.exists)
     else standardPaths.find(os.exists)
 
-  private def installHomebrew(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus install-brew]\u001b[0m Checking/Installing Homebrew...")
+  private def installHomebrew(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino install-brew]\u001b[0m Checking/Installing Homebrew...")
     getBrewBin(ctx) match
       case Some(brewPath) =>
         println(s"  \u001b[36m[INFO]\u001b[0m Updating Homebrew at $brewPath...")
@@ -232,9 +232,9 @@ object ToolInstallers:
             println(s"  \u001b[33m[NOTE]\u001b[0m Homebrew installation skipped: ${e.getMessage}")
             Right(())
 
-  private def installGh(ctx: Context): Either[CumulusError, Unit] =
+  private def installGh(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-gh]\u001b[0m Checking/Installing GitHub CLI (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-gh]\u001b[0m Checking/Installing GitHub CLI (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "github-cli"))
@@ -265,8 +265,8 @@ object ToolInstallers:
     else if os.exists(csShareBin) then Some(csShareBin)
     else None
 
-  private def installCoursier(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus install-coursier]\u001b[0m Checking/Installing Coursier...")
+  private def installCoursier(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino install-coursier]\u001b[0m Checking/Installing Coursier...")
     getCoursierBin(ctx) match
       case Some(csPath) =>
         println(s"  \u001b[36m[INFO]\u001b[0m Updating Coursier at $csPath...")
@@ -294,15 +294,15 @@ object ToolInstallers:
             Right(())
 
 
-  private def installTools(ctx: Context): Either[CumulusError, Unit] =
+  private def installTools(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, impala, kalker, aerc)...")
+    println(s"\u001b[1;36m[polyomino install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, impala, kalker, aerc)...")
 
     val cargoHomeBin = ctx.home / ".cargo" / "bin"
     def cargoAvailable(): Boolean =
       isAvailable("cargo") || os.exists(cargoHomeBin / "cargo")
 
-    def runCargo(tool: String, extraArgs: Seq[String] = Nil): Either[CumulusError, Unit] =
+    def runCargo(tool: String, extraArgs: Seq[String] = Nil): Either[PolyominoError, Unit] =
       val cargoExe = if isAvailable("cargo") then "cargo" else (cargoHomeBin / "cargo").toString
       val cmd: Seq[os.Shellable] = Seq(cargoExe: os.Shellable, "install": os.Shellable, tool: os.Shellable, "--locked": os.Shellable) ++ extraArgs.map(a => (a: os.Shellable))
       try
@@ -372,9 +372,9 @@ object ToolInstallers:
 
     Right(())
 
-  private def installTelegram(ctx: Context): Either[CumulusError, Unit] =
+  private def installTelegram(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-telegram]\u001b[0m Installing/Updating Telegram Desktop (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-telegram]\u001b[0m Installing/Updating Telegram Desktop (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
         runPkgInstall("sudo", Seq("pacman", "-S", "--noconfirm", "telegram-desktop"))
@@ -387,9 +387,9 @@ object ToolInstallers:
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
-  private def installNode(ctx: Context): Either[CumulusError, Unit] =
+  private def installNode(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[cumulus install-node]\u001b[0m Installing Node.js & npm (PM: $pm)...")
+    println(s"\u001b[1;36m[polyomino install-node]\u001b[0m Installing Node.js & npm (PM: $pm)...")
     pm match
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "nodejs", "npm"))
       case PackageManager.Dnf => runPkgInstall("sudo", Seq("dnf", "install", "-y", "nodejs", "npm"))
@@ -397,8 +397,8 @@ object ToolInstallers:
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "node"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Node.js environment provisioned."))
 
-  private def installYazi(ctx: Context): Either[CumulusError, Unit] =
-    println(s"\u001b[1;36m[cumulus install-yazi]\u001b[0m Installing yazi file manager (latest) & plugins...")
+  private def installYazi(ctx: Context): Either[PolyominoError, Unit] =
+    println(s"\u001b[1;36m[polyomino install-yazi]\u001b[0m Installing yazi file manager (latest) & plugins...")
     val cargoHomeBin = ctx.home / ".cargo" / "bin"
     def cargoAvailable(): Boolean =
       isAvailable("cargo") || os.exists(cargoHomeBin / "cargo")
@@ -433,8 +433,8 @@ object ToolInstallers:
           println(s"  \u001b[33m[NOTE]\u001b[0m yazi installation skipped: ${e.getMessage}")
           Right(())
 
-  private def installAll(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
+  private def installAll(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
       _ <- installSystemDeps(ctx)
       _ <- installHomebrew(ctx)
@@ -450,10 +450,10 @@ object ToolInstallers:
       _ <- installNode(ctx)
       _ <- installTools(ctx)
       _ <- installYazi(ctx)
-      _ <- cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
+      _ <- polyomino.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
     yield ()
 
-  private def runPkgInstall(cmd: String, args: Seq[String]): Either[CumulusError, Unit] =
+  private def runPkgInstall(cmd: String, args: Seq[String]): Either[PolyominoError, Unit] =
     try
       val fullCmd: Seq[os.Shellable] = (cmd +: args).map(s => (s: os.Shellable))
       val res = os.proc(fullCmd*).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)

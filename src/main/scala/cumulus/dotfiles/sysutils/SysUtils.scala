@@ -1,12 +1,12 @@
-package cumulus.dotfiles.sysutils
+package polyomino.dotfiles.sysutils
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
-import cumulus.dotfiles.theme.ThemeEngine
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
+import polyomino.dotfiles.theme.ThemeEngine
 
 object SysUtils:
-  def runLock(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;34m[cumulus lock]\u001b[0m Locking screen via swaylock...")
+  def runLock(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;34m[polyomino lock]\u001b[0m Locking screen via swaylock...")
     val lockConfigFile = ctx.configDir / "swaylock" / "config"
     try
       val cmd = if os.exists(lockConfigFile) then
@@ -20,8 +20,8 @@ object SysUtils:
     catch
       case e: Exception => Left(CommandError(s"Lock failed: ${e.getMessage}"))
 
-  def runIdle(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;34m[cumulus idle]\u001b[0m Launching swayidle daemon...")
+  def runIdle(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;34m[polyomino idle]\u001b[0m Launching swayidle daemon...")
     val lockConfigFile = ctx.configDir / "swaylock" / "config"
     val lockCmd = if os.exists(lockConfigFile) then
       s"swaylock -f --config $lockConfigFile"
@@ -41,19 +41,19 @@ object SysUtils:
     catch
       case e: Exception => Left(CommandError(s"Idle daemon failed: ${e.getMessage}"))
 
-  def runScreenshot(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  def runScreenshot(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     val mode = args.headOption.getOrElse("region")
 
     if mode != "full" && mode != "region" && mode != "window" then
-      System.err.println("Usage: cumulus-screenshot {full|region|window}")
-      return Left(CommandError("Usage: cumulus-screenshot {full|region|window}", 1))
+      System.err.println("Usage: polyomino-screenshot {full|region|window}")
+      return Left(CommandError("Usage: polyomino-screenshot {full|region|window}", 1))
 
     val screenshotsDir = ctx.home / "Pictures" / "Screenshots"
     os.makeDir.all(screenshotsDir)
     val timestamp = os.proc("date", "+%Y-%m-%d_%H-%M-%S").call(check = false).out.text().trim
     val file = screenshotsDir / s"$timestamp.png"
 
-    println(s"\u001b[1;34m[cumulus screenshot]\u001b[0m Capturing $mode screenshot to $file...")
+    println(s"\u001b[1;34m[polyomino screenshot]\u001b[0m Capturing $mode screenshot to $file...")
 
     try
       val captureRes = mode match
@@ -127,11 +127,11 @@ object SysUtils:
       if isCommandAvailable("notify-send") then
         val escapedTitle = title.replace("\\", "\\\\").replace("\"", "\\\"")
         val escapedBody = body.replace("\\", "\\\\").replace("\"", "\\\"")
-        os.proc("notify-send", "-u", "normal", "-t", "4000", "-a", "cumulus", escapedTitle, escapedBody).call(check = false)
+        os.proc("notify-send", "-u", "normal", "-t", "4000", "-a", "polyomino", escapedTitle, escapedBody).call(check = false)
     catch
       case _: Exception => () // Silently fail if notification daemon unavailable
 
-  def runCalendar(ctx: Context): Either[CumulusError, Unit] =
+  def runCalendar(ctx: Context): Either[PolyominoError, Unit] =
     if isCommandAvailable("swaync-client") && isProcessRunning("swaync") then
       try
         os.proc("swaync-client", "-t", "-sw").call(check = false)
@@ -144,12 +144,12 @@ object SysUtils:
   private def isProcessRunning(name: String): Boolean =
     try os.proc("pgrep", "-x", name).call(check = false).exitCode == 0 catch case _: Exception => false
 
-  private def runFallbackCalendar(ctx: Context): Either[CumulusError, Unit] =
+  private def runFallbackCalendar(ctx: Context): Either[PolyominoError, Unit] =
     try
       if isCommandAvailable("kitty") then
         os.proc(
           "kitty",
-          "--class=cumulus-calendar",
+          "--class=polyomino-calendar",
           "--title=Calendar",
           "-o", "font_size=15",
           "-o", "remember_window_size=no",

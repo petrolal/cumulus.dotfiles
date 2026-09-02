@@ -1,6 +1,6 @@
-package cumulus.dotfiles.theme
+package polyomino.dotfiles.theme
 
-import cumulus.dotfiles.context.Context
+import polyomino.dotfiles.context.Context
 import upickle.default._
 
 case class Palette(
@@ -48,7 +48,7 @@ object Palette:
     var result = Map.empty[String, Palette]
     val searchDirs = Seq(
       ctx.dotfilesDir / "themes" / "palettes",
-      ctx.configDir / "cumulus" / "themes"
+      ctx.configDir / "polyomino" / "themes"
     )
 
     for dir <- searchDirs if os.exists(dir) do

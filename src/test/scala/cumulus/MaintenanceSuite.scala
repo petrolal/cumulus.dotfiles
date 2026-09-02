@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.maintenance.Maintenance
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.maintenance.Maintenance
 import munit.FunSuite
 
 class MaintenanceSuite extends FunSuite:

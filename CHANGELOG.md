@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-08-13
 
 ### Added
-- **Multi-call native binary** compiled with GraalVM — single `cumulus` executable with subcommand routing
+- **Multi-call native binary** compiled with GraalVM — single `polyomino` executable with subcommand routing
 - **Dynamic window autotiling** with Fibonacci spiral layout for Sway/Wayland
 - **Desktop theme switching** across application surfaces (AWS, Azure, GCP, OCI cloud themes)
 - **System provisioning** via 3-stage installation (bootstrap → binary install → interactive setup)

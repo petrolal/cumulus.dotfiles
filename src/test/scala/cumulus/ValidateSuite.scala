@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.validate.Validator
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.validate.Validator
 import munit.FunSuite
 
 class ValidateSuite extends FunSuite:

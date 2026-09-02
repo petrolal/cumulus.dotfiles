@@ -1,6 +1,6 @@
 # Installation Flow Guide
 
-Complete guide to installing cumulus.dotfiles using the three-stage installation process.
+Complete guide to installing polyomino.dotfiles using the three-stage installation process.
 
 ## Overview
 
@@ -11,13 +11,13 @@ Stage 1: Bootstrap (Java + Coursier)
     ↓
     bash bootstrap.sh
     ↓
-Stage 2: Coursier (Download cumulus binary)
+Stage 2: Coursier (Download polyomino binary)
     ↓
-    cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+    cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
     ↓
 Stage 3: Interactive Installer (Full system setup)
     ↓
-    cumulus install [options]
+    polyomino install [options]
     ↓
     COMPLETE!
 ```
@@ -26,13 +26,13 @@ Stage 3: Interactive Installer (Full system setup)
 
 ```bash
 # 1. Bootstrap: Install Java & Coursier
-bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/polyomino.dotfiles/master/bootstrap.sh)
 
-# 2. Install cumulus binary from Maven Central
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+# 2. Install polyomino binary from Maven Central
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
 
 # 3. Run interactive installer
-cumulus install
+polyomino install
 ```
 
 ## Detailed Installation
@@ -43,11 +43,11 @@ The bootstrap script performs **minimal setup only**:
 
 ```bash
 # One-liner
-bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/polyomino.dotfiles/master/bootstrap.sh)
 
 # Or from cloned repo
-git clone https://github.com/petrolal/cumulus.dotfiles.git ~/cumulus.dotfiles
-cd ~/cumulus.dotfiles
+git clone https://github.com/petrolal/polyomino.dotfiles.git ~/polyomino.dotfiles
+cd ~/polyomino.dotfiles
 ./bootstrap.sh
 ```
 
@@ -64,25 +64,25 @@ cd ~/cumulus.dotfiles
 - ❌ Does NOT create symlinks
 - ❌ Does NOT deploy dotfiles
 
-### Stage 2: Install cumulus Binary (1-2 minutes)
+### Stage 2: Install polyomino Binary (1-2 minutes)
 
-Once Java & Coursier are installed, download the cumulus CLI:
+Once Java & Coursier are installed, download the polyomino CLI:
 
 ```bash
 # Install from Maven Central
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
 
 # Or latest version
-cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino
 
 # Verify installation
-cumulus --version
+polyomino --version
 ```
 
 Coursier automatically:
 - Downloads JAR from Maven Central
 - Resolves dependencies
-- Creates launch script in `~/.local/share/coursier/bin/cumulus`
+- Creates launch script in `~/.local/share/coursier/bin/polyomino`
 - Updates PATH (if configured)
 
 ### Stage 3: Full Setup & Tooling Provisioning (5-15 minutes)
@@ -90,22 +90,22 @@ Coursier automatically:
 Run the Scala-based installer:
 
 ```bash
-cumulus install
+polyomino install
 ```
 
 This automates the complete configuration and environment provisioning:
 
 **Dotfiles & Symlinks:**
 - Symlink dotfiles to home directory (`~/.zshrc`, `~/.config/sway`, `~/.config/kitty`, `~/.config/waybar`, `~/.config/wofi`, `~/.config/mako`, etc.)
-- Create subcommand aliases in `~/.local/bin/cumulus-*`
-- Generate deployment manifest in `~/.local/share/cumulus/manifest.json`
+- Create subcommand aliases in `~/.local/bin/polyomino-*`
+- Generate deployment manifest in `~/.local/share/polyomino/manifest.json`
 
 **System & Developer Tooling:**
-- **Homebrew**: Ensures Homebrew package manager is installed (`cumulus install-brew`)
-- **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`cumulus install-gh`)
-- **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`cumulus install-coursier`)
-- **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`cumulus install-apps`, `cumulus install-fonts`)
-- **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`cumulus install-tools`)
+- **Homebrew**: Ensures Homebrew package manager is installed (`polyomino install-brew`)
+- **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`polyomino install-gh`)
+- **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`polyomino install-coursier`)
+- **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`polyomino install-apps`, `polyomino install-fonts`)
+- **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`polyomino install-tools`)
 
 **System Health Check:**
 - Verify all symlinks
@@ -134,20 +134,20 @@ This automates the complete configuration and environment provisioning:
 ┌─────────────────────────────────────────┐
 │ STAGE 2: COURSIER                       │
 ├─────────────────────────────────────────┤
-│ cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus  │
+│ cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino  │
 │ - Download JAR from Maven Central       │
 │ - Resolve dependencies                  │
 │ - Create launch script in ~/.local/bin  │
 └────────────────┬────────────────────────┘
                  │
                  ↓
-         ✓ cumulus CLI ready
+         ✓ polyomino CLI ready
                  │
                  ↓
 ┌─────────────────────────────────────────┐
 │ STAGE 3: FULL SYSTEM PROVISIONING       │
 ├─────────────────────────────────────────┤
-│ cumulus install                         │
+│ polyomino install                         │
 │                                         │
 │ Scala-based orchestrator:               │
 │ - Deploy symlinks & dotfiles            │
@@ -166,23 +166,23 @@ This automates the complete configuration and environment provisioning:
 
 ## Interactive Installation Options
 
-The `cumulus install` command supports various options:
+The `polyomino install` command supports various options:
 
 ```bash
 # Full interactive installation (default)
-cumulus install
+polyomino install
 
 # Deploy only symlinks (skip system installation)
-cumulus install --links-only
+polyomino install --links-only
 
 # Quiet mode (non-interactive, skip prompts)
-cumulus install --quiet
+polyomino install --quiet
 
 # Verbose logging
-cumulus install -v
+polyomino install -v
 
 # Custom dotfiles path
-cumulus install --dotfiles ~/my-custom-dotfiles
+polyomino install --dotfiles ~/my-custom-dotfiles
 ```
 
 ## Environment Setup
@@ -194,7 +194,7 @@ After installation, ensure PATH is configured:
 Add to `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-# Coursier and cumulus
+# Coursier and polyomino
 export PATH="$HOME/.local/bin:$PATH"
 
 # SDKMan (if you installed it)
@@ -215,17 +215,17 @@ exec zsh
 After installation, verify everything works:
 
 ```bash
-# Check cumulus is installed
-cumulus --version
+# Check polyomino is installed
+polyomino --version
 
 # Run health check
-cumulus healthcheck
+polyomino healthcheck
 
 # List available commands
-cumulus --help
+polyomino --help
 
 # Test a command
-cumulus-theme --help
+polyomino-theme --help
 ```
 
 ## Stage 1: Bootstrap Details
@@ -258,7 +258,7 @@ brightnessctl, pulseaudio-utils, mako, firefox, neovim
 After running `bootstrap.sh`, add to `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-# Coursier and cumulus binaries
+# Coursier and polyomino binaries
 export PATH="$HOME/.local/bin:$PATH"
 
 # SDKMan (for Java/Scala/sbt management)
@@ -298,19 +298,19 @@ echo $PATH | grep "$HOME/.local/bin"
 
 **Standard (recommended):**
 ```bash
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
 ```
 
 **Latest version:**
 ```bash
-cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino
 ```
 
 **Fat JAR (for testing before Maven Central sync):**
 ```bash
-cd ~/cumulus.dotfiles
+cd ~/polyomino.dotfiles
 sbt assembly
-cs install file://$(pwd)/target/scala-3.5.2/cumulus-0.1.0-assembly.jar --name cumulus
+cs install file://$(pwd)/target/scala-3.5.2/polyomino-0.1.0-assembly.jar --name polyomino
 ```
 
 ### Coursier Configuration
@@ -329,13 +329,13 @@ ls -la ~/.local/share/coursier/bin/
 
 **Customize installation location:**
 ```bash
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/my-bin/cumulus
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/my-bin/polyomino
 export PATH="~/my-bin:$PATH"
 ```
 
 ## Troubleshooting
 
-### "cumulus: command not found"
+### "polyomino: command not found"
 
 PATH is not configured. Add to shell config:
 
@@ -382,21 +382,21 @@ chmod +x ~/.local/bin/cs
 cs update
 ```
 
-### "Cannot download cumulus from Maven Central"
+### "Cannot download polyomino from Maven Central"
 
 Maven Central deployment may be in progress (10-30 mins). Try:
 
 ```bash
 # Wait a few minutes, then try again
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
 
 # Or install from local JAR if available
-cd ~/cumulus.dotfiles
+cd ~/polyomino.dotfiles
 sbt assembly
-cs install file://$(pwd)/target/scala-3.5.2/cumulus-0.1.0-assembly.jar --name cumulus
+cs install file://$(pwd)/target/scala-3.5.2/polyomino-0.1.0-assembly.jar --name polyomino
 ```
 
-### "cumulus install fails during system dependency installation"
+### "polyomino install fails during system dependency installation"
 
 System packages failed to install. Options:
 
@@ -411,7 +411,7 @@ System packages failed to install. Options:
 
 2. **Run installer again:**
    ```bash
-   cumulus install
+   polyomino install
    ```
 
 ### "SDKMan: command not found"
@@ -433,18 +433,18 @@ If you prefer to install system packages manually:
 
 ```bash
 # Skip system package installation
-CUMULUS_SKIP_SYSTEM_DEPS=1 cumulus install
+CUMULUS_SKIP_SYSTEM_DEPS=1 polyomino install
 ```
 
 ### Install to Custom Location
 
 ```bash
-# Install cumulus to custom location
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/my-local-bin/cumulus
+# Install polyomino to custom location
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/my-local-bin/polyomino
 
 # Or use custom Coursier cache
 export COURSIER_CACHE=~/.coursier-custom
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
 ```
 
 ### CI/CD Automated Installation
@@ -454,12 +454,12 @@ cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
 set -euo pipefail
 
 # Automated bootstrap
-bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/cumulus.dotfiles/master/bootstrap.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/polyomino.dotfiles/master/bootstrap.sh)
 
 # Non-interactive installation
 export PATH="$HOME/.local/bin:$PATH"
-cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus
-cumulus install --quiet
+cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
+polyomino install --quiet
 ```
 
 ### Development Installation (From Source)
@@ -468,18 +468,18 @@ To install from source for development:
 
 ```bash
 # Clone repository
-git clone https://github.com/petrolal/cumulus.dotfiles.git ~/cumulus.dotfiles
-cd ~/cumulus.dotfiles
+git clone https://github.com/petrolal/polyomino.dotfiles.git ~/polyomino.dotfiles
+cd ~/polyomino.dotfiles
 
 # Build from source
 sbt nativeImage
 
 # Install locally
 mkdir -p ~/.local/bin
-cp target/native-image/cumulus ~/.local/bin/
+cp target/native-image/polyomino ~/.local/bin/
 
 # Run installer
-cumulus install
+polyomino install
 ```
 
 ## Post-Installation Management
@@ -488,9 +488,9 @@ cumulus install
 
 If you have API keys (GitHub, Terraform) or private environment variables, do not put them in the tracked `zsh_config/` directory.
 
-Create `~/.cumulus.local.zsh` in your home folder:
+Create `~/.polyomino.local.zsh` in your home folder:
 ```bash
-echo 'export GH_PAT="your-key-here"' >> ~/.cumulus.local.zsh
+echo 'export GH_PAT="your-key-here"' >> ~/.polyomino.local.zsh
 ```
 This file is automatically sourced by `zsh/zsh_config/40-environment.zsh` on startup but remains outside of version control.
 
@@ -529,7 +529,7 @@ chmod +x ~/.local/bin/cs
 | Stage | Time | What's Happening |
 |-------|------|-----------------|
 | Bootstrap | 5-10 min | Installing system packages, Java, Coursier |
-| Download | 1-2 min | Downloading cumulus from Maven Central |
+| Download | 1-2 min | Downloading polyomino from Maven Central |
 | Deploy | 5-15 min | Interactive setup, symlink creation, health check |
 | **Total** | **10-25 min** | **Depends on network & system speed** |
 
@@ -538,7 +538,7 @@ chmod +x ~/.local/bin/cs
 | Stage | Time | What's Happening |
 |-------|------|-----------------|
 | Bootstrap | 2-3 min | Installing Java, Coursier |
-| Download | 1-2 min | Downloading cumulus from Maven Central |
+| Download | 1-2 min | Downloading polyomino from Maven Central |
 | Deploy | 2-5 min | Deploy symlinks, health check |
 | **Total** | **5-10 min** | **Much faster!** |
 

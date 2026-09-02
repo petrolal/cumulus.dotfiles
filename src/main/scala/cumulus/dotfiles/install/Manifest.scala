@@ -1,4 +1,4 @@
-package cumulus.dotfiles.install
+package polyomino.dotfiles.install
 
 import upickle.default._
 

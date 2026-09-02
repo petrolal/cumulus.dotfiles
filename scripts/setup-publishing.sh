@@ -4,7 +4,7 @@
 set -euo pipefail
 
 echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║  cumulus-dotfiles Publishing Setup                            ║"
+echo "║  polyomino-dotfiles Publishing Setup                            ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo
 
@@ -60,7 +60,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo
   echo
   echo "To add secrets to GitHub:"
-  echo "  1. Go to: https://github.com/petrolal/cumulus-dotfiles/settings/secrets/actions"
+  echo "  1. Go to: https://github.com/petrolal/polyomino-dotfiles/settings/secrets/actions"
   echo "  2. Add these secrets:"
   echo "     - SONATYPE_USERNAME: $SONATYPE_USER"
   echo "     - SONATYPE_PASSWORD: (paste your password)"
@@ -87,7 +87,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo
   echo
   echo "To add secrets to GitHub:"
-  echo "  1. Go to: https://github.com/petrolal/cumulus-dotfiles/settings/secrets/actions"
+  echo "  1. Go to: https://github.com/petrolal/polyomino-dotfiles/settings/secrets/actions"
   echo "  2. Add these secrets:"
   echo "     - AUR_SSH_PRIVATE_KEY: (paste your AUR SSH private key)"
   echo "     - MAINTAINER_EMAIL: $MAINTAINER_EMAIL"
@@ -126,6 +126,6 @@ echo "  2. Update version in build.sbt"
 echo "  3. Create and push a version tag:"
 echo "     git tag -a v0.1.0 -m 'Release version 0.1.0'"
 echo "     git push origin --tags"
-echo "  4. Watch the CI/CD pipeline: https://github.com/petrolal/cumulus-dotfiles/actions"
+echo "  4. Watch the CI/CD pipeline: https://github.com/petrolal/polyomino-dotfiles/actions"
 echo
 echo "For detailed instructions, see: PUBLISHING.md"

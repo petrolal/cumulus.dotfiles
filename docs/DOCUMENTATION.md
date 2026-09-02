@@ -1,6 +1,6 @@
 # Documentation Index
 
-Complete guide to all cumulus.dotfiles documentation.
+Complete guide to all polyomino.dotfiles documentation.
 
 ## Getting Started
 
@@ -56,11 +56,11 @@ Complete guide to all cumulus.dotfiles documentation.
 ## File Structure
 
 ```
-cumulus.dotfiles/
+polyomino.dotfiles/
 ├── bootstrap.sh                    # Stage 1: Bootstrap installer
 ├── build.sbt                       # Scala build configuration
 ├── src/
-│   ├── main/scala/cumulus/        # Scala CLI implementation
+│   ├── main/scala/polyomino/        # Scala CLI implementation
 │   │   ├── Main.scala             # Entry point, command dispatch
 │   │   └── dotfiles/              # Feature modules
 │   │       ├── install/           # Installation (Stage 3)
@@ -68,7 +68,7 @@ cumulus.dotfiles/
 │   │       ├── theme/             # Theme engine
 │   │       ├── sysutils/          # System utilities
 │   │       └── ...
-│   └── test/scala/cumulus/        # Unit tests
+│   └── test/scala/polyomino/        # Unit tests
 │
 ├── scripts/
 │   ├── maintain-sdkman.sh          # SDKMan tool management
@@ -106,12 +106,12 @@ Installs minimal system setup:
 **Time:** 5-10 minutes
 
 ### Stage 2: Coursier
-Downloads the cumulus CLI binary:
+Downloads the polyomino CLI binary:
 - Fetches JAR from Maven Central
 - Resolves dependencies
 - Creates launch script
 
-**Command:** `cs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus`
+**Command:** `cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino`
 **Time:** 1-2 minutes
 
 ### Stage 3: Full Setup & Tooling Provisioning
@@ -121,15 +121,15 @@ Scala-based CLI handles full setup:
 - Desktop apps, fonts, and TUI tooling installation
 - System health checks
 
-**Command:** `cumulus install`
+**Command:** `polyomino install`
 **Time:** 5-15 minutes
-**Location:** `src/main/scala/cumulus/dotfiles/install/DeployInstaller.scala`
+**Location:** `src/main/scala/polyomino/dotfiles/install/DeployInstaller.scala`
 
 ## Key Components
 
-### Scala CLI (cumulus)
+### Scala CLI (polyomino)
 
-**Main entry point:** `src/main/scala/cumulus/Main.scala`
+**Main entry point:** `src/main/scala/polyomino/Main.scala`
 
 **Subcommands:**
 - `install` - Full setup (Stage 3)
@@ -214,7 +214,7 @@ sbt assembly
 sbt test
 
 # Run specific test
-sbt 'testOnly cumulus.InstallSuite'
+sbt 'testOnly polyomino.InstallSuite'
 
 # Run with coverage
 sbt 'clean; coverage; test; coverageReport'
@@ -228,10 +228,10 @@ sbt nativeImage
 
 # Install to ~/.local/bin
 mkdir -p ~/.local/bin
-cp target/native-image/cumulus ~/.local/bin/
+cp target/native-image/polyomino ~/.local/bin/
 
 # Test
-cumulus --version
+polyomino --version
 ```
 
 ## Configuration Files
@@ -257,13 +257,13 @@ When updating documentation:
 ## See Also
 
 - [Project Context](project-context.md) - Detailed project background
-- [GitHub Repository](https://github.com/petrolal/cumulus.dotfiles)
-- [Maven Central](https://search.maven.org/search?q=io.github.petrolal:cumulus)
-- [AUR Package](https://aur.archlinux.org/packages/cumulus-dotfiles)
+- [GitHub Repository](https://github.com/petrolal/polyomino.dotfiles)
+- [Maven Central](https://search.maven.org/search?q=io.github.petrolal:polyomino)
+- [AUR Package](https://aur.archlinux.org/packages/polyomino-dotfiles)
 
 ## Quick Links by Task
 
-### "I want to install cumulus"
+### "I want to install polyomino"
 → [INSTALLATION_FLOW.md](INSTALLATION_FLOW.md) - Quick start (3 commands)
 
 ### "I'm having installation issues"
@@ -278,7 +278,7 @@ When updating documentation:
 ### "I want to build from source"
 → [README.md](../README.md#building-from-source)
 
-### "I'm developing cumulus"
+### "I'm developing polyomino"
 → This file's "Development Workflow" section
 
 ---

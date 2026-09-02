@@ -1,8 +1,8 @@
-pkgbase = cumulus-dotfiles
+pkgbase = polyomino-dotfiles
 	pkgdesc = Sway dotfiles installer with Scala 3 + GraalVM native image
 	pkgver = 0.1.0
 	pkgrel = 1
-	url = https://github.com/petrolal/cumulus.dotfiles
+	url = https://github.com/petrolal/polyomino.dotfiles
 	arch = x86_64
 	license = MIT
 	makedepends = jdk-openjdk
@@ -31,7 +31,7 @@ pkgbase = cumulus-dotfiles
 	depends = zsh
 	optdepends = alacritty: for terminal screenshot region selection
 	optdepends = termite: alternative terminal for screenshot
-	source = git+https://github.com/petrolal/cumulus-dotfiles.git
+	source = git+https://github.com/petrolal/polyomino-dotfiles.git
 	sha256sums = SKIP
 
-pkgname = cumulus-dotfiles
+pkgname = polyomino-dotfiles

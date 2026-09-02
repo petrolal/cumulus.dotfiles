@@ -40,7 +40,7 @@ graalvm-build/
 .agent/
 .agents/
 .claude/
-.cumulus-sdd/*
+.polyomino-sdd/*
 AGENTS.md
 CLAUDE.md
 

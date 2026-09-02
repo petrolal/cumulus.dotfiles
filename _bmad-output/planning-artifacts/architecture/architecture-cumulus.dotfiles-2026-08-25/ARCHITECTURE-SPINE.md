@@ -1,10 +1,10 @@
 ---
-name: 'cumulus.dotfiles'
+name: 'polyomino.dotfiles'
 type: architecture-spine
 purpose: build-substrate
 altitude: project
 paradigm: 'Native Monolithic CLI Orchestrator'
-scope: 'cumulus.dotfiles core engine and dotfiles manager'
+scope: 'polyomino.dotfiles core engine and dotfiles manager'
 status: final
 created: '2026-08-25'
 updated: '2026-08-25'
@@ -13,12 +13,12 @@ sources: []
 companions: []
 ---
 
-# Architecture Spine — cumulus.dotfiles
+# Architecture Spine — polyomino.dotfiles
 
 ## Design Paradigm
 
 **Native Monolithic CLI Orchestrator**
-The system is built as a single, cohesive Scala 3 application compiled ahead-of-time to a GraalVM Native Image. It acts as a centralized orchestrator (`cumulus`) that parses inputs and dispatches execution to isolated subcommands. Each subcommand operates independently but shares a unified execution context.
+The system is built as a single, cohesive Scala 3 application compiled ahead-of-time to a GraalVM Native Image. It acts as a centralized orchestrator (`polyomino`) that parses inputs and dispatches execution to isolated subcommands. Each subcommand operates independently but shares a unified execution context.
 
 ## Invariants & Rules
 
@@ -28,14 +28,14 @@ The system is built as a single, cohesive Scala 3 application compiled ahead-of-
 - **Rule:** Modules may directly execute side-effects (e.g., `os.proc(...).call()`, `os.write(...)`) inline. No strict `--dry-run` or mockable interface boundaries are required.
 
 ### AD-2 — Mutable Context Registry
-- **Binds:** `cumulus.dotfiles.context.Context` and all modules
+- **Binds:** `polyomino.dotfiles.context.Context` and all modules
 - **Prevents:** Cumbersome functional state-passing between discrete stages of a subcommand.
 - **Rule:** The `Context` object serves as a mutable registry. Modules are permitted to update and retrieve state from it during a single execution run.
 
 ### AD-3 — Fail-Fast Error Contract
 - **Binds:** All subcommand execution paths
 - **Prevents:** Unpredictable automatic rollback attempts that could further corrupt the desktop environment.
-- **Rule:** Subcommands must fail-fast. Upon encountering a failure, they must halt immediately, return a `CumulusError`, and leave the system in its current state for manual user remediation.
+- **Rule:** Subcommands must fail-fast. Upon encountering a failure, they must halt immediately, return a `PolyominoError`, and leave the system in its current state for manual user remediation.
 
 ### AD-4 — Zero-Dependency Native Distribution [ADOPTED]
 - **Binds:** CI/CD and deployment pipeline
@@ -62,7 +62,7 @@ flowchart TD
 
 | Concern | Convention |
 | --- | --- |
-| Error shapes | All domain errors extend `CumulusError` and are returned via `Either[CumulusError, A]`. |
+| Error shapes | All domain errors extend `PolyominoError` and are returned via `Either[PolyominoError, A]`. |
 | Cross-cutting config | Handled exclusively via the `Context` object parsed at process start. |
 | External process calls | Executed via `os-lib` (`os.proc`). |
 
@@ -79,12 +79,12 @@ flowchart TD
 ## Structural Seed
 
 ```text
-cumulus.dotfiles/
-  src/main/scala/cumulus/
+polyomino.dotfiles/
+  src/main/scala/polyomino/
     Main.scala                 # Orchestrator & Dispatcher
     dotfiles/
       context/                 # Mutable Context Registry
-      error/                   # CumulusError definitions
+      error/                   # PolyominoError definitions
       install/                 # Bootstrapping logic
       theme/                   # Theme application
       ...                      # Other subcommand domains

@@ -1,7 +1,7 @@
 enablePlugins(NativeImagePlugin)
 
 scalaVersion := "3.5.2"
-name := "cumulus"
+name := "polyomino"
 organization := "io.github.petrolal"
 version := {
   val tagVersion = sys.env.get("CI_VERSION")
@@ -18,8 +18,8 @@ version := {
 // Maven Central / Sonatype publishing settings
 publishMavenStyle := true
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
-homepage := Some(url("https://github.com/petrolal/cumulus.dotfiles"))
-scmInfo := Some(ScmInfo(url("https://github.com/petrolal/cumulus.dotfiles"), "scm:git@github.com:petrolal/cumulus.dotfiles.git"))
+homepage := Some(url("https://github.com/petrolal/polyomino.dotfiles"))
+scmInfo := Some(ScmInfo(url("https://github.com/petrolal/polyomino.dotfiles"), "scm:git@github.com:petrolal/polyomino.dotfiles.git"))
 developers := List(
   Developer(
     id = "petrolal",
@@ -49,9 +49,9 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "1.0.0" % Test
 )
 
-Compile / mainClass := Some("cumulus.Main")
+Compile / mainClass := Some("polyomino.Main")
 
-// Coursier configuration - makes `cs bootstrap io.github.petrolal::cumulus -o ~/.local/bin/cumulus` work
+// Coursier configuration - makes `cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino` work
 // scriptClasspath := Seq("*")  // Requires sbt-coursier plugin
 
 // Package JAR with all dependencies (fat JAR)
@@ -60,7 +60,7 @@ assembly / assemblyMergeStrategy := {
   case x => MergeStrategy.first
 }
 assembly / assemblyJarName := s"${name.value}-${version.value}-assembly.jar"
-assembly / mainClass := Some("cumulus.Main")
+assembly / mainClass := Some("polyomino.Main")
 
 // Create lightweight launcher JAR for Coursier
 packageBin / packageOptions += Package.ManifestAttributes(

@@ -1,7 +1,7 @@
-package cumulus.dotfiles.install
+package polyomino.dotfiles.install
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 import upickle.default._
 
 object DeployInstaller:
@@ -14,23 +14,23 @@ object DeployInstaller:
     "install-tools", "install-telegram", "full-install", "theme-picker", "whichkey", "wichkey"
   )
 
-  def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println("[1;32m[cumulus install][0m Deploying cumulus.dotfiles configurations & symlinks...")
+  def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
+    println("[1;32m[polyomino install][0m Deploying polyomino.dotfiles configurations & symlinks...")
     val binDir = ctx.home / ".local" / "bin"
     os.makeDir.all(binDir)
 
-    val mainBinary = binDir / "cumulus"
+    val mainBinary = binDir / "polyomino"
     println(s"  [32m[OK][0m Target executable: $mainBinary")
 
     var manifestEntries = List.empty[ManifestEntry]
 
     // 1. Clean & deploy dotfile configuration symlinks from scratch
     val timestamp = System.currentTimeMillis()
-    val backupBaseDir = ctx.home / ".cumulus_backup" / timestamp.toString
+    val backupBaseDir = ctx.home / ".polyomino_backup" / timestamp.toString
 
     val configMappings = Seq(
       (ctx.home / ".zshrc", ctx.dotfilesDir / "zsh" / ".zshrc"),
-      (ctx.configDir / "cumulus" / "zsh_config", ctx.dotfilesDir / "zsh" / "zsh_config"),
+      (ctx.configDir / "polyomino" / "zsh_config", ctx.dotfilesDir / "zsh" / "zsh_config"),
       (ctx.configDir / "sway", ctx.dotfilesDir / "config" / "sway"),
       (ctx.configDir / "kitty", ctx.dotfilesDir / "config" / "kitty"),
       (ctx.configDir / "waybar", ctx.dotfilesDir / "config" / "waybar"),
@@ -83,13 +83,13 @@ object DeployInstaller:
         else
           println(s"  [33m[WARN][0m Skipping symlink for ${targetPath.last} - could not remove existing path")
 
-    // 2. Purge obsolete cumulus-* symlinks not in Subcommands
-    val validSymlinkNames = Subcommands.map(cmd => s"cumulus-$cmd").toSet
+    // 2. Purge obsolete polyomino-* symlinks not in Subcommands
+    val validSymlinkNames = Subcommands.map(cmd => s"polyomino-$cmd").toSet
     var purgedCount = 0
     if os.exists(binDir) then
       for file <- os.list(binDir) do
         val filename = file.last
-        if filename.startsWith("cumulus-") && !validSymlinkNames.contains(filename) then
+        if filename.startsWith("polyomino-") && !validSymlinkNames.contains(filename) then
           try
             os.remove(file)
             purgedCount += 1
@@ -101,7 +101,7 @@ object DeployInstaller:
     // 3. Clean & deploy CLI subcommand symlinks in ~/.local/bin/
     var binSymlinkCount = 0
     for cmd <- Subcommands do
-      val symlinkPath = binDir / s"cumulus-$cmd"
+      val symlinkPath = binDir / s"polyomino-$cmd"
       try
         if os.exists(symlinkPath) || os.isLink(symlinkPath) then os.remove(symlinkPath)
         // Use ln command for reliable symlink creation
@@ -113,7 +113,7 @@ object DeployInstaller:
           backupPath = None
         )
       catch
-        case e: Exception => println(s"  [33m[NOTE][0m Failed to create symlink for cumulus-$cmd: ${e.getMessage}")
+        case e: Exception => println(s"  [33m[NOTE][0m Failed to create symlink for polyomino-$cmd: ${e.getMessage}")
 
     // 4. Save manifest JSON
     val manifestDir = ctx.shareDir
@@ -133,17 +133,17 @@ object DeployInstaller:
       case e: Exception => println(s"  [33m[NOTE][0m Manifest write failed: ${e.getMessage}")
 
     println(s"  [32m[OK][0m Created $configSymlinkCount config symlinks and $binSymlinkCount CLI subcommand symlinks")
-    println("\n[1;32m[SUCCESS][0m cumulus.dotfiles deployment complete!")
+    println("\n[1;32m[SUCCESS][0m polyomino.dotfiles deployment complete!")
 
     // Apply active desktop theme to re-render all config files
-    val activePalette = cumulus.dotfiles.theme.ThemeEngine.getActivePalette(ctx)
-    cumulus.dotfiles.theme.ThemeEngine.applyTheme(ctx, activePalette.name)
+    val activePalette = polyomino.dotfiles.theme.ThemeEngine.getActivePalette(ctx)
+    polyomino.dotfiles.theme.ThemeEngine.applyTheme(ctx, activePalette.name)
 
     if !args.contains("--links-only") then
-      println("\n[1;32m[cumulus full-install][0m Installing all system dependencies, desktop apps, fonts, and tooling...")
+      println("\n[1;32m[polyomino full-install][0m Installing all system dependencies, desktop apps, fonts, and tooling...")
       for
         _ <- ToolInstallers.runTool("full-install", ctx, args)
-        _ <- cumulus.dotfiles.validate.Validator.run(ctx, args)
+        _ <- polyomino.dotfiles.validate.Validator.run(ctx, args)
       yield ()
     else
       Right(())

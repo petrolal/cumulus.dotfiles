@@ -101,7 +101,7 @@
           font-size="42"
           font-weight="600"
           letter-spacing="12"
-          opacity="0.9">cumulus</text>
+          opacity="0.9">polyomino</text>
 
     <circle cx="280" cy="-12" r="4" fill="#F2994A" />
 

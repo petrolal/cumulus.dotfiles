@@ -61,6 +61,20 @@ jobs:
           fi
           sbt compile test
 
+      - name: Compile GraalVM Native Image
+        run: |
+          if [ -f "engine/build.sbt" ] && [ ! -f "build.sbt" ]; then
+            cd engine
+          fi
+          sbt nativeImage
+
+      - name: Upload native image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: polyomino-native-image
+          path: target/native-image/polyomino
+          retention-days: 1
+
   publish-maven-central:
     name: Publish to Maven Central
     needs: build-and-test
@@ -147,6 +161,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Download native image
+        uses: actions/download-artifact@v4
+        with:
+          name: polyomino-native-image
+
       - name: Extract Tag Name
         id: tag
         run: |
@@ -167,6 +186,7 @@ jobs:
           tag_name: ${{ steps.tag.outputs.TAG_NAME }}
           name: Release ${{ steps.tag.outputs.TAG_NAME }}
           generate_release_notes: true
+          files: polyomino
           draft: false
           prerelease: false
         env:

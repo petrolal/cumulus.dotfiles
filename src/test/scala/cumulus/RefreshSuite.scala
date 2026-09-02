@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.refresh.RefreshEngine
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.refresh.RefreshEngine
 import munit.FunSuite
 
 class RefreshSuite extends FunSuite:

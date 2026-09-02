@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.autotiling.AutotilingDaemon
-import cumulus.dotfiles.context.Context
+import polyomino.dotfiles.autotiling.AutotilingDaemon
+import polyomino.dotfiles.context.Context
 import munit.FunSuite
 
 class AutotilingSuite extends FunSuite:

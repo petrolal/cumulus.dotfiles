@@ -1,7 +1,7 @@
-package cumulus.dotfiles.validate
+package polyomino.dotfiles.validate
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 object Validator:
   val VersionStr = "0.1.0 (Scala 3.5.2 Native Image)"
@@ -14,8 +14,8 @@ object Validator:
     "theme-picker", "whichkey", "wichkey"
   )
 
-  def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
-    println(s"\u001b[1;36m[cumulus healthcheck]\u001b[0m Running 25+ point desktop health & symlink audit...")
+  def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
+    println(s"\u001b[1;36m[polyomino healthcheck]\u001b[0m Running 25+ point desktop health & symlink audit...")
 
     var missingCount = 0
 
@@ -24,7 +24,7 @@ object Validator:
     println(s"  \u001b[32m[OK]\u001b[0m Version: $VersionStr")
 
     val binDir = ctx.home / ".local" / "bin"
-    val mainBinary = binDir / "cumulus"
+    val mainBinary = binDir / "polyomino"
 
     if os.exists(mainBinary) then
       println(s"  \u001b[32m[OK]\u001b[0m Main executable target: $mainBinary")
@@ -50,11 +50,11 @@ object Validator:
     // 3. Audit Subcommand Binary Symlinks in ~/.local/bin/
     println("\n\u001b[1m--- Subcommand Symlink Audit (~/.local/bin/) ---\u001b[0m")
     for cmd <- Subcommands do
-      val symlinkPath = binDir / s"cumulus-$cmd"
+      val symlinkPath = binDir / s"polyomino-$cmd"
       if os.exists(symlinkPath) || os.isLink(symlinkPath) then
-        println(s"  \u001b[32m[OK]\u001b[0m Symlink 'cumulus-$cmd' -> $mainBinary")
+        println(s"  \u001b[32m[OK]\u001b[0m Symlink 'polyomino-$cmd' -> $mainBinary")
       else
-        println(s"  \u001b[31m[FAIL]\u001b[0m Symlink 'cumulus-$cmd' is MISSING at $symlinkPath")
+        println(s"  \u001b[31m[FAIL]\u001b[0m Symlink 'polyomino-$cmd' is MISSING at $symlinkPath")
         missingCount += 1
 
     // 4. Audit Desktop Config Paths

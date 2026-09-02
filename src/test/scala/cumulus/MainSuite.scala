@@ -1,4 +1,4 @@
-package cumulus
+package polyomino
 
 import munit.FunSuite
 

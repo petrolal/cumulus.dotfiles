@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# cumulus.dotfiles Bootstrap Installer
+# polyomino.dotfiles Bootstrap Installer
 # Minimal installer: Installs Java & Coursier only
-# Full setup is handled by: cumulus install
+# Full setup is handled by: polyomino install
 set -euo pipefail
 
-echo -e "\033[1;36m[cumulus bootstrap]\033[0m Starting cumulus.dotfiles installer..."
+echo -e "\033[1;36m[polyomino bootstrap]\033[0m Starting polyomino.dotfiles installer..."
 echo ""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,7 +31,7 @@ install_system_deps() {
     return
   fi
 
-  echo -e "  \033[1;36m[cumulus]\033[0m Installing system dependencies for $pkg_mgr..."
+  echo -e "  \033[1;36m[polyomino]\033[0m Installing system dependencies for $pkg_mgr..."
   echo -e "  \033[33m[INFO]\033[0m You may be prompted for your sudo password..."
 
   case "$pkg_mgr" in
@@ -74,7 +74,7 @@ install_java() {
     return
   fi
 
-  echo -e "  \033[1;36m[cumulus]\033[0m Installing Java (GraalVM 21)..."
+  echo -e "  \033[1;36m[polyomino]\033[0m Installing Java (GraalVM 21)..."
 
   # Try to install via SDKMan
   if [ ! -d "$HOME/.sdkman" ]; then
@@ -103,7 +103,7 @@ install_coursier() {
     return
   fi
 
-  echo -e "  \033[1;36m[cumulus]\033[0m Installing Coursier..."
+  echo -e "  \033[1;36m[polyomino]\033[0m Installing Coursier..."
 
   mkdir -p "$BIN_DIR"
 
@@ -129,7 +129,7 @@ install_coursier() {
 
 install_tools() {
   local pkg_mgr="$1"
-  echo -e "  \033[1;36m[cumulus]\033[0m Installing terminal & TUI tools (spotify_player, bluetui, kalker)..."
+  echo -e "  \033[1;36m[polyomino]\033[0m Installing terminal & TUI tools (spotify_player, bluetui, kalker)..."
 
   # Ensure cargo/rust and required build dependencies are available
   if ! command -v cargo &> /dev/null; then
@@ -266,11 +266,11 @@ echo ""
 echo -e "\033[1;32m[SUCCESS]\033[0m Bootstrap complete!"
 echo ""
 echo -e "\033[1;36m[Next Steps]\033[0m"
-echo -e "  1. Install cumulus from Maven Central:"
-echo -e "     \033[33mcs bootstrap io.github.petrolal::cumulus:0.1.0 -o ~/.local/bin/cumulus\033[0m"
+echo -e "  1. Install polyomino from Maven Central:"
+echo -e "     \033[33mcs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino\033[0m"
 echo ""
 echo -e "  2. Run the interactive installer:"
-echo -e "     \033[33mcumulus install\033[0m"
+echo -e "     \033[33mpolyomino install\033[0m"
 echo ""
 echo -e "  3. Follow the interactive prompts to:"
 echo -e "     - Choose your preferred tools and versions"

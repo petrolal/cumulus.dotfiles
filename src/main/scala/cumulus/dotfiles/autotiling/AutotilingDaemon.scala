@@ -1,15 +1,15 @@
-package cumulus.dotfiles.autotiling
+package polyomino.dotfiles.autotiling
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 object AutotilingDaemon:
-  def run(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     ctx.swaySocket match
       case None =>
         Left(CommandError("SWAYSOCK environment variable is not set. Sway autotiling daemon requires active Sway session.", 1))
       case Some(sock) =>
-        println(s"\u001b[1;36m[cumulus autotiling]\u001b[0m Starting Sway Fibonacci autotiling daemon (socket: $sock)...")
+        println(s"\u001b[1;36m[polyomino autotiling]\u001b[0m Starting Sway Fibonacci autotiling daemon (socket: $sock)...")
         try
           // Perform initial split calculation
           autoSplitFocusedWindow()

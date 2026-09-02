@@ -1,15 +1,15 @@
-package cumulus.dotfiles.calendar
+package polyomino.dotfiles.calendar
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
-import cumulus.dotfiles.theme.ThemeEngine
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
+import polyomino.dotfiles.theme.ThemeEngine
 
 object CalendarPopup:
-  def run(ctx: Context, args: List[String] = Nil): Either[CumulusError, Unit] =
+  def run(ctx: Context, args: List[String] = Nil): Either[PolyominoError, Unit] =
     // Toggle behavior: if already running, kill it to close
     val myPid = ProcessHandle.current().pid()
     try
-      val checkRes = os.proc("pgrep", "-f", "cumulus-calendar-runner").call(check = false)
+      val checkRes = os.proc("pgrep", "-f", "polyomino-calendar-runner").call(check = false)
       if checkRes.exitCode == 0 then
         val pids = checkRes.out.text().trim.split("\\s+").filter(_.nonEmpty).map(_.toLong).filter(_ != myPid)
         if pids.nonEmpty then
@@ -19,8 +19,8 @@ object CalendarPopup:
     catch
       case _: Exception => ()
 
-    // Ensure helper script is deployed in ~/.local/share/cumulus/
-    val runnerScript = ctx.shareDir / "cumulus-calendar-runner.py"
+    // Ensure helper script is deployed in ~/.local/share/polyomino/
+    val runnerScript = ctx.shareDir / "polyomino-calendar-runner.py"
     os.makeDir.all(ctx.shareDir)
     os.write.over(runnerScript, PythonRunnerScript)
     try os.proc("chmod", "+x", runnerScript.toString).call(check = false) catch case _: Exception => ()
@@ -300,13 +300,13 @@ object CalendarPopup:
       |    range_bg = hex_to_rgba(accent_color, 0.25)
       |
       |    win = Gtk.Window()
-      |    win.set_title("Cumulus Calendar")
+      |    win.set_title("Polyomino Calendar")
       |    win.set_resizable(False)
       |    win.set_size_request(340, 430)
       |
       |    GtkLayerShell.init_for_window(win)
       |    GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
-      |    GtkLayerShell.set_namespace(win, "cumulus-calendar-popup")
+      |    GtkLayerShell.set_namespace(win, "polyomino-calendar-popup")
       |    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
       |    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 6)
       |    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)

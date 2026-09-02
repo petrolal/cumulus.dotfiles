@@ -57,7 +57,7 @@ Example interactive session:
 ```bash
 $ ./scripts/maintain-sdkman.sh install
 
-[cumulus-sdkman] Interactive SDKMan Setup
+[polyomino-sdkman] Interactive SDKMan Setup
 
   [INFO] Select Java version:
   1) Java 21 GraalVM (recommended, native image support)
@@ -79,7 +79,7 @@ $ ./scripts/maintain-sdkman.sh install
   [OK] Scala 3.5.2 installed
 
 ...
-[cumulus-sdkman] Setup complete!
+[polyomino-sdkman] Setup complete!
 ```
 
 ## Available Commands

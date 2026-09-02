@@ -24,6 +24,6 @@ export MOZ_ENABLE_WAYLAND=1
 export NIXOS_OZONE_WL=1
 
 # Load local secrets (outside version control)
-if [ -f "$HOME/.cumulus.local.zsh" ]; then
-  source "$HOME/.cumulus.local.zsh"
+if [ -f "$HOME/.polyomino.local.zsh" ]; then
+  source "$HOME/.polyomino.local.zsh"
 fi

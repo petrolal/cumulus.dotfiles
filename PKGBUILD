@@ -1,10 +1,10 @@
 # Maintainer: petrolal <petrolalucas@gmail.com>
-pkgname=cumulus-dotfiles
+pkgname=polyomino-dotfiles
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Sway dotfiles installer with Scala 3 + GraalVM native image"
 arch=('x86_64')
-url="https://github.com/petrolal/cumulus.dotfiles"
+url="https://github.com/petrolal/polyomino.dotfiles"
 license=('MIT')
 depends=(
   'sway'
@@ -50,7 +50,7 @@ package() {
   cd "${pkgname}"
 
   # Install main binary
-  install -Dm755 "target/native-image/cumulus" "${pkgdir}/usr/local/bin/cumulus"
+  install -Dm755 "target/native-image/polyomino" "${pkgdir}/usr/local/bin/polyomino"
 
   # Create subcommand symlinks
   local subcommands=(
@@ -63,12 +63,12 @@ package() {
   )
 
   for cmd in "${subcommands[@]}"; do
-    ln -s "/usr/local/bin/cumulus" "${pkgdir}/usr/local/bin/cumulus-${cmd}"
+    ln -s "/usr/local/bin/polyomino" "${pkgdir}/usr/local/bin/polyomino-${cmd}"
   done
 
   # Install dotfiles config directory
-  install -dm755 "${pkgdir}/opt/cumulus"
-  cp -r config zsh bootstrap.sh "${pkgdir}/opt/cumulus/"
+  install -dm755 "${pkgdir}/opt/polyomino"
+  cp -r config zsh bootstrap.sh "${pkgdir}/opt/polyomino/"
 
   # Install systemd user service for idle daemon (optional)
   install -dm755 "${pkgdir}/usr/lib/systemd/user"

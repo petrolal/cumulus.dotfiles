@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CumulusError, UnknownCommandError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{PolyominoError, UnknownCommandError}
 
 object Main:
   def main(args: Array[String]): Unit =
@@ -10,11 +10,11 @@ object Main:
 
   def dispatch(args: Array[String]): Int =
     val rawProg = sys.env.getOrElse("CUMULUS_PROG_NAME", getArgv0())
-    val progName = if rawProg.nonEmpty then rawProg else "cumulus"
+    val progName = if rawProg.nonEmpty then rawProg else "polyomino"
     val binaryBasename = try os.Path(progName, os.pwd).last catch case _: Exception => progName
 
-    val (cmd, restArgs) = if binaryBasename.startsWith("cumulus-") then
-      (binaryBasename.stripPrefix("cumulus-"), args.toList)
+    val (cmd, restArgs) = if binaryBasename.startsWith("polyomino-") then
+      (binaryBasename.stripPrefix("polyomino-"), args.toList)
     else
       args.headOption match
         case Some(cmdArg) if !cmdArg.startsWith("-") => (cmdArg, args.tail.toList)
@@ -26,7 +26,7 @@ object Main:
       case Right(_) => 0
       case Left(err) =>
         if err.message.nonEmpty then
-          println(s"\u001b[1;31m[cumulus] error:\u001b[0m ${err.message}")
+          println(s"\u001b[1;31m[polyomino] error:\u001b[0m ${err.message}")
         err.code
 
   private def getArgv0(): String =
@@ -38,42 +38,42 @@ object Main:
     catch
       case _: Exception => ""
 
-  private def runCommand(name: String, args: List[String]): Either[CumulusError, Unit] =
+  private def runCommand(name: String, args: List[String]): Either[PolyominoError, Unit] =
     for
       ctx <- Context.discover()
       res <- dispatchModule(name, ctx, args)
     yield res
 
-  private def dispatchModule(name: String, ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  private def dispatchModule(name: String, ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     name match
-      case "version" | "-v" | "--version" => Right(println("cumulus 0.1.0 (Scala 3.5.2 Native Image)"))
-      case "healthcheck" | "validate" => cumulus.dotfiles.validate.Validator.run(ctx, args)
-      case "sdd" => cumulus.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
-      case "lock" => cumulus.dotfiles.sysutils.SysUtils.runLock(ctx)
-      case "idle" => cumulus.dotfiles.sysutils.SysUtils.runIdle(ctx)
-      case "screenshot" => cumulus.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
-      case "calendar" => cumulus.dotfiles.calendar.CalendarPopup.run(ctx, args)
-      case "theme" => cumulus.dotfiles.theme.ThemeEngine.run(ctx, args)
-      case "runtime-refresh" => cumulus.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
-      case "os-colorscheme" => cumulus.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
-      case "notify-config" => cumulus.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
-      case "autotiling" => cumulus.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
-      case "theme-picker" => cumulus.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
-      case "whichkey" | "wichkey" => cumulus.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
-      case "backup" => cumulus.dotfiles.maintenance.Maintenance.runBackup(ctx, args)
-      case "restore" => cumulus.dotfiles.maintenance.Maintenance.runRestore(ctx, args)
-      case "update" => cumulus.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)
-      case "install" | "deploy" => cumulus.dotfiles.install.DeployInstaller.run(ctx, args)
-      case name if name.startsWith("install-") => cumulus.dotfiles.install.ToolInstallers.runTool(name, ctx, args)
-      case "full-install" => cumulus.dotfiles.install.ToolInstallers.runTool("full-install", ctx, args)
+      case "version" | "-v" | "--version" => Right(println("polyomino 0.1.0 (Scala 3.5.2 Native Image)"))
+      case "healthcheck" | "validate" => polyomino.dotfiles.validate.Validator.run(ctx, args)
+      case "sdd" => polyomino.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
+      case "lock" => polyomino.dotfiles.sysutils.SysUtils.runLock(ctx)
+      case "idle" => polyomino.dotfiles.sysutils.SysUtils.runIdle(ctx)
+      case "screenshot" => polyomino.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
+      case "calendar" => polyomino.dotfiles.calendar.CalendarPopup.run(ctx, args)
+      case "theme" => polyomino.dotfiles.theme.ThemeEngine.run(ctx, args)
+      case "runtime-refresh" => polyomino.dotfiles.refresh.RefreshEngine.runRefresh(ctx)
+      case "os-colorscheme" => polyomino.dotfiles.refresh.RefreshEngine.runOsColorscheme(ctx)
+      case "notify-config" => polyomino.dotfiles.refresh.NotificationIntegration.configureApps(ctx)
+      case "autotiling" => polyomino.dotfiles.autotiling.AutotilingDaemon.run(ctx, args)
+      case "theme-picker" => polyomino.dotfiles.pickers.WofiPickers.runThemePicker(ctx, args)
+      case "whichkey" | "wichkey" => polyomino.dotfiles.pickers.WofiPickers.runWhichkey(ctx, args)
+      case "backup" => polyomino.dotfiles.maintenance.Maintenance.runBackup(ctx, args)
+      case "restore" => polyomino.dotfiles.maintenance.Maintenance.runRestore(ctx, args)
+      case "update" => polyomino.dotfiles.maintenance.Maintenance.runUpdate(ctx, args)
+      case "install" | "deploy" => polyomino.dotfiles.install.DeployInstaller.run(ctx, args)
+      case name if name.startsWith("install-") => polyomino.dotfiles.install.ToolInstallers.runTool(name, ctx, args)
+      case "full-install" => polyomino.dotfiles.install.ToolInstallers.runTool("full-install", ctx, args)
       case other => Left(UnknownCommandError(other))
 
   val UmbrellaHelp: String =
-    """cumulus — tooling for the cumulus.dotfiles Sway/Wayland desktop.
+    """polyomino — tooling for the polyomino.dotfiles Sway/Wayland desktop.
       |
       |Usage:
-      |  cumulus <command> [args...]
-      |  cumulus-<command> [args...]      (installed alias)
+      |  polyomino <command> [args...]
+      |  polyomino-<command> [args...]      (installed alias)
       |
       |Commands:
       |  install          full setup: symlinks config + installs/updates all dependencies
@@ -106,7 +106,7 @@ object Main:
       |  theme-picker     wofi GUI front-end for the theme command
       |  whichkey         wofi cheatsheet of the live sway keybindings
       |
-      |Run `cumulus <command> --help` for command-specific usage.
+      |Run `polyomino <command> --help` for command-specific usage.
       |""".stripMargin
 
   private def printUmbrellaHelp(): Unit =

@@ -1,11 +1,11 @@
-package cumulus.dotfiles.refresh
+package polyomino.dotfiles.refresh
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
 
 object RefreshEngine:
-  def runRefresh(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus refresh]\u001b[0m Triggering runtime app reloads...")
+  def runRefresh(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino refresh]\u001b[0m Triggering runtime app reloads...")
 
     // Sway reload
     try os.proc("timeout", "2", "swaymsg", "reload").call(check = false, stdout = os.Pipe, stderr = os.Pipe) catch case _: Exception => ()
@@ -41,8 +41,8 @@ object RefreshEngine:
   private def isCommandAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false, stdout = os.Pipe, stderr = os.Pipe).exitCode == 0 catch case _: Exception => false
 
-  def runOsColorscheme(ctx: Context): Either[CumulusError, Unit] =
-    println("\u001b[1;36m[cumulus os-colorscheme]\u001b[0m Syncing GNOME GTK color-scheme...")
+  def runOsColorscheme(ctx: Context): Either[PolyominoError, Unit] =
+    println("\u001b[1;36m[polyomino os-colorscheme]\u001b[0m Syncing GNOME GTK color-scheme...")
     try
       os.proc("gsettings", "set", "org.gnome.desktop.interface", "color-scheme", "prefer-dark").call(check = false)
       println("  \u001b[32m[OK]\u001b[0m Set org.gnome.desktop.interface color-scheme = 'prefer-dark'")

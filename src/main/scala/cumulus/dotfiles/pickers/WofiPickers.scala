@@ -1,11 +1,11 @@
-package cumulus.dotfiles.pickers
+package polyomino.dotfiles.pickers
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.error.{CommandError, CumulusError}
-import cumulus.dotfiles.theme.ThemeEngine
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.error.{CommandError, PolyominoError}
+import polyomino.dotfiles.theme.ThemeEngine
 
 object WofiPickers:
-  def runThemePicker(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  def runThemePicker(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     // Toggle behavior: check if theme picker is already open
     try
       val checkRes = os.proc("pgrep", "-f", "wofi.*--prompt.*Theme").call(check = false)
@@ -17,8 +17,8 @@ object WofiPickers:
     catch
       case _: Exception => ()
 
-    println("\u001b[1;35m[cumulus theme-picker]\u001b[0m Launching Wofi GUI theme picker...")
-    val themes = cumulus.dotfiles.theme.Palette.listAll(ctx)
+    println("\u001b[1;35m[polyomino theme-picker]\u001b[0m Launching Wofi GUI theme picker...")
+    val themes = polyomino.dotfiles.theme.Palette.listAll(ctx)
     val inputList = themes.map(escapeMarkup).mkString("\n")
 
     try
@@ -58,7 +58,7 @@ object WofiPickers:
     catch
       case e: Exception => Left(CommandError(s"Wofi theme-picker failed: ${e.getMessage}"))
 
-  def runWhichkey(ctx: Context, args: List[String]): Either[CumulusError, Unit] =
+  def runWhichkey(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     // Toggle behavior: check if whichkey wofi is already running
     try
       val checkRes = os.proc("pgrep", "-f", "wofi.*--prompt.*which-key").call(check = false)
@@ -70,7 +70,7 @@ object WofiPickers:
     catch
       case _: Exception => ()
 
-    println("\u001b[1;35m[cumulus whichkey]\u001b[0m Displaying Sway keybindings cheatsheet...")
+    println("\u001b[1;35m[polyomino whichkey]\u001b[0m Displaying Sway keybindings cheatsheet...")
     val keybindingsList = resolveSwayKeybindings(ctx)
     val entries = if keybindingsList.nonEmpty then keybindingsList else defaultKeybindings
     val inputList = entries.map(escapeMarkup).mkString("\n")
@@ -152,8 +152,8 @@ object WofiPickers:
 
             if !isRawCodeOnly then
               // Deduplicate whichkey and screenshot internal aliases
-              val isWhichKey = action.contains("cumulus-whichkey")
-              val isScreenshotFull = action.contains("cumulus screenshot full") || action.contains("cumulus-screenshot full")
+              val isWhichKey = action.contains("polyomino-whichkey")
+              val isScreenshotFull = action.contains("polyomino screenshot full") || action.contains("polyomino-screenshot full")
 
               val shouldAdd = if isWhichKey then
                 if seenActions.contains("whichkey") then false else { seenActions += "whichkey"; true }
@@ -171,15 +171,15 @@ object WofiPickers:
 
   private def friendlyAction(action: String): String =
     action match
-      case a if a.contains("cumulus-whichkey") => "Keybindings cheatsheet"
-      case a if a.contains("cumulus-theme-picker") => "Theme and wallpaper picker"
-      case a if a.contains("cumulus-lock") => "Lock screen (swaylock)"
+      case a if a.contains("polyomino-whichkey") => "Keybindings cheatsheet"
+      case a if a.contains("polyomino-theme-picker") => "Theme and wallpaper picker"
+      case a if a.contains("polyomino-lock") => "Lock screen (swaylock)"
       case a if a.contains("systemctl suspend") => "Suspend system"
       case a if a.contains("systemctl poweroff") => "Shutdown system"
       case a if a.contains("systemctl reboot") => "Reboot system"
-      case a if a.contains("cumulus screenshot full") => "Screenshot full screen"
-      case a if a.contains("cumulus screenshot region") => "Screenshot region selection"
-      case a if a.contains("cumulus screenshot window") => "Screenshot active window"
+      case a if a.contains("polyomino screenshot full") => "Screenshot full screen"
+      case a if a.contains("polyomino screenshot region") => "Screenshot region selection"
+      case a if a.contains("polyomino screenshot window") => "Screenshot active window"
       case a if a.contains("swaync-client -t -sw") => "Toggle notification center"
       case a if a.contains("kitty -e kalker") => "Calculator (kalker)"
       case a if a.contains("kitty -e yazi") => "File manager (yazi)"

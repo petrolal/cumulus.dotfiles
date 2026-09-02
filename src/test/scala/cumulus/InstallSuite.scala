@@ -1,7 +1,7 @@
-package cumulus
+package polyomino
 
-import cumulus.dotfiles.context.Context
-import cumulus.dotfiles.install.{DeployInstaller, ToolInstallers, Manifest, ManifestEntry}
+import polyomino.dotfiles.context.Context
+import polyomino.dotfiles.install.{DeployInstaller, ToolInstallers, Manifest, ManifestEntry}
 import munit.FunSuite
 
 class InstallSuite extends FunSuite:

@@ -69,7 +69,7 @@
           font-size="42"
           font-weight="600"
           letter-spacing="12"
-          opacity="0.85">cumulus</text>
+          opacity="0.85">polyomino</text>
 
     <text x="0" y="36"
           text-anchor="end"
