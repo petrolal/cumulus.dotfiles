@@ -433,7 +433,7 @@ If you prefer to install system packages manually:
 
 ```bash
 # Skip system package installation
-CUMULUS_SKIP_SYSTEM_DEPS=1 polyomino install
+POLYOMINO_SKIP_SYSTEM_DEPS=1 polyomino install
 ```
 
 ### Install to Custom Location

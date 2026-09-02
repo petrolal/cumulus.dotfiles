@@ -9,7 +9,7 @@ object Main:
     if exitCode != 0 then sys.exit(exitCode)
 
   def dispatch(args: Array[String]): Int =
-    val rawProg = sys.env.getOrElse("CUMULUS_PROG_NAME", getArgv0())
+    val rawProg = sys.env.getOrElse("POLYOMINO_PROG_NAME", getArgv0())
     val progName = if rawProg.nonEmpty then rawProg else "polyomino"
     val binaryBasename = try os.Path(progName, os.pwd).last catch case _: Exception => progName
 

@@ -17,7 +17,7 @@ object Context:
       val home = os.home
       val configDir = sys.env.get("XDG_CONFIG_HOME").map(os.Path(_)).getOrElse(home / ".config")
       val shareDir = sys.env.get("XDG_DATA_HOME").map(os.Path(_)).getOrElse(home / ".local" / "share" / "polyomino")
-      val dotfilesDir = sys.env.get("CUMULUS_DOTFILES_DIR").map(os.Path(_)).getOrElse(home / "polyomino.dotfiles")
+      val dotfilesDir = sys.env.get("POLYOMINO_DOTFILES_DIR").map(os.Path(_)).getOrElse(home / "polyomino.dotfiles")
       val swaySocket = sys.env.get("SWAYSOCK")
 
       Right(Context(
