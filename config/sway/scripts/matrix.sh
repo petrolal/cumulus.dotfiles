@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Polyomino Terminal Matrix / Tetromino Screen Saver
 
-if command -v cmatrix >/dev/null 2>&1; then
+tetromino_rain="$(dirname "${BASH_SOURCE[0]}")/tetromino-rain.sh"
+
+if [[ -x "$tetromino_rain" ]]; then
+  exec "$tetromino_rain"
+elif command -v cmatrix >/dev/null 2>&1; then
   exec cmatrix -s -C yellow
-elif command -v bastet >/dev/null 2>&1; then
-  exec bastet
 elif command -v tint >/dev/null 2>&1; then
   exec tint
 else
