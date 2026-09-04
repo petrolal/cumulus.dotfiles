@@ -28,6 +28,7 @@ object CalendarPopup:
     val palette = ThemeEngine.getActivePalette(ctx)
     val waybarTheme = ctx.configDir / "waybar" / "theme.css"
     val themePath = if os.exists(waybarTheme) then waybarTheme.toString else ""
+    val targetOutput = args.sliding(2).collectFirst { case Seq("--output", name) => name }.getOrElse("")
 
     try
       os.proc(
@@ -37,7 +38,8 @@ object CalendarPopup:
         "--text", palette.text,
         "--mantle", palette.mantle,
         "--red", palette.red,
-        "--theme-file", themePath
+        "--theme-file", themePath,
+        "--target-output", targetOutput
       ).spawn()
       Right(())
     catch
@@ -51,11 +53,85 @@ object CalendarPopup:
       |import datetime
       |import calendar
       |import argparse
+      |import json
+      |import subprocess
       |import gi
       |
       |gi.require_version("Gtk", "3.0")
       |gi.require_version("GtkLayerShell", "0.1")
       |from gi.repository import Gtk, Gdk, GtkLayerShell, GLib, Pango
+      |
+      |DEBUG_LOG = os.path.expanduser("~/.local/share/polyomino/calendar-debug.log")
+      |
+      |def dlog(msg):
+      |    try:
+      |        with open(DEBUG_LOG, "a") as f:
+      |            f.write(f"[{datetime.datetime.now().isoformat()}] {msg}\\n")
+      |    except Exception:
+      |        pass
+      |
+      |def get_outputs():
+      |    try:
+      |        out = subprocess.run(["swaymsg", "-t", "get_outputs"], capture_output=True, timeout=2, check=True).stdout
+      |        return json.loads(out)
+      |    except Exception as e:
+      |        dlog(f"get_outputs failed: {e!r}")
+      |        return []
+      |
+      |def find_output_rect_by_name(name, source):
+      |    # xdotool/XWayland pointer queries are stale for native-Wayland
+      |    # surfaces like waybar itself and must not be used to find "which
+      |    # screen was clicked". WAYBAR_OUTPUT_NAME is also unreliable: it is
+      |    # not set for built-in modules' on-click exec on this waybar build.
+      |    # So the output name is instead passed explicitly via --target-output
+      |    # from a per-monitor waybar bar config (see find_target_output_rect).
+      |    if not name:
+      |        dlog(f"{source}: no output name given")
+      |        return None
+      |    outputs = get_outputs()
+      |    dlog(f"{source}: name={name} outputs={[(o.get('name'), o.get('rect')) for o in outputs]}")
+      |    for o in outputs:
+      |        if o.get("name") == name:
+      |            r = o.get("rect")
+      |            dlog(f"{source}: matched output {name} rect={r}")
+      |            return r
+      |    dlog(f"{source}: no output named {name} found")
+      |    return None
+      |
+      |def find_target_output_rect(target_output_arg):
+      |    r = find_output_rect_by_name(target_output_arg, "target-output-arg")
+      |    if r is not None:
+      |        return r
+      |    return find_output_rect_by_name(os.environ.get("WAYBAR_OUTPUT_NAME"), "waybar-env")
+      |
+      |def find_focused_output_rect():
+      |    outputs = get_outputs()
+      |    for o in outputs:
+      |        if o.get("focused"):
+      |            return o.get("rect")
+      |    for o in outputs:
+      |        if o.get("active"):
+      |            return o.get("rect")
+      |    return None
+      |
+      |def find_gdk_monitor(output_rect):
+      |    if not output_rect:
+      |        dlog("find_gdk_monitor: no output_rect given")
+      |        return None
+      |    display = Gdk.Display.get_default()
+      |    if display is None:
+      |        dlog("find_gdk_monitor: Gdk.Display.get_default() is None")
+      |        return None
+      |    geos = []
+      |    for i in range(display.get_n_monitors()):
+      |        monitor = display.get_monitor(i)
+      |        geo = monitor.get_geometry()
+      |        geos.append((i, geo.x, geo.y, geo.width, geo.height))
+      |        if geo.x == output_rect.get("x") and geo.y == output_rect.get("y"):
+      |            dlog(f"find_gdk_monitor: matched gdk monitor {i} geo=({geo.x},{geo.y}) to output_rect={output_rect}")
+      |            return monitor
+      |    dlog(f"find_gdk_monitor: no match for output_rect={output_rect}, gdk monitors={geos}")
+      |    return None
       |
       |class CustomCalendar(Gtk.Box):
       |    def __init__(self, theme_colors):
@@ -265,6 +341,7 @@ object CalendarPopup:
       |    parser.add_argument("--mantle", default="#040D15")
       |    parser.add_argument("--red", default="#EF4444")
       |    parser.add_argument("--theme-file", default="")
+      |    parser.add_argument("--target-output", default="")
       |    args = parser.parse_args()
       |
       |    base_color = args.base
@@ -307,8 +384,19 @@ object CalendarPopup:
       |    GtkLayerShell.init_for_window(win)
       |    GtkLayerShell.set_layer(win, GtkLayerShell.Layer.TOP)
       |    GtkLayerShell.set_namespace(win, "polyomino-calendar-popup")
+      |    target_rect = find_target_output_rect(args.target_output)
+      |    dlog(f"target_rect = {target_rect} (--target-output={args.target_output!r})")
+      |    if target_rect is None:
+      |        target_rect = find_focused_output_rect()
+      |        dlog(f"fell back to focused output rect = {target_rect}")
+      |    gdk_monitor = find_gdk_monitor(target_rect)
+      |    dlog(f"final gdk_monitor = {gdk_monitor}")
+      |    if gdk_monitor is not None:
+      |        GtkLayerShell.set_monitor(win, gdk_monitor)
       |    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.TOP, True)
+      |    GtkLayerShell.set_anchor(win, GtkLayerShell.Edge.RIGHT, True)
       |    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.TOP, 6)
+      |    GtkLayerShell.set_margin(win, GtkLayerShell.Edge.RIGHT, 10)
       |    GtkLayerShell.set_keyboard_mode(win, GtkLayerShell.KeyboardMode.ON_DEMAND)
       |
       |    popup_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)

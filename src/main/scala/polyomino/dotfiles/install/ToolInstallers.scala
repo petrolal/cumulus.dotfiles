@@ -66,13 +66,13 @@ object ToolInstallers:
     println(s"\u001b[1;36m[polyomino install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "waybar", "kitty", "wofi", "swaylock", "gtklock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim", "fastfetch", "cmatrix", "jq", "networkmanager-applet", "polkit-gnome"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "waybar", "kitty", "wofi", "swaylock", "gtklock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim", "fastfetch", "cmatrix", "jq", "xdotool", "network-manager-applet", "polkit-gnome"))
         if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "swayfx", "ncpamixer", "onlyoffice-bin"))
         else runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway"))
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch", "cmatrix", "jq", "network-manager-applet", "polkit-gnome"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch", "cmatrix", "jq", "xdotool", "network-manager-applet", "polkit-gnome"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch", "cmatrix", "jq", "network-manager-gnome", "policykit-1-gnome"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch", "cmatrix", "jq", "xdotool", "network-manager-gnome", "policykit-1-gnome"))
       case PackageManager.Brew =>
         runPkgInstall("brew", Seq("install", "fastfetch", "cmatrix", "jq"))
       case _ =>

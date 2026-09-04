@@ -1,31 +1,86 @@
 // ~/.config/waybar/config.jsonc
 // Production Waybar layout — ML4W floating pill style.
-{
-	"include": "~/.config/waybar/modules.jsonc",
-	"layer": "top",
-	"position": "top",
-	"height": 32,
-	"spacing": 6,
-	"margin-top": 6,
-	"margin-left": 8,
-	"margin-right": 8,
-	"modules-left": [
-		"sway/workspaces",
-		"custom/spotify"
-	],
-	"modules-center": [
-		"sway/mode",
-		"sway/window"
-	],
-	"modules-right": [
-		"pulseaudio",
-		"bluetooth",
-		"network",
-		"cpu",
-		"memory",
-		"battery",
-		"clock",
-		"tray"
-	]
-
-}
+//
+// One bar object per physical output. Waybar runs all bars in a single
+// process (no per-output env var is available to on-click exec commands
+// for built-in modules), so the only reliable way for the calendar
+// popup's on-click to know which monitor's clock was clicked is to bake
+// the output name into that bar's own on-click command below. If you
+// change monitors/outputs, update the "output" fields (see `swaymsg -t
+// get_outputs` for current names) and add/remove bar objects to match.
+[
+	{
+		"output": "HDMI-A-1",
+		"include": "~/.config/waybar/modules.jsonc",
+		"layer": "top",
+		"position": "top",
+		"height": 32,
+		"spacing": 6,
+		"margin-top": 6,
+		"margin-left": 8,
+		"margin-right": 8,
+		"modules-left": [
+			"sway/workspaces",
+			"custom/spotify"
+		],
+		"modules-center": [
+			"sway/mode",
+			"sway/window"
+		],
+		"modules-right": [
+			"pulseaudio",
+			"bluetooth",
+			"network",
+			"cpu",
+			"memory",
+			"battery",
+			"tray",
+			"clock"
+		],
+		"clock": {
+			"interval": 60,
+			"align": 0,
+			"rotate": 0,
+			"tooltip": false,
+			"format": " {:%H:%M:%S  %b %Y}",
+			"on-click": "~/.local/bin/polyomino calendar --output HDMI-A-1"
+		}
+	},
+	{
+		"output": "eDP-1",
+		"include": "~/.config/waybar/modules.jsonc",
+		"layer": "top",
+		"position": "top",
+		"height": 32,
+		"spacing": 6,
+		"margin-top": 6,
+		"margin-left": 8,
+		"margin-right": 8,
+		"modules-left": [
+			"sway/workspaces",
+			"custom/spotify"
+		],
+		"modules-center": [
+			"sway/mode",
+			"sway/window"
+		],
+		"modules-right": [
+			"pulseaudio",
+			"bluetooth",
+			"network",
+			"cpu",
+			"memory",
+			"battery",
+			"tray",
+			"clock"
+		],
+		"clock": {
+			"interval": 60,
+			"align": 0,
+			"rotate": 0,
+			"tooltip": false,
+			"format": " {:%H:%M:%S  %b %Y}",
+			"on-click": "~/.local/bin/polyomino calendar --output eDP-1"
+		}
+	}
+]
