@@ -124,6 +124,14 @@ gaps inner 10
 gaps outer 0
 smart_borders on
 
+# SwayFX eye-candy (rounded corners, blur, shadows)
+corner_radius 10
+blur enable
+blur_radius 5
+blur_passes 2
+shadows enable
+shadow_blur_radius 20
+
 ### ────────────────────────────────────────────────────────────────
 ### Workspace names (mapped to numbers so SUPER+1..9 still works)
 ### ────────────────────────────────────────────────────────────────
