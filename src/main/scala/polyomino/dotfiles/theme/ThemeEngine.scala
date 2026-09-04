@@ -158,10 +158,8 @@ object ThemeEngine:
         |}
         |
         |window#waybar {
-        |    background-color: @base;
+        |    background-color: transparent;
         |    color: @text;
-        |    border: 1px solid @mantle;
-        |    border-radius: 12px;
         |    transition-property: background-color;
         |    transition-duration: .5s;
         |}
