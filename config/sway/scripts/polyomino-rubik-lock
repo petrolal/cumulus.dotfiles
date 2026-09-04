@@ -1021,6 +1021,16 @@ class PolyominoRubikLockApp:
         if self.tick_source_id:
             GLib.source_remove(self.tick_source_id)
         self.current_tick_ms = ms
+        # Resync the animation clock to "now" whenever cadence changes.
+        # Without this, waking from the throttled idle tick (up to
+        # IDLE_TICK_MS old) leaves self.last_time stale, so the very next
+        # on_tick computes a big dt and a freshly-started slice turn (whose
+        # whole duration is ~100ms) jumps straight to progress=1.0 instead
+        # of animating through it — the turn appears to snap instead of
+        # rotate. This is exactly what happens on the real lock screen: a
+        # normal typing cadence (>IDLE_TICK_MS between keys) drops to idle
+        # between almost every keystroke, so nearly every turn was snapping.
+        self.last_time = time.time()
         self.tick_source_id = GLib.timeout_add(ms, self.on_tick)
 
     def queue_redraw_all(self):
