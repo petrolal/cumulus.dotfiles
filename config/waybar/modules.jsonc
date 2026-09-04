@@ -11,40 +11,31 @@
 			"warning": 30,
 			"critical": 15
 		},
-		"format": "BAT {icon}",
-		"format-charging": " {icon}",
-		"format-plugged": " {icon}",
-		"format-full": "BAT [■■■■]",
+		"format": "{icon} {capacity}%",
+		"format-charging": " {capacity}%",
+		"format-plugged": " {capacity}%",
+		"format-full": " {capacity}%",
 		"format-alt": "{time} {icon}",
 		"format-icons": [
-			"[■   ]",
-			"[■■  ]",
-			"[■■■ ]",
-			"[■■■■]"
+			"",
+			"",
+			"",
+			"",
+			""
 		],
 		"format-time": "{H}h {M}min"
 	},
 	// waybar-cpu
 	"cpu": {
 		"interval": 3,
-		"format": "CPU {icon}",
-		"format-icons": [
-			"[■   ]",
-			"[■■  ]",
-			"[■■■ ]",
-			"[■■■■]"
-		]
+		"format": " {usage}%",
+		"tooltip": true
 	},
 	// waybar-memory
 	"memory": {
 		"interval": 5,
-		"format": "RAM {icon}",
-		"format-icons": [
-			"[■   ]",
-			"[■■  ]",
-			"[■■■ ]",
-			"[■■■■]"
-		]
+		"format": " {percentage}%",
+		"tooltip-format": "{used:0.1f}GiB / {total:0.1f}GiB"
 	},
 
 	// waybar-bluetooth

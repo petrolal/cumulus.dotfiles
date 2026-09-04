@@ -160,7 +160,8 @@ object ThemeEngine:
         |window#waybar {
         |    background-color: @base;
         |    color: @text;
-        |    border-bottom: 2px solid @mantle;
+        |    border: 1px solid @mantle;
+        |    border-radius: 12px;
         |    transition-property: background-color;
         |    transition-duration: .5s;
         |}
@@ -184,39 +185,37 @@ object ThemeEngine:
         |}
         |
         |#workspaces {
-	|    background-color: @mantle;
-	|    color: @accent;
-	|    border-radius: 0px 8px 0px 0px;
-	|    padding: 4px;
-        |    margin-right: 10px;
+        |    background-color: @mantle;
+        |    color: @accent;
+        |    border-radius: 8px;
+        |    padding: 4px;
+        |    margin: 4px 6px 4px 6px;
         |}
         |
         |#workspaces button {
         |    padding: 0 8px;
         |    background-color: transparent;
         |    color: @text;
-        |    border-bottom: 2px solid transparent;
+        |    border-radius: 6px;
         |}
         |
         |#workspaces button.focused,
         |#workspaces button.active {
-        |    background-color: @mantle;
+        |    background-color: @base;
         |    color: @accent;
         |}
         |
         |#workspaces button:hover {
-        |    background-color: @mantle;
+        |    background-color: @base;
         |    color: @accent;
-        |    border-radius: 8px;
-        |    border-bottom: 2px solid @accent;
         |}
         |
         |#workspaces button.urgent {
         |    background-color: @red;
         |    color: @base;
-        |    border-bottom: 2px solid @red;
         |}
         |
+        |/* Floating pill modules */
         |#clock,
         |#tray,
         |#network,
@@ -227,76 +226,74 @@ object ThemeEngine:
         |#cpu,
         |#memory,
         |#custom-notification,
+        |#custom-spotify,
         |#mode {
-        |    padding: 0 10px;
-        |    margin: 0 2px;
+        |    background-color: @mantle;
+        |    padding: 0 12px;
+        |    margin: 4px 2px;
+        |    border-radius: 8px;
         |    color: @text;
-        |    border-bottom: 2px solid transparent;
         |}
         |
-        |/* Polyomino Pill Accent Colors */
+        |#tray {
+        |    padding: 0 10px;
+        |}
+        |
+        |/* Polyomino Pill Accent Colors — one distinct hue per module */
         |#pulseaudio {
         |    color: #10AC84;
-        |    border-bottom: 2px solid #10AC84;
         |}
         |
         |#network,
         |#network.wifi {
         |    color: #00D2D3;
-        |    border-bottom: 2px solid #00D2D3;
+        |}
+        |
+        |#bluetooth {
+        |    color: #5DADE2;
         |}
         |
         |#battery {
-        |    color: #EBB434;
-        |    border-bottom: 2px solid #EBB434;
+        |    color: @accent;
         |}
         |
         |#cpu {
-        |    color: #EBB434;
-        |    border-bottom: 2px solid #EBB434;
+        |    color: #FF6B35;
         |}
         |
         |#memory {
-        |    color: #00D2D3;
-        |    border-bottom: 2px solid #00D2D3;
+        |    color: #9B59B6;
+        |}
+        |
+        |#custom-spotify {
+        |    color: #1DB954;
         |}
         |
         |#clock:hover,
-        |#clock:active,
         |#clock.active,
         |#tray:hover,
         |#network:hover,
-        |#network:active,
         |#network.active,
         |#bluetooth:hover,
-        |#bluetooth:active,
         |#bluetooth.active,
         |#pulseaudio:hover,
-        |#pulseaudio:active,
         |#pulseaudio.active,
         |#backlight:hover,
-        |#backlight:active,
         |#backlight.active,
         |#battery:hover,
-        |#battery:active,
         |#battery.active,
         |#cpu:hover,
-        |#cpu:active,
         |#cpu.active,
         |#memory:hover,
-        |#memory:active,
         |#memory.active,
         |#custom-notification:hover,
-        |#custom-notification:active,
         |#custom-notification.active,
         |#custom-notification.open,
         |#custom-notification.open-window,
+        |#custom-spotify:hover,
         |#mode:hover,
-        |#mode:active,
         |#mode.active {
-        |    background-color: @mantle;
-        |    color: @accent;
-        |    border-bottom: 2px solid @accent;
+        |    background-color: @base;
         |}
         |
         |#battery.warning {
