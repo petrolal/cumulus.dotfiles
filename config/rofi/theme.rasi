@@ -4,7 +4,7 @@
     fg: #F8FAFC;
     accent: #EBB434;
     mantle: #0F1117;
-    border-col: #2B303C;
+    border-col: #EBB434;
     font: "JetBrainsMono Nerd Font 12";
     background-color: transparent;
     text-color: @fg;
