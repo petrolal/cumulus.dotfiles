@@ -48,6 +48,11 @@ for_window [app_id="polyomino-calendar"] floating enable, resize set 680 440, mo
 # Floating lockscreen preview window
 for_window [app_id="polyomino-lock-preview"] floating enable, resize set 1024 720, move position center
 
+# Quick system-status TUI popups (bluetooth, audio mixer) — float centered on whatever
+# workspace they're invoked from instead of tiling into one, since they're glanced at and closed.
+for_window [app_id="kitty" title="bluetui"] floating enable, resize set 900 600, move position center
+for_window [app_id="kitty" title="ncpamixer"] floating enable, resize set 700 500, move position center
+
 # System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
 # connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
 exec nm-applet --indicator
@@ -168,10 +173,21 @@ assign [class="jetbrains-idea-ce"] $ws2
 assign [app_id="code"] $ws2
 assign [class="Code"] $ws2
 
-# 7: infra — terminal windows explicitly titled for VPN/infra work land here; must be assigned
-# before the generic kitty rule below, since sway's `assign` uses first-match-wins and a later,
-# more specific rule for the same app_id would otherwise never fire.
+# TUI apps launched via `$term -e <cmd>` all report app_id="kitty" — they never get their own
+# app_id/class, so they must be matched by the --title kitty is launched with below, and those
+# title rules must come before the generic kitty rule, since `assign` is first-match-wins.
+
+# 7: infra — terminal windows explicitly titled for VPN/infra work land here; move others
+# manually with SUPER+SHIFT+7, since ad hoc CLI (openvpn3, kubectl, etc.) has no window of its
+# own to match on.
 assign [app_id="kitty" title="infra"] $ws7
+
+# 5: comms (email + chat)
+assign [app_id="kitty" title="aerc"] $ws5
+assign [app_id="thunderbird"] $ws5
+assign [class="Thunderbird"] $ws5
+assign [app_id="telegramdesktop"] $ws5
+assign [class="TelegramDesktop"] $ws5
 
 # 3: term
 assign [app_id="kitty"] $ws3
@@ -182,23 +198,16 @@ assign [class="Docker Desktop"] $ws4
 assign [app_id="lens"] $ws4
 assign [class="Lens"] $ws4
 
-# 5: comms
-assign [app_id="thunderbird"] $ws5
-assign [class="Thunderbird"] $ws5
-assign [app_id="aerc"] $ws5
-assign [class="aerc"] $ws5
-
 # 6: notes
 assign [app_id="obsidian"] $ws6
 assign [class="obsidian"] $ws6
 
-# general infra CLI (openvpn3, kubectl, etc.) runs inside kitty terminals titled "infra"
-# (assigned to ws7 above, before the generic kitty rule); move others manually with
-# SUPER+SHIFT+7, since CLI tools have no window of their own to match on.
+# 8: misc/media
+assign [app_id="kitty" title="spotify"] $ws8
 
-# 8: misc
-assign [app_id="telegramdesktop"] $ws8
-assign [class="TelegramDesktop"] $ws8
+# bluetui/ncpamixer are quick system-status popups, not persistent work — they float on
+# whatever workspace you invoked them from instead of tiling into one (see for_window rules
+# in the Autostart section below the calendar/lock-preview floating rules).
 
 ### ────────────────────────────────────────────────────────────────
 ### Key bindings — stock Sway defaults (overrides previous ML4W custom set)
@@ -210,10 +219,10 @@ bindsym $mod+Shift+q kill
 bindsym $mod+d exec $launcher
 bindsym $mod+Shift+b exec google-chrome-stable
 bindsym $mod+Shift+f exec $term -e yazi
-bindsym $mod+Shift+m exec $term -e spotify_player
-bindsym $mod+Shift+u exec $term -e bluetui
-bindsym $mod+Shift+v exec $term -e ncpamixer
-bindsym $mod+Shift+a exec $term -e aerc
+bindsym $mod+Shift+m exec $term --title spotify -e spotify_player
+bindsym $mod+Shift+u exec $term --title bluetui -e bluetui
+bindsym $mod+Shift+v exec $term --title ncpamixer -e ncpamixer
+bindsym $mod+Shift+a exec $term --title aerc -e aerc
 bindsym $mod+Shift+n exec swaync-client -t -sw
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
