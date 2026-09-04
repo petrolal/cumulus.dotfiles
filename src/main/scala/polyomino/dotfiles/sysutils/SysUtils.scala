@@ -164,5 +164,18 @@ object SysUtils:
     catch
       case e: Exception => Left(CommandError(s"Calendar popup failed: ${e.getMessage}"))
 
+  def runDrawWindow(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
+    val script = ctx.dotfilesDir / "config" / "sway" / "scripts" / "sway-draw-window.sh"
+    val scriptToRun = if os.exists(script) then script else ctx.configDir / "sway" / "scripts" / "sway-draw-window.sh"
+    if os.exists(scriptToRun) then
+      try
+        val fullCmd: Seq[os.Shellable] = (scriptToRun.toString +: args).map(s => (s: os.Shellable))
+        os.proc(fullCmd*).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+        Right(())
+      catch
+        case e: Exception => Left(CommandError(s"Draw window failed: ${e.getMessage}"))
+    else
+      Left(CommandError(s"Script not found at $scriptToRun"))
+
   private def isCommandAvailable(cmd: String): Boolean =
     try os.proc("which", cmd).call(check = false).exitCode == 0 catch case _: Exception => false

@@ -254,6 +254,11 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
 
+# Draw interactive floating window with slurp
+bindsym $mod+Shift+w exec ~/.local/bin/sway-draw-window # Draw window geometry (resize current or spawn)
+bindsym $mod+Shift+Return exec ~/.local/bin/sway-draw-window --spawn # Draw and spawn new floating terminal
+bindsym $mod+Shift+g exec ~/.local/bin/sway-draw-window # Draw window geometry (alias)
+
 # Scratchpad
 bindsym $mod+Shift+minus move scratchpad, $send-notify 'Scratchpad'
 bindsym $mod+minus scratchpad show

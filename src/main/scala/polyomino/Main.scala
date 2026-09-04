@@ -52,6 +52,7 @@ object Main:
       case "lock" => polyomino.dotfiles.sysutils.SysUtils.runLock(ctx)
       case "idle" => polyomino.dotfiles.sysutils.SysUtils.runIdle(ctx)
       case "screenshot" => polyomino.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
+      case "draw-window" | "sway-draw-window" => polyomino.dotfiles.sysutils.SysUtils.runDrawWindow(ctx, args)
       case "calendar" => polyomino.dotfiles.calendar.CalendarPopup.run(ctx, args)
       case "theme" => polyomino.dotfiles.theme.ThemeEngine.run(ctx, args)
       case "runtime-refresh" => polyomino.dotfiles.refresh.RefreshEngine.runRefresh(ctx)

@@ -8,7 +8,7 @@ object Validator:
 
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
-    "screenshot", "autotiling", "healthcheck", "backup", "restore", "update",
+    "screenshot", "draw-window", "sway-draw-window", "autotiling", "healthcheck", "backup", "restore", "update",
     "sdd", "install", "deploy", "install-fonts", "install-apps", "install-browser",
     "install-devops", "install-zsh", "install-sdkman", "install-tools",
     "theme-picker", "whichkey", "wichkey"
