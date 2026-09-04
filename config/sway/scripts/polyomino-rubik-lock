@@ -121,14 +121,111 @@ def pam_authenticate_user(username: str, password: str, service: str = "swaylock
 
 # ---------------------------------------------------------------------------
 # Strict Polyomino Minimalist Tron Tokens & Shaders
+#
+# Colors follow the currently active polyomino.dotfiles sway theme
+# (~/.config/polyomino/theme/state -> themes/palettes/<FLAVOR>.conf), with
+# the values below kept as the built-in fallback if that theme data can't
+# be found (e.g. running the script outside the dotfiles checkout).
 # ---------------------------------------------------------------------------
-COLOR_BG = (15 / 255, 17 / 255, 23 / 255)            # #0F1117 (Deep Obsidian Void / Blackout)
-COLOR_GLASS = (25 / 255, 28 / 255, 36 / 255)          # #191C24 (Translucent Obsidian Glass)
-COLOR_RESTING_TEAL = (0 / 255, 210 / 255, 211 / 255)  # #00D2D3 (Maré Teal - Resting Wireframe)
-COLOR_ACTIVE_GOLD = (235 / 255, 180 / 255, 52 / 255)  # #EBB434 (Axé Gold - Active / Turning Edge)
+def _hex_to_rgb(hex_str):
+    h = hex_str.strip().strip('"').strip("'").lstrip('#')
+    return (int(h[0:2], 16) / 255, int(h[2:4], 16) / 255, int(h[4:6], 16) / 255)
+
+
+def _lighten(rgb, amount=0.35):
+    return tuple(c + (1.0 - c) * amount for c in rgb)
+
+
+def _load_theme_palette():
+    """Parse the active theme's palette .conf (shell KEY="value" pairs)."""
+    state_file = os.path.expanduser("~/.config/polyomino/theme/state")
+    flavor = None
+    try:
+        with open(state_file, "r") as f:
+            for line in f:
+                if line.startswith("FLAVOR="):
+                    flavor = line.strip().split("=", 1)[1]
+                    break
+    except OSError:
+        return None
+    if not flavor:
+        return None
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+    palette_file = os.path.join(repo_root, "themes", "palettes", f"{flavor}.conf")
+
+    values = {}
+    try:
+        with open(palette_file, "r") as f:
+            for line in f:
+                stripped = line.strip()
+                if not stripped or stripped.startswith('#') or "=" not in stripped:
+                    continue
+                key, _, rest = stripped.partition("=")
+                key = key.strip()
+                rest = rest.strip()
+                if rest[:1] in ('"', "'"):
+                    quote = rest[0]
+                    end = rest.find(quote, 1)
+                    val = rest[1:end] if end != -1 else rest[1:]
+                else:
+                    val = rest.split('#', 1)[0].strip()
+                values[key] = val
+    except OSError:
+        return None
+
+    required = ("BASE", "MANTLE", "BLUE", "TEAL", "RED")
+    if not all(k in values for k in required):
+        return None
+    return values
+
+
+def _load_theme_colors():
+    defaults = {
+        "COLOR_BG": (15 / 255, 17 / 255, 23 / 255),            # #0F1117
+        "COLOR_GLASS": (25 / 255, 28 / 255, 36 / 255),          # #191C24
+        "COLOR_RESTING_TEAL": (0 / 255, 210 / 255, 211 / 255),  # #00D2D3
+        "COLOR_ACTIVE_GOLD": (235 / 255, 180 / 255, 52 / 255),  # #EBB434
+        "COLOR_CLEAR_CYAN": (85 / 255, 239 / 255, 196 / 255),   # #55EFC4
+        "COLOR_REJECT_RED": (238 / 255, 82 / 255, 83 / 255),    # #EE5253
+    }
+
+    palette = _load_theme_palette()
+    if not palette:
+        return defaults
+
+    try:
+        base = _hex_to_rgb(palette["BASE"])
+        glass = _hex_to_rgb(palette["MANTLE"])
+        active = _hex_to_rgb(palette["BLUE"])    # primary accent token
+        resting = _hex_to_rgb(palette["TEAL"])   # secondary accent token
+        reject = _hex_to_rgb(palette["RED"])
+        clear = _lighten(resting, 0.35)
+        return {
+            "COLOR_BG": base,
+            "COLOR_GLASS": glass,
+            "COLOR_RESTING_TEAL": resting,
+            "COLOR_ACTIVE_GOLD": active,
+            "COLOR_CLEAR_CYAN": clear,
+            "COLOR_REJECT_RED": reject,
+        }
+    except (KeyError, ValueError):
+        return defaults
+
+
+_THEME_COLORS = _load_theme_colors()
+COLOR_BG = _THEME_COLORS["COLOR_BG"]
+COLOR_GLASS = _THEME_COLORS["COLOR_GLASS"]
+COLOR_RESTING_TEAL = _THEME_COLORS["COLOR_RESTING_TEAL"]
+COLOR_ACTIVE_GOLD = _THEME_COLORS["COLOR_ACTIVE_GOLD"]
 COLOR_GOLD = COLOR_ACTIVE_GOLD
-COLOR_CLEAR_CYAN = (85 / 255, 239 / 255, 196 / 255)  # #55EFC4 (Teal Light - Password Cleared Shockwave)
-COLOR_REJECT_RED = (238 / 255, 82 / 255, 83 / 255)    # #EE5253 (Terra Red - Rejection Surge)
+COLOR_CLEAR_CYAN = _THEME_COLORS["COLOR_CLEAR_CYAN"]
+COLOR_REJECT_RED = _THEME_COLORS["COLOR_REJECT_RED"]
+
+# White-blended "core" highlight variants, used for the sharp vector cores
+# drawn on top of the reject/caps-lock indicator glyphs.
+COLOR_REJECT_RED_CORE = tuple(min(1.0, c * 0.35 + 0.65) for c in COLOR_REJECT_RED)
+COLOR_ACTIVE_GOLD_CORE = tuple(min(1.0, c * 0.35 + 0.65) for c in COLOR_ACTIVE_GOLD)
 
 SLICE_MAPPINGS = {
     'U': ((0, 1, 0), 'y', 0.5, -1),
@@ -524,7 +621,8 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
         cc = COLOR_CLEAR_CYAN
         stops = [(0.0, cc[0], cc[1], cc[2], aura_alpha), (0.5, cc[0], cc[1], cc[2], aura_alpha * 0.35)]
     else:
-        stops = [(0.0, 0 / 255, 210 / 255, 211 / 255, 0.09), (0.45, 0 / 255, 210 / 255, 211 / 255, 0.02)]
+        tr, tg, tb = COLOR_RESTING_TEAL
+        stops = [(0.0, tr, tg, tb, 0.09), (0.45, tr, tg, tb, 0.02)]
 
     AURA_DOWNSCALE = 6
     sw = max(1, math.ceil(width / AURA_DOWNSCALE))
@@ -535,7 +633,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
                                 cx / AURA_DOWNSCALE, cy / AURA_DOWNSCALE, aura_radius / AURA_DOWNSCALE)
     for offset, r, g, b, a in stops:
         pat.add_color_stop_rgba(offset, r, g, b, a)
-    pat.add_color_stop_rgba(1.0, 15 / 255, 17 / 255, 23 / 255, 0.0)
+    pat.add_color_stop_rgba(1.0, COLOR_BG[0], COLOR_BG[1], COLOR_BG[2], 0.0)
     scr.set_source(pat)
     scr.paint()
 
@@ -720,7 +818,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
                 cr.fill_preserve()
 
                 # Core vector outline
-                cr.set_source_rgba(1.0, 0.55, 0.55, 0.95)
+                cr.set_source_rgba(*COLOR_REJECT_RED_CORE, 0.95)
                 cr.set_line_width(1.0)
                 cr.stroke()
         else:
@@ -736,7 +834,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
             cr.stroke_preserve()
             cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.65)
             cr.fill_preserve()
-            cr.set_source_rgba(1.0, 0.55, 0.55, 0.95)
+            cr.set_source_rgba(*COLOR_REJECT_RED_CORE, 0.95)
             cr.set_line_width(1.0)
             cr.stroke()
 
@@ -744,7 +842,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
             cr.set_font_size(11.0)
             mult_text = f"× {failed_count}"
             cr.move_to(cx - 5, indicator_y + 4.0)
-            cr.set_source_rgba(1.0, 0.65, 0.65, 0.95)
+            cr.set_source_rgba(*COLOR_REJECT_RED_CORE, 0.95)
             cr.show_text(mult_text)
 
         # Monospace Text Readout
@@ -776,7 +874,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
 
         # Text sharp vector core
         cr.move_to(tx, ty)
-        cr.set_source_rgba(1.0, 0.65, 0.65, 0.90)
+        cr.set_source_rgba(*COLOR_REJECT_RED_CORE, 0.90)
         cr.show_text(label)
 
     # 7. CapsLock Warning Indicator (Axé Gold Emissive Vector Badge)
@@ -809,7 +907,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
         cr.stroke_preserve()
         cr.set_source_rgba(COLOR_ACTIVE_GOLD[0], COLOR_ACTIVE_GOLD[1], COLOR_ACTIVE_GOLD[2], 0.75)
         cr.fill_preserve()
-        cr.set_source_rgba(1.0, 0.95, 0.70, 0.98)
+        cr.set_source_rgba(*COLOR_ACTIVE_GOLD_CORE, 0.98)
         cr.set_line_width(1.0)
         cr.stroke()
 
@@ -829,7 +927,7 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
 
         # Text sharp core
         cr.move_to(tx, ty)
-        cr.set_source_rgba(1.0, 0.92, 0.65, 0.95)
+        cr.set_source_rgba(*COLOR_ACTIVE_GOLD_CORE, 0.95)
         cr.show_text(label)
 
     cr.restore()
