@@ -1,0 +1,1 @@
+/home/petrolal/.config/fastfetch/assets/polyonimo_arch_tetris.txt

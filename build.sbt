@@ -49,6 +49,8 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "1.0.0" % Test
 )
 
+Test / parallelExecution := false
+
 Compile / mainClass := Some("polyomino.Main")
 
 // Coursier configuration - makes `cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino` work

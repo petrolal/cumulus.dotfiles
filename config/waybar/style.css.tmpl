@@ -68,12 +68,41 @@ tooltip label {
 #pulseaudio,
 #backlight,
 #battery,
+#cpu,
+#memory,
 #custom-notification,
 #mode {
     padding: 0 10px;
     margin: 0 2px;
     color: @@TEXT@@;
     border-bottom: 2px solid transparent;
+}
+
+/* Polyomino Pill Accent Colors */
+#pulseaudio {
+    color: #10AC84;
+    border-bottom: 2px solid #10AC84;
+}
+
+#network,
+#network.wifi {
+    color: #00D2D3;
+    border-bottom: 2px solid #00D2D3;
+}
+
+#battery {
+    color: #EBB434;
+    border-bottom: 2px solid #EBB434;
+}
+
+#cpu {
+    color: #EBB434;
+    border-bottom: 2px solid #EBB434;
+}
+
+#memory {
+    color: #00D2D3;
+    border-bottom: 2px solid #00D2D3;
 }
 
 #clock:hover,
@@ -95,6 +124,12 @@ tooltip label {
 #battery:hover,
 #battery:active,
 #battery.active,
+#cpu:hover,
+#cpu:active,
+#cpu.active,
+#memory:hover,
+#memory:active,
+#memory.active,
 #custom-notification:hover,
 #custom-notification:active,
 #custom-notification.active,
@@ -107,6 +142,7 @@ tooltip label {
     color: @@BLUE@@;
     border-bottom: 2px solid @@BLUE@@;
 }
+
 
 #battery.warning {
     color: @@YELLOW@@;

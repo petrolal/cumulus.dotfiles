@@ -1,0 +1,32 @@
+# Dunst notification daemon configuration
+# Polyomino "Matrix Fill" Scratchpad styling
+
+[global]
+    width = (250, 400)
+    height = 200
+    offset = 12x12
+    origin = top-right
+    transparency = 0
+    frame_width = 2
+    frame_color = "#EBB434"
+    corner_radius = 12
+    font = "JetBrainsMono Nerd Font 10"
+    format = "[ ⊞ ] <b>%s</b>\n%b"
+    separator_height = 2
+    padding = 12
+    horizontal_padding = 12
+
+[urgency_low]
+    background = "#191C24"
+    foreground = "#F8FAFC"
+    frame_color = "#EBB434"
+
+[urgency_normal]
+    background = "#191C24"
+    foreground = "#F8FAFC"
+    frame_color = "#EBB434"
+
+[urgency_critical]
+    background = "#191C24"
+    foreground = "#F8FAFC"
+    frame_color = "#EE5253"

@@ -1,7 +1,7 @@
 {
 	// waybar-battery
 	"battery": {
-		"interval": 60,
+		"interval": 30,
 		"align": 0,
 		"rotate": 0,
 		"full-at": 100,
@@ -11,26 +11,42 @@
 			"warning": 30,
 			"critical": 15
 		},
-		"format": "{icon} {capacity}%",
-		"format-charging": " {capacity}%",
-		"format-plugged": " {capacity}%",
-		"format-full": "{icon} Full",
-		//"format-good": "",
-		"format-alt": "{icon} {time}",
+		"format": "BAT {icon}",
+		"format-charging": " {icon}",
+		"format-plugged": " {icon}",
+		"format-full": "BAT [■■■■]",
+		"format-alt": "{time} {icon}",
 		"format-icons": [
-			"󰁺",
-			"󰁻",
-			"󰁼",
-			"󰁽",
-			"󰁾",
-			"󰁿",
-			"󰂀",
-			"󰂁",
-			"󰂂",
-			"󰁹"
+			"[■   ]",
+			"[■■  ]",
+			"[■■■ ]",
+			"[■■■■]"
 		],
 		"format-time": "{H}h {M}min"
 	},
+	// waybar-cpu
+	"cpu": {
+		"interval": 3,
+		"format": "CPU {icon}",
+		"format-icons": [
+			"[■   ]",
+			"[■■  ]",
+			"[■■■ ]",
+			"[■■■■]"
+		]
+	},
+	// waybar-memory
+	"memory": {
+		"interval": 5,
+		"format": "RAM {icon}",
+		"format-icons": [
+			"[■   ]",
+			"[■■  ]",
+			"[■■■ ]",
+			"[■■■■]"
+		]
+	},
+
 	// waybar-bluetooth
 	"bluetooth": {
 		"format": "󰂯 {status}",

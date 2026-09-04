@@ -58,6 +58,9 @@ exec ~/.local/bin/polyomino-idle
 # Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
 exec_always ~/.local/bin/polyomino-autotiling
 
+# Set FastFetch logo 
+exec_always --no-startup-id ~/.config/fastfetch/set_logo.sh
+
 # Polkit authentication agent — required for GUI privilege prompts (Intune, NetworkManager, disk mounts).
 # GNOME's polkit agent is reused since it is desktop-agnostic; no separate install needed.
 exec /usr/libexec/polkit-gnome-authentication-agent-1
@@ -282,7 +285,9 @@ bindsym $mod+F4 exec polyomino-theme aruanda
 # (vim-style "l" = right, see `set $right l` above), which silently wins
 # and made sway show a "there are errors in your config" banner).
 bindsym $mod+Escape exec ~/.local/bin/polyomino-lock # Lock screen
+bindsym $mod+Shift+x exec $term -e ~/.config/sway/scripts/matrix.sh # Terminal matrix screensaver
 bindsym $mod+Shift+Escape exec systemctl suspend # Suspend system
+
 bindsym $mod+Control+Escape exec systemctl poweroff # Shutdown system
 bindsym $mod+Control+Shift+Escape exec systemctl reboot # Reboot system
 
