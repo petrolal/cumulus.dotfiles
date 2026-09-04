@@ -114,7 +114,7 @@ font pango:JetBrainsMono Nerd Font 10
 
 default_border pixel 2
 default_floating_border pixel 2
-gaps inner 4
+gaps inner 10
 gaps outer 0
 smart_borders on
 
@@ -138,10 +138,12 @@ workspace $ws9
 # as a fallback for apps still running under XWayland (IntelliJ, some Electron builds).
 
 # 1: web
-# assign [app_id="microsoft-edge"] $ws1
-# assign [class="Microsoft-edge"] $ws1
-# assign [app_id="firefox"] $ws1
-# assign [class="firefox"] $ws1
+assign [app_id="microsoft-edge"] $ws1
+assign [class="Microsoft-edge"] $ws1
+assign [app_id="firefox"] $ws1
+assign [class="firefox"] $ws1
+assign [app_id="google-chrome"] $ws1
+assign [class="google-chrome"] $ws1
 
 # 2: code
 assign [class="jetbrains-idea"] $ws2
@@ -150,7 +152,7 @@ assign [app_id="code"] $ws2
 assign [class="Code"] $ws2
 
 # 3: term
-# assign [app_id="kitty"] $ws3
+assign [app_id="kitty"] $ws3
 
 # 4: containers
 assign [app_id="docker-desktop"] $ws4
@@ -161,9 +163,8 @@ assign [class="Lens"] $ws4
 # 5: comms
 assign [app_id="thunderbird"] $ws5
 assign [class="Thunderbird"] $ws5
-# Teams and Outlook Web run as Edge/Firefox tabs or PWAs — match their PWA window class if installed:
-assign [app_id="microsoft-edge" title="Microsoft Teams"] $ws5
-assign [app_id="microsoft-edge" title="Outlook"] $ws5
+assign [app_id="aerc"] $ws5
+assign [class="aerc"] $ws5
 
 # 6: notes
 assign [app_id="obsidian"] $ws6
@@ -252,7 +253,7 @@ bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
 
 # Scratchpad
-bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+Shift+minus move scratchpad, $send-notify 'Scratchpad'
 bindsym $mod+minus scratchpad show
 
 # Resizing

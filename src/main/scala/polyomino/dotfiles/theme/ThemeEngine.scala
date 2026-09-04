@@ -160,7 +160,7 @@ object ThemeEngine:
         |window#waybar {
         |    background-color: @base;
         |    color: @text;
-        |    border-bottom: 2px solid @accent;
+        |    border-bottom: 2px solid @mantle;
         |    transition-property: background-color;
         |    transition-duration: .5s;
         |}
@@ -183,6 +183,14 @@ object ThemeEngine:
         |    font-size: 15px;
         |}
         |
+        |#workspaces {
+	|    background-color: @mantle;
+	|    color: @accent;
+	|    border-radius: 0px 8px 0px 0px;
+	|    padding: 4px;
+        |    margin-right: 10px;
+        |}
+        |
         |#workspaces button {
         |    padding: 0 8px;
         |    background-color: transparent;
@@ -194,12 +202,12 @@ object ThemeEngine:
         |#workspaces button.active {
         |    background-color: @mantle;
         |    color: @accent;
-        |    border-bottom: 2px solid @accent;
         |}
         |
         |#workspaces button:hover {
         |    background-color: @mantle;
         |    color: @accent;
+        |    border-radius: 8px;
         |    border-bottom: 2px solid @accent;
         |}
         |
