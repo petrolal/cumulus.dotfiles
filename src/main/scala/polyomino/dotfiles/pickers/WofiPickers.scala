@@ -21,16 +21,24 @@ object WofiPickers:
     val themes = polyomino.dotfiles.theme.Palette.listAll(ctx)
     val inputList = themes.map(escapeMarkup).mkString("\n")
 
+    val wofiConfigFile = ctx.configDir / "wofi" / "config"
+    val wofiStyleFile = ctx.configDir / "wofi" / "style.css"
+
     try
       // Step 1: Select Theme
-      val resTheme = os.proc(
-        "wofi", "--show", "dmenu",
-        "--prompt", "Select Theme",
-        "--width", "400",
-        "--lines", "10",
-        "--insensitive",
-        "--cache-file", "/dev/null"
-      ).call(stdin = inputList, check = false)
+      val themeArgs = Seq("wofi")
+        ++ (if os.exists(wofiConfigFile) then Seq("--conf", wofiConfigFile.toString) else Seq.empty)
+        ++ Seq(
+          "--show", "dmenu",
+          "--prompt", "Select Theme",
+          "--width", "560",
+          "--lines", "3",
+          "--columns", "2",
+          "--insensitive",
+          "--cache-file", "/dev/null"
+        ) ++ (if os.exists(wofiStyleFile) then Seq("--style", wofiStyleFile.toString) else Seq.empty)
+      val shellableThemeArgs: Seq[os.Shellable] = themeArgs.map(s => (s: os.Shellable))
+      val resTheme = os.proc(shellableThemeArgs*).call(stdin = inputList, check = false)
 
       val selectedTheme = resTheme.out.text().trim
       if selectedTheme.isEmpty then return Right(())
@@ -39,14 +47,19 @@ object WofiPickers:
 
       // Step 2: Select Wallpaper Mode
       val modes = Seq("1. Static Wallpaper", "2. Rotate Wallpapers (30m)")
-      val resMode = os.proc(
-        "wofi", "--show", "dmenu",
-        "--prompt", s"Wallpaper mode for '$selectedTheme'",
-        "--width", "450",
-        "--lines", "4",
-        "--insensitive",
-        "--cache-file", "/dev/null"
-      ).call(stdin = modes.mkString("\n"), check = false)
+      val modeArgs = Seq("wofi")
+        ++ (if os.exists(wofiConfigFile) then Seq("--conf", wofiConfigFile.toString) else Seq.empty)
+        ++ Seq(
+          "--show", "dmenu",
+          "--prompt", s"Wallpaper mode for '$selectedTheme'",
+          "--width", "560",
+          "--lines", "2",
+          "--columns", "2",
+          "--insensitive",
+          "--cache-file", "/dev/null"
+        ) ++ (if os.exists(wofiStyleFile) then Seq("--style", wofiStyleFile.toString) else Seq.empty)
+      val shellableModeArgs: Seq[os.Shellable] = modeArgs.map(s => (s: os.Shellable))
+      val resMode = os.proc(shellableModeArgs*).call(stdin = modes.mkString("\n"), check = false)
 
       val selectedModeStr = resMode.out.text().trim
       val (mode, interval) = if selectedModeStr.contains("Rotate") then
@@ -75,15 +88,24 @@ object WofiPickers:
     val entries = if keybindingsList.nonEmpty then keybindingsList else defaultKeybindings
     val inputList = entries.map(escapeMarkup).mkString("\n")
 
-    try
-      os.proc(
-        "wofi", "--show", "dmenu",
-        "--prompt", "which-key",
-        "--width", "780",
-        "--lines", "22",
+    val wofiConfigFile = ctx.configDir / "wofi" / "config"
+    val wofiStyleFile = ctx.configDir / "wofi" / "style.css"
+
+    val whichkeyArgs = Seq("wofi")
+      ++ (if os.exists(wofiConfigFile) then Seq("--conf", wofiConfigFile.toString) else Seq.empty)
+      ++ Seq(
+        "--show", "dmenu",
+        "--prompt", "[⊞] which-key",
+        "--width", "880",
+        "--lines", "8",
+        "--columns", "2",
         "--insensitive",
         "--cache-file", "/dev/null"
-      ).spawn(stdin = inputList)
+      ) ++ (if os.exists(wofiStyleFile) then Seq("--style", wofiStyleFile.toString) else Seq.empty)
+
+    try
+      val shellableWhichkey: Seq[os.Shellable] = whichkeyArgs.map(s => (s: os.Shellable))
+      os.proc(shellableWhichkey*).spawn(stdin = inputList)
       Right(())
     catch
       case e: Exception => Left(CommandError(s"Wofi whichkey failed: ${e.getMessage}"))
