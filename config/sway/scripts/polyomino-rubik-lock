@@ -1,0 +1,950 @@
+#!/usr/bin/env python3
+"""
+=============================================================================
+ Polyomino 3D Rubik's Cube Lockscreen for Sway
+ Native ext-session-lock-v1 + Linux PAM + 3D Slice Rotation Engine
+
+ Strict Polyomino Palette Tokens:
+   - Background Base : #0F1117 (Deep Slate / Obsidian)
+   - Cube Core / Bevel: #191C24 (Dark Slate / Structural Bevels)
+   - Face 1 (Primary) : #EBB434 (Axé Gold - Up / Y+)
+   - Face 2 (Secondary): #00D2D3 (Maré Teal - Front / Z+)
+   - Face 3 (Reject)   : #EE5253 (Terra Red - Right / X+)
+   - Face 4 (Neutral)  : #E6E6E6 (Neutral Light - Down / Y-)
+   - Face 5 (Indigo)   : #3B3B58 (Deep Indigo - Left / X-)
+   - Face 6 (Amber)    : #C98E1A (Muted Amber - Back / Z-)
+=============================================================================
+"""
+
+import sys
+import os
+import math
+import time
+import random
+import ctypes
+import getpass
+import threading
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+try:
+    gi.require_version('GtkSessionLock', '0.1')
+    from gi.repository import GtkSessionLock
+    HAS_SESSION_LOCK = True
+except Exception:
+    HAS_SESSION_LOCK = False
+
+from gi.repository import Gtk, Gdk, GLib
+import cairo
+
+# ---------------------------------------------------------------------------
+# Linux PAM Ctypes Binding
+# ---------------------------------------------------------------------------
+try:
+    libpam = ctypes.CDLL("libpam.so.0")
+    libc = ctypes.CDLL("libc.so.6")
+
+    libc.strdup.restype = ctypes.c_void_p
+    libc.strdup.argtypes = [ctypes.c_char_p]
+    libc.calloc.restype = ctypes.c_void_p
+    libc.calloc.argtypes = [ctypes.c_size_t, ctypes.c_size_t]
+except Exception:
+    libpam = None
+    libc = None
+
+class PamMessage(ctypes.Structure):
+    _fields_ = [("msg_style", ctypes.c_int), ("msg", ctypes.c_char_p)]
+
+class PamResponse(ctypes.Structure):
+    _fields_ = [("resp", ctypes.c_void_p), ("resp_retcode", ctypes.c_int)]
+
+PAM_PROMPT_ECHO_OFF = 1
+PAM_PROMPT_ECHO_ON = 2
+PAM_CONV_FUNC = ctypes.CFUNCTYPE(
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.POINTER(ctypes.POINTER(PamMessage)),
+    ctypes.POINTER(ctypes.POINTER(PamResponse)),
+    ctypes.c_void_p
+)
+
+class PamConv(ctypes.Structure):
+    _fields_ = [("conv", PAM_CONV_FUNC), ("appdata_ptr", ctypes.c_void_p)]
+
+if libpam:
+    libpam.pam_start.restype = ctypes.c_int
+    libpam.pam_start.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(PamConv), ctypes.POINTER(ctypes.c_void_p)]
+    libpam.pam_authenticate.restype = ctypes.c_int
+    libpam.pam_authenticate.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    libpam.pam_end.restype = ctypes.c_int
+    libpam.pam_end.argtypes = [ctypes.c_void_p, ctypes.c_int]
+
+def pam_authenticate_user(username: str, password: str, service: str = "swaylock") -> bool:
+    if not libpam or not libc:
+        return False
+    pw_bytes = password.encode('utf-8')
+
+    for srv in [service, "swaylock", "gtklock", "system-auth", "login"]:
+        def conv_cb(n_msgs, msgs, resp, appdata):
+            resp_ptr = libc.calloc(n_msgs, ctypes.sizeof(PamResponse))
+            r_arr = (PamResponse * n_msgs).from_address(resp_ptr)
+            for i in range(n_msgs):
+                m = msgs[i].contents
+                if m.msg_style in (PAM_PROMPT_ECHO_OFF, PAM_PROMPT_ECHO_ON):
+                    r_arr[i].resp = libc.strdup(pw_bytes)
+                    r_arr[i].resp_retcode = 0
+                else:
+                    r_arr[i].resp = None
+                    r_arr[i].resp_retcode = 0
+            resp[0] = ctypes.cast(resp_ptr, ctypes.POINTER(PamResponse))
+            return 0
+
+        conv_func = PAM_CONV_FUNC(conv_cb)
+        conv = PamConv(conv_func, None)
+        pam_h = ctypes.c_void_p()
+
+        ret = libpam.pam_start(srv.encode('utf-8'), username.encode('utf-8'), ctypes.byref(conv), ctypes.byref(pam_h))
+        if ret != 0:
+            continue
+
+        auth_ret = libpam.pam_authenticate(pam_h, 0)
+        libpam.pam_end(pam_h, auth_ret)
+        if auth_ret == 0:
+            return True
+
+    return False
+
+# ---------------------------------------------------------------------------
+# Strict Polyomino Minimalist Tron Tokens & Shaders
+# ---------------------------------------------------------------------------
+COLOR_BG = (15 / 255, 17 / 255, 23 / 255)            # #0F1117 (Deep Obsidian Void / Blackout)
+COLOR_GLASS = (25 / 255, 28 / 255, 36 / 255)          # #191C24 (Translucent Obsidian Glass)
+COLOR_RESTING_TEAL = (0 / 255, 210 / 255, 211 / 255)  # #00D2D3 (Maré Teal - Resting Wireframe)
+COLOR_ACTIVE_GOLD = (235 / 255, 180 / 255, 52 / 255)  # #EBB434 (Axé Gold - Active / Turning Edge)
+COLOR_GOLD = COLOR_ACTIVE_GOLD
+COLOR_CLEAR_CYAN = (85 / 255, 239 / 255, 196 / 255)  # #55EFC4 (Teal Light - Password Cleared Shockwave)
+COLOR_REJECT_RED = (238 / 255, 82 / 255, 83 / 255)    # #EE5253 (Terra Red - Rejection Surge)
+
+SLICE_MAPPINGS = {
+    'U': ((0, 1, 0), 'y', 0.5, -1),
+    'D': ((0, 1, 0), 'y', -0.5, 1),
+    'R': ((1, 0, 0), 'x', 0.5, 1),
+    'L': ((1, 0, 0), 'x', -0.5, -1),
+    'F': ((0, 0, 1), 'z', 0.5, 1),
+    'B': ((0, 0, 1), 'z', -0.5, -1),
+}
+
+# ---------------------------------------------------------------------------
+# 3D Math & Cubic-Bezier Easing
+# ---------------------------------------------------------------------------
+def mat_mul_vec(m, v):
+    return (
+        m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2],
+        m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2],
+        m[2][0]*v[0] + m[2][1]*v[1] + m[2][2]*v[2]
+    )
+
+def mat_mul_mat(a, b):
+    res = [[0.0]*3 for _ in range(3)]
+    for i in range(3):
+        for j in range(3):
+            res[i][j] = a[i][0]*b[0][j] + a[i][1]*b[1][j] + a[i][2]*b[2][j]
+    return res
+
+def rot_matrix(axis, angle):
+    c = math.cos(angle)
+    s = math.sin(angle)
+    ax, ay, az = axis
+    return [
+        [c + ax*ax*(1-c),    ax*ay*(1-c) - az*s, ax*az*(1-c) + ay*s],
+        [ay*ax*(1-c) + az*s, c + ay*ay*(1-c),    ay*az*(1-c) - ax*s],
+        [az*ax*(1-c) - ay*s, az*ay*(1-c) + ax*s, c + az*az*(1-c)]
+    ]
+
+def cubic_bezier_ease(t):
+    """Cubic-bezier easing (0.25, 0.1, 0.25, 1.0) for snappy 100ms slice rotations."""
+    t = max(0.0, min(1.0, t))
+    s = t
+    for _ in range(5):
+        x = 0.75 * (1 - s) * s + s * s * s
+        dx = 0.75 * (1 - s) * (1 - s) + 2.25 * s * s
+        if abs(dx) < 1e-6:
+            break
+        s -= (x - t) / dx
+        s = max(0.0, min(1.0, s))
+    return 3 * (1 - s) * (1 - s) * s * 0.1 + 3 * (1 - s) * s * s * 1.0 + s * s * s
+
+# ---------------------------------------------------------------------------
+# Cubie Geometry & Lattice Definitions
+# ---------------------------------------------------------------------------
+CUBIE_HALF_SIZE = 0.47
+LOCAL_VERTS = [
+    (-CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE), # 0
+    (+CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE), # 1
+    (+CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE), # 2
+    (-CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE), # 3
+    (-CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE), # 4
+    (+CUBIE_HALF_SIZE, -CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE), # 5
+    (+CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE), # 6
+    (-CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE, +CUBIE_HALF_SIZE), # 7
+]
+
+LOCAL_EDGES = [
+    (0, 1), (1, 2), (2, 3), (3, 0), # Back ring
+    (4, 5), (5, 6), (6, 7), (7, 4), # Front ring
+    (0, 4), (1, 5), (2, 6), (3, 7), # Connecting struts
+]
+
+LOCAL_FACES = [
+    ((4, 5, 6, 7), (0, 0, 1)),   # Front (+Z)
+    ((1, 0, 3, 2), (0, 0, -1)),  # Back (-Z)
+    ((3, 2, 6, 7), (0, 1, 0)),   # Up (+Y)
+    ((0, 1, 5, 4), (0, -1, 0)),  # Down (-Y)
+    ((1, 5, 6, 2), (1, 0, 0)),   # Right (+X)
+    ((0, 4, 7, 3), (-1, 0, 0)),  # Left (-X)
+]
+
+class Cubie:
+    def __init__(self, cx, cy, cz):
+        self.grid_pos = (cx, cy, cz)
+        self.orig_pos = (cx * 1.05, cy * 1.05, cz * 1.05)
+        self.pos = self.orig_pos
+        self.rot = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+class ActiveSliceTurn:
+    def __init__(self, slice_name, clockwise, duration=0.10):
+        self.slice_name = slice_name
+        self.clockwise = clockwise
+        self.duration = duration
+        self.elapsed = 0.0
+        axis, coord, thresh, dir_sign = SLICE_MAPPINGS[slice_name]
+        self.axis = axis
+        self.coord = coord
+        self.thresh = thresh
+        self.target_angle = dir_sign * (math.pi / 2) if clockwise else -dir_sign * (math.pi / 2)
+        self.current_angle = 0.0
+        self.done = False
+
+    def update(self, dt):
+        self.elapsed += dt
+        progress = min(1.0, self.elapsed / self.duration)
+        self.current_angle = self.target_angle * cubic_bezier_ease(progress)
+        if progress >= 1.0:
+            self.done = True
+
+# ---------------------------------------------------------------------------
+# Minimalist Rubik Tron Engine
+# ---------------------------------------------------------------------------
+class RubikEngine:
+    def __init__(self):
+        self.cubies = []
+        for x in (-1, 0, 1):
+            for y in (-1, 0, 1):
+                for z in (-1, 0, 1):
+                    if x == 0 and y == 0 and z == 0:
+                        continue
+                    self.cubies.append(Cubie(x, y, z))
+        self.base_yaw = math.radians(-32)
+        self.base_pitch = math.radians(24)
+        self.yaw = self.base_yaw
+        self.pitch = self.base_pitch
+        self.active_turn = None
+        self.turn_queue = []
+        self.move_history = []
+        self.password = ""
+        self.is_checking = False
+        self.checking_time = 0.0
+        self.auth_state = "IDLE"  # IDLE, CHECKING, SUCCESS, REJECT
+        self.failed_attempts = 0
+        self.error_pulse_time = 0.0
+        self.shake_time = 0.0
+        self.shake_offset = 0.0
+        self.flash_time = 0.0
+        self.flash_color = COLOR_ACTIVE_GOLD
+
+    def twist_slice(self, slice_name, clockwise=True):
+        axis, coord, thresh, dir_sign = SLICE_MAPPINGS[slice_name]
+        angle = dir_sign * (math.pi / 2) if clockwise else -dir_sign * (math.pi / 2)
+        R = rot_matrix(axis, angle)
+        for c in self.cubies:
+            val = c.pos[0] if coord == 'x' else (c.pos[1] if coord == 'y' else c.pos[2])
+            cond = (val > thresh) if thresh > 0 else (val < thresh)
+            if cond:
+                c.pos = mat_mul_vec(R, c.pos)
+                c.rot = mat_mul_mat(R, c.rot)
+                c.pos = (round(c.pos[0] / 1.05) * 1.05,
+                         round(c.pos[1] / 1.05) * 1.05,
+                         round(c.pos[2] / 1.05) * 1.05)
+
+    def handle_keystroke(self, char):
+        if self.is_checking:
+            return
+        self.auth_state = "IDLE"
+        self.password += char
+
+        # Deterministically map keystroke to slice & direction
+        slices = ['U', 'D', 'L', 'R', 'F', 'B']
+        slice_name = slices[ord(char) % len(slices)]
+        clockwise = (((ord(char) * 7) // 3) % 2) == 0
+
+        self.move_history.append((slice_name, clockwise))
+        turn = ActiveSliceTurn(slice_name, clockwise, duration=0.10)
+        if self.active_turn is None:
+            self.active_turn = turn
+        else:
+            self.turn_queue.append(turn)
+
+    def clear_password(self):
+        if self.is_checking:
+            return
+        had_input = bool(self.password or self.move_history)
+        self.password = ""
+        self.move_history = []
+        self.turn_queue = []
+        self.active_turn = None
+        self.auth_state = "IDLE"
+
+        # Snap all cubies to pristine solved alignment
+        for c in self.cubies:
+            c.pos = c.orig_pos
+            c.rot = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+        # Password cleared shockwave feedback in Teal Light (#55EFC4)
+        self.flash_color = COLOR_CLEAR_CYAN
+        self.flash_time = 0.35
+        self.shake_time = 0.10 if had_input else 0.06
+
+    def handle_backspace(self):
+        if self.is_checking:
+            return
+        if not self.password:
+            # Buffer already empty: subtle shudder feedback
+            self.flash_color = COLOR_CLEAR_CYAN
+            self.flash_time = 0.18
+            self.shake_time = 0.06
+            return
+
+        self.password = self.password[:-1]
+
+        if self.move_history:
+            last_slice, was_clockwise = self.move_history.pop()
+            # Smoothly unwinds previous slice rotation by -90 deg
+            turn = ActiveSliceTurn(last_slice, not was_clockwise, duration=0.08)
+            if self.active_turn is None:
+                self.active_turn = turn
+            else:
+                self.turn_queue.append(turn)
+
+        # If buffer became completely empty after this backspace:
+        if len(self.password) == 0:
+            self.flash_color = COLOR_CLEAR_CYAN
+            self.flash_time = 0.30
+            self.shake_time = 0.08
+
+    def trigger_authentication(self, on_success_callback):
+        if self.is_checking or not self.password:
+            return
+        self.is_checking = True
+        self.auth_state = "CHECKING"
+        password_to_check = self.password
+
+        def worker():
+            t0 = time.time()
+            user = getpass.getuser()
+            success = pam_authenticate_user(user, password_to_check, service="swaylock")
+            elapsed = time.time() - t0
+            # Ensure calculating/checking animation is visible for at least 350ms
+            min_duration = 0.35
+            if elapsed < min_duration:
+                time.sleep(min_duration - elapsed)
+
+            def finish():
+                self.is_checking = False
+                if success:
+                    # Success: Energetic Axé Gold surge + camera vibration + rapid slice turns (mirroring error anim in Axé Gold)
+                    self.auth_state = "SUCCESS"
+                    self.failed_attempts = 0
+                    self.error_pulse_time = 0.0
+                    self.flash_color = COLOR_ACTIVE_GOLD
+                    self.flash_time = 0.50
+                    self.shake_time = 0.15
+                    self.password = ""
+                    # Three rapid slice twists in Axé Gold celebrating unlock
+                    slices = ['U', 'D', 'L', 'R', 'F', 'B']
+                    for _ in range(3):
+                        s = random.choice(slices)
+                        cw = random.choice([True, False])
+                        self.turn_queue.append(ActiveSliceTurn(s, cw, duration=0.06))
+                    GLib.timeout_add(350, on_success_callback)
+                else:
+                    # Rejection: Sharp Terra Red surge + 150ms camera vibration (+-6px)
+                    self.auth_state = "REJECT"
+                    self.failed_attempts += 1
+                    self.error_pulse_time = 0.60
+                    self.flash_color = COLOR_REJECT_RED
+                    self.flash_time = 0.50
+                    self.shake_time = 0.15
+                    self.password = ""
+                    # Three instant slice twists reset the cube
+                    slices = ['U', 'D', 'L', 'R', 'F', 'B']
+                    for _ in range(3):
+                        s = random.choice(slices)
+                        cw = random.choice([True, False])
+                        self.turn_queue.append(ActiveSliceTurn(s, cw, duration=0.06))
+                return False
+
+            GLib.idle_add(finish)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def update(self, dt):
+        # Checking feedback: Gyroscopic calculation spin
+        if self.is_checking:
+            self.checking_time += dt
+            self.yaw += dt * 3.5
+            self.pitch = self.base_pitch + math.sin(self.checking_time * 6.0) * math.radians(5)
+        else:
+            if self.checking_time > 0.0:
+                self.checking_time = 0.0
+            # Smoothly re-align pitch and yaw to base isometric perspective
+            self.pitch += (self.base_pitch - self.pitch) * min(1.0, dt * 6.0)
+            diff = (self.base_yaw - self.yaw + math.pi) % (2 * math.pi) - math.pi
+            self.yaw += diff * min(1.0, dt * 5.0)
+
+        # Subtle 150ms camera vibration (+-6px)
+        if self.shake_time > 0.0:
+            self.shake_time = max(0.0, self.shake_time - dt)
+            decay = self.shake_time / 0.15
+            self.shake_offset = math.sin((0.15 - self.shake_time) * 90.0) * 6.0 * decay
+        else:
+            self.shake_offset = 0.0
+
+        # Flash decay
+        if self.flash_time > 0.0:
+            self.flash_time = max(0.0, self.flash_time - dt)
+
+        # Error pulse decay
+        if self.error_pulse_time > 0.0:
+            self.error_pulse_time = max(0.0, self.error_pulse_time - dt)
+
+        # Slice turn update
+        if self.active_turn:
+            self.active_turn.update(dt)
+            if self.active_turn.done:
+                turn = self.active_turn
+                R = rot_matrix(turn.axis, turn.target_angle)
+                for c in self.cubies:
+                    val = c.pos[0] if turn.coord == 'x' else (c.pos[1] if turn.coord == 'y' else c.pos[2])
+                    cond = (val > turn.thresh) if turn.thresh > 0 else (val < turn.thresh)
+                    if cond:
+                        c.pos = mat_mul_vec(R, c.pos)
+                        c.rot = mat_mul_mat(R, c.rot)
+                        c.pos = (round(c.pos[0] / 1.05) * 1.05,
+                                 round(c.pos[1] / 1.05) * 1.05,
+                                 round(c.pos[2] / 1.05) * 1.05)
+
+                if self.turn_queue:
+                    self.active_turn = self.turn_queue.pop(0)
+                else:
+                    self.active_turn = None
+
+# ---------------------------------------------------------------------------
+# Minimalist 3D Tron Holographic Renderer (Pure Geometry)
+# ---------------------------------------------------------------------------
+def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
+    # 1. Background Void: Deep Obsidian / Blackout (#0F1117)
+    cr.set_source_rgb(*COLOR_BG)
+    cr.paint()
+
+    # Apply subtle camera vibration (+-6px)
+    cr.save()
+    if engine.shake_offset != 0.0:
+        cr.translate(engine.shake_offset, 0.0)
+
+    # 2. Dead-Center Positioning
+    cx = width / 2
+    cy = height / 2
+
+    # Subtle weightless bloom aura behind cube
+    aura_radius = min(width, height) * 0.45
+    aura_alpha = 0.09
+    if engine.is_checking:
+        pulse = 0.5 + 0.5 * math.sin(engine.checking_time * 10.0)
+        aura_radius *= (1.0 + pulse * 0.18)
+        aura_alpha = 0.08 + pulse * 0.09
+        ar = COLOR_RESTING_TEAL[0] * (1.0 - pulse) + COLOR_ACTIVE_GOLD[0] * pulse
+        ag = COLOR_RESTING_TEAL[1] * (1.0 - pulse) + COLOR_ACTIVE_GOLD[1] * pulse
+        ab = COLOR_RESTING_TEAL[2] * (1.0 - pulse) + COLOR_ACTIVE_GOLD[2] * pulse
+        pat = cairo.RadialGradient(cx, cy, 30, cx, cy, aura_radius)
+        pat.add_color_stop_rgba(0.0, ar, ag, ab, aura_alpha)
+        pat.add_color_stop_rgba(0.45, ar, ag, ab, aura_alpha * 0.3)
+    elif engine.flash_time > 0.0 and engine.flash_color == COLOR_CLEAR_CYAN:
+        # Outward expanding shockwave ring on password cleared
+        fac = min(1.0, engine.flash_time / 0.35)
+        aura_radius *= (1.0 + (1.0 - fac) * 0.45)
+        aura_alpha = 0.22 * fac
+        pat = cairo.RadialGradient(cx, cy, 30, cx, cy, aura_radius)
+        pat.add_color_stop_rgba(0.0, *COLOR_CLEAR_CYAN, aura_alpha)
+        pat.add_color_stop_rgba(0.5, *COLOR_CLEAR_CYAN, aura_alpha * 0.35)
+    else:
+        pat = cairo.RadialGradient(cx, cy, 30, cx, cy, aura_radius)
+        pat.add_color_stop_rgba(0.0, 0 / 255, 210 / 255, 211 / 255, 0.09)
+        pat.add_color_stop_rgba(0.45, 0 / 255, 210 / 255, 211 / 255, 0.02)
+    pat.add_color_stop_rgba(1.0, 15 / 255, 17 / 255, 23 / 255, 0.0)
+    cr.set_source(pat)
+    cr.paint()
+
+    # 3. Camera Transformation Setup
+    Ry = [[math.cos(engine.yaw), 0, math.sin(engine.yaw)], [0, 1, 0], [-math.sin(engine.yaw), 0, math.cos(engine.yaw)]]
+    Rx = [[1, 0, 0], [0, math.cos(engine.pitch), -math.sin(engine.pitch)], [0, math.sin(engine.pitch), math.cos(engine.pitch)]]
+    R_view = mat_mul_mat(Rx, Ry)
+
+    fov = 7.5
+    scale = min(width, height) * 0.46
+
+    lx, ly, lz = 0.35, 0.75, -0.6
+    ll = math.sqrt(lx*lx + ly*ly + lz*lz)
+    L_dir = (lx/ll, ly/ll, lz/ll)
+
+    turn_R = None
+    if engine.active_turn:
+        turn_R = rot_matrix(engine.active_turn.axis, engine.active_turn.current_angle)
+
+    render_items = []
+
+    # Gather 3D transparent elements
+    for cubie in engine.cubies:
+        c_pos = cubie.pos
+        c_rot = cubie.rot
+
+        is_turning = False
+        if engine.active_turn:
+            t = engine.active_turn
+            val = c_pos[0] if t.coord == 'x' else (c_pos[1] if t.coord == 'y' else c_pos[2])
+            cond = (val > t.thresh) if t.thresh > 0 else (val < t.thresh)
+            if cond:
+                is_turning = True
+                c_pos = mat_mul_vec(turn_R, c_pos)
+                c_rot = mat_mul_mat(turn_R, c_rot)
+
+        # Project 8 cubie vertices
+        proj_verts = []
+        view_z_verts = []
+        for lv in LOCAL_VERTS:
+            wv = mat_mul_vec(c_rot, lv)
+            p_world = (c_pos[0] + wv[0], c_pos[1] + wv[1], c_pos[2] + wv[2])
+            p_view = mat_mul_vec(R_view, p_world)
+            z_cam = p_view[2] + fov
+            factor = scale / z_cam
+            sx = cx + p_view[0] * factor
+            sy = cy - p_view[1] * factor
+            proj_verts.append((sx, sy))
+            view_z_verts.append(z_cam)
+
+        # Faces: Nearly Invisible Obsidian Glass (#191C24 at 10% opacity, transmission: 0.95, roughness: 0.05)
+        for v_indices, n_local in LOCAL_FACES:
+            n_world = mat_mul_vec(c_rot, n_local)
+            n_view = mat_mul_vec(R_view, n_world)
+            avg_z = sum(view_z_verts[i] for i in v_indices) / 4.0
+            pts = [proj_verts[i] for i in v_indices]
+
+            dot = max(0.0, n_view[0]*L_dir[0] + n_view[1]*L_dir[1] + n_view[2]*L_dir[2])
+            spec = min(0.18, (dot ** 8) * 0.30)
+
+            r = min(1.0, COLOR_GLASS[0] + spec)
+            g = min(1.0, COLOR_GLASS[1] + spec)
+            b = min(1.0, COLOR_GLASS[2] + spec)
+            alpha = 0.10 + spec * 0.25
+
+            if engine.flash_time > 0.0:
+                fac = min(1.0, engine.flash_time / 0.4)
+                r = r * (1.0 - fac) + engine.flash_color[0] * fac * 0.25
+                g = g * (1.0 - fac) + engine.flash_color[1] * fac * 0.25
+                b = b * (1.0 - fac) + engine.flash_color[2] * fac * 0.25
+                alpha = min(0.40, alpha + fac * 0.15)
+            elif engine.is_checking:
+                wave = 0.5 + 0.5 * math.sin(engine.checking_time * 10.0 + avg_z * 0.5)
+                r = r * (1.0 - wave * 0.25) + COLOR_ACTIVE_GOLD[0] * wave * 0.15
+                g = g * (1.0 - wave * 0.25) + COLOR_ACTIVE_GOLD[1] * wave * 0.15
+                b = b * (1.0 - wave * 0.25) + COLOR_ACTIVE_GOLD[2] * wave * 0.15
+                alpha = min(0.25, alpha + wave * 0.08)
+
+            render_items.append(("FACE", avg_z, pts, (r, g, b, alpha)))
+
+        # Edges: Razor-Thin Holographic Wireframe (Teal Resting #00D2D3 / Axé Gold Turning #EBB434)
+        for i, j in LOCAL_EDGES:
+            avg_z = (view_z_verts[i] + view_z_verts[j]) / 2.0
+            pt1 = proj_verts[i]
+            pt2 = proj_verts[j]
+
+            if engine.flash_time > 0.0:
+                fac = min(1.0, engine.flash_time / 0.4)
+                base = engine.flash_color
+                intensity = 2.4 * fac + 1.0 * (1.0 - fac)
+                col = base
+            elif engine.is_checking:
+                # Calculating harmonic electric wave sweep across cube vectors
+                wave = 0.5 + 0.5 * math.sin(engine.checking_time * 12.0 + (pt1[0] + pt2[1]) * 0.015)
+                col = (
+                    COLOR_RESTING_TEAL[0] * (1.0 - wave) + COLOR_ACTIVE_GOLD[0] * wave,
+                    COLOR_RESTING_TEAL[1] * (1.0 - wave) + COLOR_ACTIVE_GOLD[1] * wave,
+                    COLOR_RESTING_TEAL[2] * (1.0 - wave) + COLOR_ACTIVE_GOLD[2] * wave,
+                )
+                intensity = 1.4 + wave * 1.0
+            elif is_turning:
+                col = COLOR_ACTIVE_GOLD
+                intensity = 2.0
+            else:
+                col = COLOR_RESTING_TEAL
+                intensity = 1.0
+
+            render_items.append(("EDGE", avg_z, (pt1, pt2), col, intensity, is_turning))
+
+    # 4. Depth Sorting (Back-to-Front Painter's Ordering)
+    render_items.sort(key=lambda item: item[1], reverse=True)
+
+    # 5. Render Glass Bodies & Emissive Vector Outlines
+    for item in render_items:
+        itype = item[0]
+        if itype == "FACE":
+            _, _, pts, col = item
+            cr.move_to(pts[0][0], pts[0][1])
+            for p in pts[1:]:
+                cr.line_to(p[0], p[1])
+            cr.close_path()
+            cr.set_source_rgba(*col)
+            cr.fill()
+        elif itype == "EDGE":
+            _, _, (p1, p2), (r, g, b), intensity, is_turning = item
+
+            # Holographic Neon Vector Shader (Clean Selective Bloom)
+            # Outer Halo
+            cr.move_to(p1[0], p1[1]); cr.line_to(p2[0], p2[1])
+            cr.set_source_rgba(r, g, b, 0.08 * intensity)
+            cr.set_line_width(6.0 if is_turning else 4.0)
+            cr.stroke()
+
+            # Diffuse Glow
+            cr.move_to(p1[0], p1[1]); cr.line_to(p2[0], p2[1])
+            cr.set_source_rgba(r, g, b, 0.22 * intensity)
+            cr.set_line_width(3.0 if is_turning else 2.0)
+            cr.stroke()
+
+            # Razor-thin 1px Emissive Vector Core
+            cr.move_to(p1[0], p1[1]); cr.line_to(p2[0], p2[1])
+            core_r = min(1.0, r * 0.35 + 0.65)
+            core_g = min(1.0, g * 0.35 + 0.65)
+            core_b = min(1.0, b * 0.35 + 0.65)
+            cr.set_source_rgba(core_r, core_g, core_b, 0.98 * min(1.0, intensity))
+            cr.set_line_width(1.0)
+            cr.stroke()
+
+    # 6. Minimalist Error Count Indicator (Security Readout)
+    if engine.failed_attempts > 0:
+        indicator_y = cy + min(width, height) * 0.28
+        failed_count = engine.failed_attempts
+        pulse_fac = min(1.0, engine.error_pulse_time / 0.60) if engine.error_pulse_time > 0.0 else 0.0
+
+        if failed_count <= 5:
+            pip_count = failed_count
+            pip_spacing = 20.0
+            total_w = (pip_count - 1) * pip_spacing
+            start_x = cx - total_w / 2.0
+
+            for k in range(pip_count):
+                px = start_x + k * pip_spacing
+                py = indicator_y
+                r = 4.5
+                cr.move_to(px, py - r)
+                cr.line_to(px + r, py)
+                cr.line_to(px, py + r)
+                cr.line_to(px - r, py)
+                cr.close_path()
+
+                # Neon bloom halo
+                cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.25 * (1.0 + pulse_fac * 0.8))
+                cr.set_line_width(4.0)
+                cr.stroke_preserve()
+
+                # Diamond fill
+                cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.60)
+                cr.fill_preserve()
+
+                # Core vector outline
+                cr.set_source_rgba(1.0, 0.55, 0.55, 0.95)
+                cr.set_line_width(1.0)
+                cr.stroke()
+        else:
+            # Multiplier format for > 5 attempts
+            r = 4.5
+            cr.move_to(cx - 16, indicator_y - r)
+            cr.line_to(cx - 16 + r, indicator_y)
+            cr.line_to(cx - 16, indicator_y + r)
+            cr.line_to(cx - 16 - r, indicator_y)
+            cr.close_path()
+            cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.30)
+            cr.set_line_width(4.0)
+            cr.stroke_preserve()
+            cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.65)
+            cr.fill_preserve()
+            cr.set_source_rgba(1.0, 0.55, 0.55, 0.95)
+            cr.set_line_width(1.0)
+            cr.stroke()
+
+            cr.select_font_face("monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+            cr.set_font_size(11.0)
+            mult_text = f"× {failed_count}"
+            cr.move_to(cx - 5, indicator_y + 4.0)
+            cr.set_source_rgba(1.0, 0.65, 0.65, 0.95)
+            cr.show_text(mult_text)
+
+        # Monospace Text Readout
+        if failed_count >= 3:
+            label = f"{failed_count} FAILED ATTEMPTS [LOCKOUT ALERT]"
+        elif failed_count > 1:
+            label = f"{failed_count} FAILED ATTEMPTS"
+        else:
+            label = "1 FAILED ATTEMPT"
+        cr.select_font_face("monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(10.5)
+        ext = cr.text_extents(label)
+        tx = cx - ext.width / 2.0
+        ty = indicator_y + 19.0
+
+        # Flanking geometric lines
+        cr.set_line_width(1.0)
+        cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.40)
+        cr.move_to(tx - 32, ty - 3.5)
+        cr.line_to(tx - 8, ty - 3.5)
+        cr.move_to(tx + ext.width + 8, ty - 3.5)
+        cr.line_to(tx + ext.width + 32, ty - 3.5)
+        cr.stroke()
+
+        # Text diffuse bloom
+        cr.move_to(tx, ty)
+        cr.set_source_rgba(COLOR_REJECT_RED[0], COLOR_REJECT_RED[1], COLOR_REJECT_RED[2], 0.35 * (1.0 + pulse_fac * 0.8))
+        cr.show_text(label)
+
+        # Text sharp vector core
+        cr.move_to(tx, ty)
+        cr.set_source_rgba(1.0, 0.65, 0.65, 0.90)
+        cr.show_text(label)
+
+    cr.restore()
+
+# ---------------------------------------------------------------------------
+# PNG Snapshot Generator
+# ---------------------------------------------------------------------------
+def render_preview_to_png(output_path, width=1920, height=1080):
+    """Render a static PNG snapshot of the minimalist Tron Rubik's cube lockscreen."""
+    engine = RubikEngine()
+    engine.password = "polyomino"
+    engine.twist_slice('U', clockwise=True)
+    engine.twist_slice('F', clockwise=False)
+    # Active turning slice in Axé Gold (#EBB434)
+    engine.active_turn = ActiveSliceTurn('R', clockwise=True, duration=0.10)
+    engine.active_turn.current_angle = math.radians(36)
+
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    cr = cairo.Context(surface)
+    render_rubik_lockscreen(cr, width, height, engine, preview_mode=True)
+    out_dir = os.path.dirname(os.path.abspath(output_path))
+    os.makedirs(out_dir, exist_ok=True)
+    surface.write_to_png(output_path)
+    print(f"\033[1;32m[OK]\033[0m Minimalist Tron lockscreen preview saved -> {output_path}")
+
+# ---------------------------------------------------------------------------
+# Lockscreen Application & Wayland Integration
+# ---------------------------------------------------------------------------
+class PolyominoRubikLockApp:
+    def __init__(self, test_mode=False, fullscreen=False):
+        self.test_mode = test_mode
+        self.fullscreen = fullscreen
+        self.engine = RubikEngine()
+        self.lock = None
+        self.windows = []
+        self.last_time = time.time()
+
+        if not self.test_mode:
+            if HAS_SESSION_LOCK and GtkSessionLock.is_supported():
+                self.lock = GtkSessionLock.prepare_lock()
+                self.lock.connect("locked", self.on_locked)
+                self.lock.connect("finished", self.on_finished)
+                # Correct ext-session-lock lifecycle: lock_lock() BEFORE new_surface()
+                self.lock.lock_lock()
+            else:
+                sys.stderr.write("GtkSessionLock unavailable. Falling back to swaylock...\n")
+                try:
+                    os.execvp("swaylock", ["swaylock", "-f"])
+                except Exception as e:
+                    sys.stderr.write(f"Failed to exec swaylock: {e}\n")
+                    sys.exit(1)
+        else:
+            self.setup_preview_windows()
+
+        GLib.timeout_add(16, self.on_tick)
+
+    def on_locked(self, lock):
+        display = Gdk.Display.get_default()
+        n_monitors = display.get_n_monitors() if display else 1
+        for i in range(max(1, n_monitors)):
+            monitor = display.get_monitor(i) if display else None
+            win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+            win.set_title("Polyomino Rubik Lock")
+            win.set_app_paintable(True)
+            win.set_can_focus(True)
+            win.add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK | Gdk.EventMask.BUTTON_PRESS_MASK)
+            win.connect("key-press-event", self.on_key_press)
+            win.connect("button-press-event", self.on_button_press)
+
+            darea = Gtk.DrawingArea()
+            darea.connect("draw", self.on_draw)
+            win.add(darea)
+
+            # Associate unmapped window with monitor
+            if monitor:
+                self.lock.new_surface(win, monitor)
+            win.show_all()
+            self.windows.append((win, darea))
+
+        if self.windows:
+            self.windows[0][0].grab_focus()
+
+    def on_finished(self, lock):
+        Gtk.main_quit()
+
+    def setup_preview_windows(self):
+        GLib.set_prgname("polyomino-lock-preview")
+        GLib.set_application_name("polyomino-lock-preview")
+        win = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        win.set_role("polyomino-lock-preview")
+        win.set_title("Polyomino Rubik Lock [PREVIEW MODE — Press ESC to Exit]")
+        win.set_app_paintable(True)
+        win.set_can_focus(True)
+        win.add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK | Gdk.EventMask.BUTTON_PRESS_MASK)
+        win.connect("key-press-event", self.on_key_press)
+        win.connect("button-press-event", self.on_button_press)
+        win.connect("destroy", lambda w: Gtk.main_quit())
+
+        darea = Gtk.DrawingArea()
+        darea.connect("draw", self.on_draw)
+        win.add(darea)
+
+        if self.fullscreen:
+            win.fullscreen()
+        else:
+            win.set_default_size(1024, 720)
+            win.set_position(Gtk.WindowPosition.CENTER)
+
+        win.show_all()
+        win.grab_focus()
+        self.windows.append((win, darea))
+
+    def on_button_press(self, widget, event):
+        widget.grab_focus()
+        return False
+
+    def on_key_press(self, widget, event):
+        keyval = event.keyval
+        state = event.state
+        is_ctrl = bool(state & Gdk.ModifierType.CONTROL_MASK)
+
+        # Clear password shortcuts: Ctrl+u, Ctrl+k, Ctrl+c, Ctrl+BackSpace, Delete
+        if (is_ctrl and keyval in (Gdk.KEY_u, Gdk.KEY_U, Gdk.KEY_k, Gdk.KEY_K, Gdk.KEY_c, Gdk.KEY_C, Gdk.KEY_BackSpace)) \
+                or keyval in (Gdk.KEY_Delete, Gdk.KEY_KP_Delete):
+            self.engine.clear_password()
+        elif keyval == Gdk.KEY_Escape:
+            if self.engine.password:
+                self.engine.clear_password()
+            elif self.test_mode:
+                Gtk.main_quit()
+            else:
+                self.engine.clear_password()
+        elif keyval == Gdk.KEY_Return or keyval == Gdk.KEY_KP_Enter:
+            self.engine.trigger_authentication(self.on_auth_success)
+        elif keyval == Gdk.KEY_BackSpace:
+            self.engine.handle_backspace()
+        elif self.test_mode and (keyval in (Gdk.KEY_q, Gdk.KEY_Q)):
+            Gtk.main_quit()
+        else:
+            char = chr(Gdk.keyval_to_unicode(keyval)) if Gdk.keyval_to_unicode(keyval) != 0 else ''
+            if char and char.isprintable() and not is_ctrl:
+                self.engine.handle_keystroke(char)
+
+        self.queue_redraw_all()
+        return True
+
+    def on_tick(self):
+        now = time.time()
+        dt = min(0.05, now - self.last_time)
+        self.last_time = now
+
+        self.engine.update(dt)
+        self.queue_redraw_all()
+        return True
+
+    def queue_redraw_all(self):
+        for win, darea in self.windows:
+            darea.queue_draw()
+
+    def on_draw(self, widget, cr):
+        alloc = widget.get_allocation()
+        render_rubik_lockscreen(cr, alloc.width, alloc.height, self.engine, preview_mode=self.test_mode)
+
+    def on_auth_success(self):
+        if not self.test_mode and self.lock:
+            self.lock.unlock_and_destroy()
+            display = Gdk.Display.get_default()
+            if display:
+                display.sync()
+            Gtk.main_quit()
+        elif self.test_mode:
+            self.engine.auth_state = "SUCCESS"
+            self.engine.flash_color = COLOR_ACTIVE_GOLD
+            GLib.timeout_add(1000, self._preview_reset_to_idle)
+        else:
+            Gtk.main_quit()
+        return False
+
+    def _preview_reset_to_idle(self):
+        if self.engine.auth_state == "SUCCESS":
+            self.engine.auth_state = "IDLE"
+        return False
+
+# ---------------------------------------------------------------------------
+# CLI Entry Point
+# ---------------------------------------------------------------------------
+def main():
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("Usage: polyomino-rubik-lock [OPTIONS]")
+        print("Polyomino 3D Rubik's Cube Lockscreen for Sway (ext-session-lock-v1)")
+        print()
+        print("Options:")
+        print("  -p, --preview, --test, -t   Run safely in an interactive floating test window")
+        print("  -f, --fullscreen            Run preview in fullscreen mode (press ESC to exit)")
+        print("  -s, --screenshot [PATH]     Render a PNG image preview and save to disk")
+        print("  -h, --help                  Display this help message")
+        sys.exit(0)
+
+    # Static PNG rendering mode
+    if any(arg in sys.argv for arg in ("--screenshot", "-s", "--image", "--render-preview")):
+        out_path = None
+        for i, arg in enumerate(sys.argv):
+            if arg in ("--screenshot", "-s", "--image", "--render-preview") and i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("-"):
+                out_path = sys.argv[i + 1]
+                break
+        if not out_path:
+            cache_dir = os.path.expanduser("~/.cache/polyomino")
+            out_path = os.path.join(cache_dir, "rubik-lock-preview.png")
+        render_preview_to_png(out_path)
+        sys.exit(0)
+
+    test_mode = any(arg in sys.argv for arg in ("--test", "-t", "--preview", "-p", "--fullscreen", "-f"))
+    fullscreen = "--fullscreen" in sys.argv or "-f" in sys.argv
+
+    app = PolyominoRubikLockApp(test_mode=test_mode, fullscreen=fullscreen)
+    Gtk.main()
+
+if __name__ == "__main__":
+    main()

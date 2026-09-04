@@ -16,7 +16,7 @@ set $right l
 
 set $term kitty
 set $launcher wofi --show drun --allow-images --conf ~/.config/wofi/config --style ~/.config/wofi/style.css
-set $lock swaylock -f -c 1e1e2e
+set $lock ~/.config/sway/scripts/polyomino-rubik-lock
 
 set $ws1 "1:web"
 set $ws2 "2:code"
@@ -45,6 +45,9 @@ exec_always pgrep -x waybar >/dev/null || waybar
 # Floating calendar popup rule
 for_window [app_id="polyomino-calendar"] floating enable, resize set 680 440, move position center
 
+# Floating lockscreen preview window
+for_window [app_id="polyomino-lock-preview"] floating enable, resize set 1024 720, move position center
+
 # System tray helper for network/VPN status (OpenVPN3 is CLI-only; nm-applet shows NetworkManager
 # connection state including VPN tunnels started via `nmcli` or the openvpn3 CLI-managed profiles).
 exec nm-applet --indicator
@@ -52,8 +55,8 @@ exec nm-applet --indicator
 # 1Password — starts minimized to tray, unlocks against the already-running gnome-keyring/PAM session.
 exec 1password --silent
 
-# Idle management (lock -> screen off -> suspend). See polyomino-idle.
-exec ~/.local/bin/polyomino-idle
+# Idle management (lock -> screen off -> suspend). Integrated with polyomino-rubik-lock.
+exec swayidle -w timeout 300 '~/.local/bin/polyomino-rubik-lock' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"'
 
 # Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
 exec_always ~/.local/bin/polyomino-autotiling
@@ -289,7 +292,7 @@ bindsym $mod+F4 exec polyomino-theme aruanda
 # Note: lock is bound to $mod+Escape (not $mod+Shift+l — that collides with $mod+Shift+$right
 # (vim-style "l" = right, see `set $right l` above), which silently wins
 # and made sway show a "there are errors in your config" banner).
-bindsym $mod+Escape exec ~/.local/bin/polyomino-lock # Lock screen
+bindsym $mod+Escape exec ~/.local/bin/polyomino-rubik-lock
 bindsym $mod+Shift+x exec $term -e ~/.config/sway/scripts/matrix.sh # Terminal matrix screensaver
 bindsym $mod+Shift+Escape exec systemctl suspend # Suspend system
 

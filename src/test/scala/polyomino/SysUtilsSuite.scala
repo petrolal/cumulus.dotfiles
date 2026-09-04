@@ -10,13 +10,13 @@ class SysUtilsSuite extends FunSuite:
   test("SysUtils.runLock handles lock call gracefully"):
     assume(!isCI)
     val ctx = Context.discover().toOption.get
-    val res = SysUtils.runLock(ctx)
+    val res = SysUtils.runLock(ctx, List("--screenshot", "/tmp/test-lock-unit.png"))
     assert(res.isRight)
 
   test("SysUtils.runLock returns Right"):
     assume(!isCI)
     val ctx = Context.discover().toOption.get
-    val res = SysUtils.runLock(ctx)
+    val res = SysUtils.runLock(ctx, List("--screenshot", "/tmp/test-lock-unit.png"))
     assertEquals(res.isRight, true)
 
   test("SysUtils.runIdle spawns daemon (skipped in CI)"):

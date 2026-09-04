@@ -49,7 +49,8 @@ object Main:
       case "version" | "-v" | "--version" => Right(println("polyomino 0.1.0 (Scala 3.5.2 Native Image)"))
       case "healthcheck" | "validate" => polyomino.dotfiles.validate.Validator.run(ctx, args)
       case "sdd" => polyomino.dotfiles.sdd.SpecDrivenDev.run(ctx, args)
-      case "lock" => polyomino.dotfiles.sysutils.SysUtils.runLock(ctx)
+      case "lock" => polyomino.dotfiles.sysutils.SysUtils.runLock(ctx, args)
+      case "preview-lock" | "lock-preview" => polyomino.dotfiles.sysutils.SysUtils.runLockPreview(ctx, args)
       case "idle" => polyomino.dotfiles.sysutils.SysUtils.runIdle(ctx)
       case "screenshot" => polyomino.dotfiles.sysutils.SysUtils.runScreenshot(ctx, args)
       case "draw-window" | "sway-draw-window" => polyomino.dotfiles.sysutils.SysUtils.runDrawWindow(ctx, args)
@@ -81,7 +82,8 @@ object Main:
       |  theme            select a desktop flavor + background mode and apply it live
       |  runtime-refresh  refresh running apps (sway/waybar/kitty/wofi/neovim/os)
       |  os-colorscheme   sync the GNOME/GTK color-scheme setting
-      |  lock             lock the screen (swaylock) styled to the active theme
+      |  lock             lock the screen (Polyomino 3D Rubik Lock / swaylock)
+      |  preview-lock     preview and test lock screen safely without locking session
       |  idle             run the swayidle daemon (auto-lock, dpms, suspend)
       |  screenshot       capture a screenshot (full|region|window)
       |  autotiling       Fibonacci spiral autotiling daemon for Sway

@@ -195,7 +195,8 @@ object WofiPickers:
     action match
       case a if a.contains("polyomino-whichkey") => "Keybindings cheatsheet"
       case a if a.contains("polyomino-theme-picker") => "Theme and wallpaper picker"
-      case a if a.contains("polyomino-lock") => "Lock screen (swaylock)"
+      case a if a.contains("preview-lock") => "Preview lockscreen (Safe test window)"
+      case a if a.contains("rubik-lock") || a.contains("polyomino-lock") || a.contains("lock") => "Lock screen (3D Rubik's Cube Lock)"
       case a if a.contains("systemctl suspend") => "Suspend system"
       case a if a.contains("systemctl poweroff") => "Shutdown system"
       case a if a.contains("systemctl reboot") => "Reboot system"
@@ -250,7 +251,7 @@ object WofiPickers:
     "Mod4+Shift+n             → Toggle notification center",
     "Mod4+Shift+t             → Theme and wallpaper picker",
     "Mod4+? / Mod4+/          → Keybindings cheatsheet",
-    "Mod4+Escape              → Lock screen (swaylock)",
+    "Mod4+Escape              → Lock screen (3D Rubik's Cube Lock)",
     "Print                    → Screenshot full screen",
     "Mod4+Print               → Screenshot region selection",
     "Mod4+Shift+Print         → Screenshot active window"

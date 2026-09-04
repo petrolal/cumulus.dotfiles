@@ -11,3 +11,15 @@ alias cn='[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/polyomino/init.lua" ] && NVIM_
 alias c='clear'
 alias reload='source ~/.zshrc'
 alias matrix='~/.config/sway/scripts/matrix.sh'
+
+# ── Terminal idle screensaver (3 minutes of inactivity at prompt) ──
+TMOUT=180
+TRAPALRM() {
+    if [[ -o interactive && -t 0 && -t 1 ]]; then
+        local saver="${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/matrix.sh"
+        if [[ -x "$saver" ]]; then
+            "$saver"
+            zle && zle reset-prompt 2>/dev/null
+        fi
+    fi
+}

@@ -39,8 +39,8 @@ install_system_deps() {
       # Core system + desktop + dev tools
       sudo pacman -S --needed --noconfirm \
         base-devel git curl wget \
-        zsh fontconfig fastfetch \
-        sway waybar kitty wofi swaylock swayidle grim slurp \
+        zsh fontconfig fastfetch cmatrix \
+        sway waybar kitty wofi swaylock gtklock swayidle grim slurp \
         brightnessctl libpulse playerctl wireplumber swaync mako \
         chromium firefox \
         neovim \
@@ -52,7 +52,7 @@ install_system_deps() {
       sudo apt-get update
       sudo apt-get install -y \
         build-essential git curl wget \
-        zsh fontconfig fastfetch \
+        zsh fontconfig fastfetch cmatrix \
         sway waybar kitty wofi swaylock swayidle grim slurp \
         brightnessctl playerctl wireplumber pulseaudio-utils sway-notification-center mako \
         firefox chromium-browser \
@@ -64,7 +64,7 @@ install_system_deps() {
     dnf)
       sudo dnf install -y \
         gcc gcc-c++ git curl wget \
-        zsh fontconfig fastfetch \
+        zsh fontconfig fastfetch cmatrix \
         sway waybar kitty wofi swaylock swayidle grim slurp \
         brightnessctl playerctl wireplumber pulseaudio-libs sway-notification-center mako \
         firefox \

@@ -11,7 +11,7 @@ object DeployInstaller:
     "sdd", "install", "deploy", "install-deps", "install-brew", "install-homebrew",
     "install-gh", "install-github-cli", "install-coursier", "install-cs",
     "install-fonts", "install-apps", "install-swaync", "install-notifications", "install-browser", "install-devops", "install-zsh", "install-sdkman",
-    "install-tools", "install-telegram", "install-node", "install-npm", "install-npx", "install-yazi", "install-fastfetch", "full-install", "theme-picker", "whichkey", "wichkey"
+    "install-tools", "install-telegram", "install-node", "install-npm", "install-npx", "install-yazi", "install-fastfetch", "full-install", "theme-picker", "whichkey", "wichkey", "rubik-lock", "preview-lock"
   )
 
   def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
@@ -103,13 +103,16 @@ object DeployInstaller:
     var binSymlinkCount = 0
     for cmd <- Subcommands do
       val symlinkPath = binDir / s"polyomino-$cmd"
+      val scriptSource = if cmd == "rubik-lock" then
+        ctx.dotfilesDir / "config" / "sway" / "scripts" / "polyomino-rubik-lock"
+      else mainBinary
       try
         if os.exists(symlinkPath) || os.isLink(symlinkPath) then os.remove(symlinkPath)
         // Use ln command for reliable symlink creation
-        os.proc("ln", "-s", mainBinary.toString, symlinkPath.toString).call()
+        os.proc("ln", "-s", scriptSource.toString, symlinkPath.toString).call()
         binSymlinkCount += 1
         manifestEntries = manifestEntries :+ ManifestEntry(
-          sourcePath = mainBinary.toString,
+          sourcePath = scriptSource.toString,
           targetPath = symlinkPath.toString,
           backupPath = None
         )

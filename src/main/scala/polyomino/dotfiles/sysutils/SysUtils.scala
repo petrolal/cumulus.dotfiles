@@ -5,20 +5,41 @@ import polyomino.dotfiles.error.{CommandError, PolyominoError}
 import polyomino.dotfiles.theme.ThemeEngine
 
 object SysUtils:
-  def runLock(ctx: Context): Either[PolyominoError, Unit] =
-    println("\u001b[1;34m[polyomino lock]\u001b[0m Locking screen via swaylock...")
-    val lockConfigFile = ctx.configDir / "swaylock" / "config"
-    try
-      val cmd = if os.exists(lockConfigFile) then
-        Seq("swaylock", "-f", "--config", lockConfigFile.toString)
-      else
-        val palette = ThemeEngine.getActivePalette(ctx)
-        val baseHex = palette.base.stripPrefix("#")
-        Seq("swaylock", "-f", "-c", baseHex)
-      os.proc(cmd).call(check = false)
-      Right(())
-    catch
-      case e: Exception => Left(CommandError(s"Lock failed: ${e.getMessage}"))
+  def runLock(ctx: Context, args: List[String] = Nil): Either[PolyominoError, Unit] =
+    val isPreview = args.exists(a => a == "--preview" || a == "-p" || a == "--test" || a == "-t" || a == "--fullscreen" || a == "-f" || a == "--screenshot" || a == "-s")
+    val rubikScript = ctx.dotfilesDir / "config" / "sway" / "scripts" / "polyomino-rubik-lock"
+    val scriptToRun = if os.exists(rubikScript) then rubikScript
+      else ctx.home / ".local" / "bin" / "polyomino-rubik-lock"
+
+    if isPreview then
+      runLockPreview(ctx, args)
+    else if os.exists(scriptToRun) then
+      println(s"\u001b[1;34m[polyomino lock]\u001b[0m Locking screen via ${scriptToRun.last}...")
+      try
+        val fullCmd: Seq[os.Shellable] = Seq(scriptToRun.toString: os.Shellable) ++ args.map(a => (a: os.Shellable))
+        os.proc(fullCmd*).spawn()
+        Right(())
+      catch
+        case e: Exception => Left(CommandError(s"Lock failed: ${e.getMessage}"))
+    else
+      Left(CommandError(s"Lock script not found at $scriptToRun"))
+
+  def runLockPreview(ctx: Context, args: List[String] = Nil): Either[PolyominoError, Unit] =
+    val rubikScript = ctx.dotfilesDir / "config" / "sway" / "scripts" / "polyomino-rubik-lock"
+    val scriptToRun = if os.exists(rubikScript) then rubikScript
+      else ctx.home / ".local" / "bin" / "polyomino-rubik-lock"
+
+    if os.exists(scriptToRun) then
+      println(s"\u001b[1;36m[polyomino preview-lock]\u001b[0m Launching lock screen preview (${scriptToRun.last})...")
+      try
+        val previewArgs = if args.isEmpty || !args.exists(a => a.startsWith("-")) then List("--preview") else args
+        val fullCmd: Seq[os.Shellable] = Seq(scriptToRun.toString: os.Shellable) ++ previewArgs.map(a => (a: os.Shellable))
+        os.proc(fullCmd*).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit)
+        Right(())
+      catch
+        case e: Exception => Left(CommandError(s"Preview lock failed: ${e.getMessage}"))
+    else
+      Left(CommandError(s"Lock script not found at $scriptToRun"))
 
   def runIdle(ctx: Context): Either[PolyominoError, Unit] =
     println("\u001b[1;34m[polyomino idle]\u001b[0m Launching swayidle daemon...")
