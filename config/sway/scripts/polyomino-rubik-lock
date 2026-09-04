@@ -865,7 +865,24 @@ class PolyominoRubikLockApp:
         self.engine = RubikEngine()
         self.lock = None
         self.windows = []
-        self.last_time = time.time()
+
+        # Animation clock: driven by each window's Gdk.FrameClock via
+        # add_tick_callback instead of a hand-timed GLib poll. This renders
+        # exactly once per real compositor frame — matching the monitor's
+        # actual refresh rate (60/120/144Hz...) rather than assuming 60 —
+        # and stops firing entirely (see _on_frame_tick) once the scene is
+        # at rest, instead of continuing to wake up on a fixed interval.
+        self.tick_widget = None
+        self.tick_callback_id = None
+        self.last_frame_time = None
+
+        display = Gdk.Display.get_default()
+        if display:
+            keymap = Gdk.Keymap.get_for_display(display)
+            if keymap:
+                # Catches caps-lock toggling outside of a keypress we see
+                # directly (on_key_press already updates it on every key).
+                keymap.connect("state-changed", self.on_keymap_state_changed)
 
         if not self.test_mode:
             if HAS_SESSION_LOCK and GtkSessionLock.is_supported():
@@ -883,17 +900,7 @@ class PolyominoRubikLockApp:
                     sys.exit(1)
         else:
             self.setup_preview_windows()
-
-        # Tick cadence: fast (60fps-ish) while anything is actually moving,
-        # throttled way down while the lock screen just sits there waiting
-        # for input — no reason to burn a core-wakeup 62x/sec for a static
-        # frame that could sit on screen for hours. handle_input() bumps us
-        # straight back to FAST_TICK_MS the instant a key is pressed, so
-        # typing/turning responsiveness is unaffected.
-        self.FAST_TICK_MS = 16
-        self.IDLE_TICK_MS = 150
-        self.current_tick_ms = self.FAST_TICK_MS
-        self.tick_source_id = GLib.timeout_add(self.current_tick_ms, self.on_tick)
+            self._start_ticking()
 
     def on_locked(self, lock):
         display = Gdk.Display.get_default()
@@ -920,6 +927,7 @@ class PolyominoRubikLockApp:
 
         if self.windows:
             self.windows[0][0].grab_focus()
+        self._start_ticking()
 
     def on_finished(self, lock):
         Gtk.main_quit()
@@ -956,10 +964,10 @@ class PolyominoRubikLockApp:
         return False
 
     def on_key_press(self, widget, event):
-        # Any keypress can start a new slice-turn animation; make sure the
-        # tick timer is already running at full rate before that animation's
-        # 2nd frame is due, even if we'd throttled down while idle.
-        self._set_tick_rate(self.FAST_TICK_MS)
+        # Any keypress can start a new slice-turn/checking animation; make
+        # sure the frame clock is actively ticking (it stops itself once
+        # the scene settles — see _on_frame_tick).
+        self._start_ticking()
 
         keyval = event.keyval
         state = event.state
@@ -991,58 +999,54 @@ class PolyominoRubikLockApp:
         self.queue_redraw_all()
         return True
 
-    def on_tick(self):
-        now = time.time()
-        dt = min(0.05, now - self.last_time)
-        self.last_time = now
+    def on_keymap_state_changed(self, keymap):
+        new_caps = keymap.get_caps_lock_state()
+        if new_caps != self.engine.caps_lock:
+            self.engine.caps_lock = new_caps
+            self.queue_redraw_all()
 
-        # Real-time CapsLock state tracking via Gdk.Keymap
-        caps_changed = False
-        display = Gdk.Display.get_default()
-        if display:
-            keymap = Gdk.Keymap.get_for_display(display)
-            if keymap:
-                new_caps = keymap.get_caps_lock_state()
-                caps_changed = new_caps != self.engine.caps_lock
-                self.engine.caps_lock = new_caps
+    def _start_ticking(self):
+        # Idempotent: no-op if already ticking or no window exists yet
+        # (on_locked() creates windows asynchronously after lock_lock()
+        # returns, so __init__ can't rely on self.windows being populated).
+        if self.tick_callback_id is not None or not self.windows:
+            return
+        self.tick_widget = self.windows[0][1]
+        self.last_frame_time = None
+        self.tick_callback_id = self.tick_widget.add_tick_callback(self._on_frame_tick)
+
+    def _on_frame_tick(self, widget, frame_clock):
+        # frame_clock.get_frame_time() is a monotonic microsecond timestamp
+        # synced to this widget's compositor frame — using it (rather than
+        # time.time()) means dt reflects the real display refresh rate.
+        frame_time = frame_clock.get_frame_time()
+        if self.last_frame_time is None:
+            dt = 1.0 / 60.0
+        else:
+            dt = min(0.05, max(0.0, (frame_time - self.last_frame_time) / 1_000_000.0))
+        self.last_frame_time = frame_time
 
         was_animating = self.engine.is_animating()
         self.engine.update(dt)
         still_animating = self.engine.is_animating()
 
         # Skip the (expensive) redraw once the scene is fully at rest —
-        # nothing changes visually while idle, so don't re-render it 60x/sec.
-        # Still draw one extra frame on the tick motion actually stops, so
-        # the final resting pose/flash gets painted, and whenever caps-lock
-        # toggles (the one bit of idle state that can change on its own).
-        if still_animating or was_animating or caps_changed:
+        # nothing changes visually while idle, so don't re-render it. Still
+        # draw one extra frame the tick motion actually stops, so the final
+        # resting pose/flash gets painted.
+        if still_animating or was_animating:
             self.queue_redraw_all()
 
-        # Slow the timer itself down once nothing is moving; snap back to
-        # full rate the moment something starts again.
-        target_ms = self.FAST_TICK_MS if still_animating else self.IDLE_TICK_MS
-        if target_ms != self.current_tick_ms:
-            self._set_tick_rate(target_ms)
-            return False  # old GLib source replaced by _set_tick_rate
-        return True
+        if still_animating:
+            return True  # GDK_TICK_CALLBACK_CONTINUE
 
-    def _set_tick_rate(self, ms):
-        if ms == self.current_tick_ms and self.tick_source_id:
-            return
-        if self.tick_source_id:
-            GLib.source_remove(self.tick_source_id)
-        self.current_tick_ms = ms
-        # Resync the animation clock to "now" whenever cadence changes.
-        # Without this, waking from the throttled idle tick (up to
-        # IDLE_TICK_MS old) leaves self.last_time stale, so the very next
-        # on_tick computes a big dt and a freshly-started slice turn (whose
-        # whole duration is ~100ms) jumps straight to progress=1.0 instead
-        # of animating through it — the turn appears to snap instead of
-        # rotate. This is exactly what happens on the real lock screen: a
-        # normal typing cadence (>IDLE_TICK_MS between keys) drops to idle
-        # between almost every keystroke, so nearly every turn was snapping.
-        self.last_time = time.time()
-        self.tick_source_id = GLib.timeout_add(ms, self.on_tick)
+        # Nothing left to animate: stop requesting frames entirely rather
+        # than continuing to wake up every refresh for no reason. A future
+        # keypress (or checking/flash/shake starting) calls _start_ticking()
+        # again to resume.
+        self.tick_callback_id = None
+        self.last_frame_time = None
+        return False  # GDK_TICK_CALLBACK_STOP
 
     def queue_redraw_all(self):
         for win, darea in self.windows:
