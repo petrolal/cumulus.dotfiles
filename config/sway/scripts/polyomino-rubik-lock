@@ -85,35 +85,39 @@ def pam_authenticate_user(username: str, password: str, service: str = "swaylock
         return False
     pw_bytes = password.encode('utf-8')
 
-    for srv in [service, "swaylock", "gtklock", "system-auth", "login"]:
-        def conv_cb(n_msgs, msgs, resp, appdata):
-            resp_ptr = libc.calloc(n_msgs, ctypes.sizeof(PamResponse))
-            r_arr = (PamResponse * n_msgs).from_address(resp_ptr)
-            for i in range(n_msgs):
-                m = msgs[i].contents
-                if m.msg_style in (PAM_PROMPT_ECHO_OFF, PAM_PROMPT_ECHO_ON):
-                    r_arr[i].resp = libc.strdup(pw_bytes)
-                    r_arr[i].resp_retcode = 0
-                else:
-                    r_arr[i].resp = None
-                    r_arr[i].resp_retcode = 0
-            resp[0] = ctypes.cast(resp_ptr, ctypes.POINTER(PamResponse))
-            return 0
+    # Resolve single valid PAM service (swaylock -> login -> system-auth)
+    target_service = service
+    if not os.path.exists(f"/etc/pam.d/{target_service}"):
+        for s in ["login", "system-auth"]:
+            if os.path.exists(f"/etc/pam.d/{s}"):
+                target_service = s
+                break
 
-        conv_func = PAM_CONV_FUNC(conv_cb)
-        conv = PamConv(conv_func, None)
-        pam_h = ctypes.c_void_p()
+    def conv_cb(n_msgs, msgs, resp, appdata):
+        resp_ptr = libc.calloc(n_msgs, ctypes.sizeof(PamResponse))
+        r_arr = (PamResponse * n_msgs).from_address(resp_ptr)
+        for i in range(n_msgs):
+            m = msgs[i].contents
+            if m.msg_style in (PAM_PROMPT_ECHO_OFF, PAM_PROMPT_ECHO_ON):
+                r_arr[i].resp = libc.strdup(pw_bytes)
+                r_arr[i].resp_retcode = 0
+            else:
+                r_arr[i].resp = None
+                r_arr[i].resp_retcode = 0
+        resp[0] = ctypes.cast(resp_ptr, ctypes.POINTER(PamResponse))
+        return 0
 
-        ret = libpam.pam_start(srv.encode('utf-8'), username.encode('utf-8'), ctypes.byref(conv), ctypes.byref(pam_h))
-        if ret != 0:
-            continue
+    conv_func = PAM_CONV_FUNC(conv_cb)
+    conv = PamConv(conv_func, None)
+    pam_h = ctypes.c_void_p()
 
-        auth_ret = libpam.pam_authenticate(pam_h, 0)
-        libpam.pam_end(pam_h, auth_ret)
-        if auth_ret == 0:
-            return True
+    ret = libpam.pam_start(target_service.encode('utf-8'), username.encode('utf-8'), ctypes.byref(conv), ctypes.byref(pam_h))
+    if ret != 0:
+        return False
 
-    return False
+    auth_ret = libpam.pam_authenticate(pam_h, 0)
+    libpam.pam_end(pam_h, auth_ret)
+    return auth_ret == 0
 
 # ---------------------------------------------------------------------------
 # Strict Polyomino Minimalist Tron Tokens & Shaders
@@ -258,6 +262,7 @@ class RubikEngine:
         self.auth_state = "IDLE"  # IDLE, CHECKING, SUCCESS, REJECT
         self.failed_attempts = 0
         self.error_pulse_time = 0.0
+        self.caps_lock = False
         self.shake_time = 0.0
         self.shake_offset = 0.0
         self.flash_time = 0.0
@@ -731,6 +736,59 @@ def render_rubik_lockscreen(cr, width, height, engine, preview_mode=False):
         cr.set_source_rgba(1.0, 0.65, 0.65, 0.90)
         cr.show_text(label)
 
+    # 7. CapsLock Warning Indicator (Axé Gold Emissive Vector Badge)
+    if getattr(engine, 'caps_lock', False):
+        caps_y = cy - min(width, height) * 0.28
+        label = "CAPS LOCK ON"
+        cr.select_font_face("monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        cr.set_font_size(10.5)
+        ext = cr.text_extents(label)
+        total_w = ext.width + 16
+        tx = cx - total_w / 2.0 + 16
+        ty = caps_y
+
+        ax = tx - 12
+        ay = ty - 3.5
+
+        # Vector Upward Arrow Path
+        cr.move_to(ax, ay - 4.5)
+        cr.line_to(ax + 4.0, ay)
+        cr.line_to(ax + 1.8, ay)
+        cr.line_to(ax + 1.8, ay + 4.5)
+        cr.line_to(ax - 1.8, ay + 4.5)
+        cr.line_to(ax - 1.8, ay)
+        cr.line_to(ax - 4.0, ay)
+        cr.close_path()
+
+        # Arrow bloom & core
+        cr.set_source_rgba(COLOR_ACTIVE_GOLD[0], COLOR_ACTIVE_GOLD[1], COLOR_ACTIVE_GOLD[2], 0.35)
+        cr.set_line_width(3.0)
+        cr.stroke_preserve()
+        cr.set_source_rgba(COLOR_ACTIVE_GOLD[0], COLOR_ACTIVE_GOLD[1], COLOR_ACTIVE_GOLD[2], 0.75)
+        cr.fill_preserve()
+        cr.set_source_rgba(1.0, 0.95, 0.70, 0.98)
+        cr.set_line_width(1.0)
+        cr.stroke()
+
+        # Flanking accent lines
+        cr.set_line_width(1.0)
+        cr.set_source_rgba(COLOR_ACTIVE_GOLD[0], COLOR_ACTIVE_GOLD[1], COLOR_ACTIVE_GOLD[2], 0.40)
+        cr.move_to(tx - 36, ty - 3.5)
+        cr.line_to(tx - 20, ty - 3.5)
+        cr.move_to(tx + ext.width + 8, ty - 3.5)
+        cr.line_to(tx + ext.width + 28, ty - 3.5)
+        cr.stroke()
+
+        # Text diffuse bloom
+        cr.move_to(tx, ty)
+        cr.set_source_rgba(COLOR_ACTIVE_GOLD[0], COLOR_ACTIVE_GOLD[1], COLOR_ACTIVE_GOLD[2], 0.35)
+        cr.show_text(label)
+
+        # Text sharp core
+        cr.move_to(tx, ty)
+        cr.set_source_rgba(1.0, 0.92, 0.65, 0.95)
+        cr.show_text(label)
+
     cr.restore()
 
 # ---------------------------------------------------------------------------
@@ -872,6 +930,7 @@ class PolyominoRubikLockApp:
             if char and char.isprintable() and not is_ctrl:
                 self.engine.handle_keystroke(char)
 
+        self.engine.caps_lock = bool(state & Gdk.ModifierType.LOCK_MASK)
         self.queue_redraw_all()
         return True
 
@@ -879,6 +938,13 @@ class PolyominoRubikLockApp:
         now = time.time()
         dt = min(0.05, now - self.last_time)
         self.last_time = now
+
+        # Real-time CapsLock state tracking via Gdk.Keymap
+        display = Gdk.Display.get_default()
+        if display:
+            keymap = Gdk.Keymap.get_for_display(display)
+            if keymap:
+                self.engine.caps_lock = keymap.get_caps_lock_state()
 
         self.engine.update(dt)
         self.queue_redraw_all()
