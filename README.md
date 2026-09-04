@@ -1,6 +1,6 @@
 # polyomino.dotfiles
 
-Personal Sway/Wayland desktop configuration — AWS Cloud theme, native
+Personal Sway/Wayland desktop configuration — native
 Sway keybindings, wofi launcher, waybar status bar, kitty terminal, and zsh
 shell config. Built in Scala 3 + GraalVM Native Image to be published to Maven Central or cloned onto a fresh machine.
 
@@ -165,7 +165,7 @@ All desktop automation, installers, maintenance, and system utilities are built 
 |---|---|
 | `polyomino install` | Deploy configs, run system package installer (`bootstrap.sh`), and execute `healthcheck` |
 | `polyomino healthcheck` | Read-only sanity check of all symlinks, binaries, fonts, and PATH configurations |
-| `polyomino theme` | Select desktop cloud theme (`aws`, `azure`, `gcp`, `oci`) & wallpaper mode |
+| `polyomino theme` | Select desktop theme (custom palettes) & wallpaper mode |
 | `polyomino-theme-picker` | Wofi GUI picker for desktop theme selection (`Mod+Shift+T`) |
 | `polyomino-whichkey` | Wofi cheatsheet of Sway keybindings (`Mod+Shift+?`) |
 | `polyomino lock` | Screen lock styled to active theme (`Mod+Escape`) |

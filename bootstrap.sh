@@ -39,7 +39,7 @@ install_system_deps() {
       # Core system + desktop + dev tools
       sudo pacman -S --needed --noconfirm \
         base-devel git curl wget \
-        zsh fontconfig \
+        zsh fontconfig fastfetch \
         sway waybar kitty wofi swaylock swayidle grim slurp \
         brightnessctl libpulse playerctl wireplumber swaync mako \
         chromium firefox \
@@ -52,7 +52,7 @@ install_system_deps() {
       sudo apt-get update
       sudo apt-get install -y \
         build-essential git curl wget \
-        zsh fontconfig \
+        zsh fontconfig fastfetch \
         sway waybar kitty wofi swaylock swayidle grim slurp \
         brightnessctl playerctl wireplumber pulseaudio-utils sway-notification-center mako \
         firefox chromium-browser \
@@ -136,13 +136,13 @@ install_tools() {
     echo -e "  \033[36m[INFO]\033[0m Installing Rust & Cargo build toolchain..."
     case "$pkg_mgr" in
       pacman)
-        sudo pacman -S --needed --noconfirm rust cargo alsa-lib libpulse dbus openssl pkgconf
+        sudo pacman -S --needed --noconfirm rust cargo alsa-lib libpulse dbus openssl pkgconf fastfetch
         ;;
       apt-get)
-        sudo apt-get install -y cargo rustc pkg-config libasound2-dev libpulse-dev libdbus-1-dev libssl-dev
+        sudo apt-get install -y cargo rustc pkg-config libasound2-dev libpulse-dev libdbus-1-dev libssl-dev fastfetch
         ;;
       dnf)
-        sudo dnf install -y cargo rust alsa-lib-devel pulseaudio-libs-devel dbus-devel openssl-devel pkgconf-pkg-config
+        sudo dnf install -y cargo rust alsa-lib-devel pulseaudio-libs-devel dbus-devel openssl-devel pkgconf-pkg-config fastfetch
         ;;
       *)
         if command -v curl &> /dev/null; then

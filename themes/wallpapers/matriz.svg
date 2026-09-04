@@ -1,0 +1,34 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+  <!-- Monolith Dark Canvas -->
+  <rect width="3840" height="2160" fill="#0F1117"/>
+
+  <!-- Geometric Grid & Wireframes -->
+  <g stroke="#1A1E27" stroke-width="3" fill="none">
+    <!-- Background Polyomino Shapes -->
+    <path d="M 600,400 h 200 v 200 h -200 z" />
+    <path d="M 800,400 h 200 v 400 h -200 z" />
+    <path d="M 2800,1200 h 300 v 300 h -150 v 150 h -150 z" />
+    <path d="M 1200,1400 h 400 v 200 h -200 v 200 h -200 z" />
+  </g>
+
+  <!-- Central Isometric Rubik's Cube Wireframe -->
+  <g transform="translate(1920, 1080)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer isometric hexagon -->
+    <polygon points="0,-260 225,-130 225,130 0,260 -225,130 -225,-130" stroke="#2B303C" stroke-width="4"/>
+
+    <!-- Y-axis center lines -->
+    <line x1="0" y1="0" x2="0" y2="260" stroke="#2B303C" stroke-width="4"/>
+    <line x1="0" y1="0" x2="225" y2="-130" stroke="#2B303C" stroke-width="4"/>
+    <line x1="0" y1="0" x2="-225" y2="-130" stroke="#2B303C" stroke-width="4"/>
+
+    <!-- Gold Accent Cuts (Axé Gold #EBB434) -->
+    <line x1="0" y1="86" x2="75" y2="43" stroke="#EBB434" stroke-width="3"/>
+    <line x1="0" y1="173" x2="150" y2="86" stroke="#EBB434" stroke-width="3"/>
+    <line x1="75" y1="217" x2="75" y2="-43" stroke="#EBB434" stroke-width="3"/>
+
+    <!-- Teal Accent Seams (Maré Teal #00D2D3) -->
+    <line x1="-75" y1="-43" x2="0" y2="-86" stroke="#00D2D3" stroke-width="3"/>
+    <line x1="-150" y1="86" x2="0" y2="173" stroke="#00D2D3" stroke-width="3"/>
+  </g>
+</svg>

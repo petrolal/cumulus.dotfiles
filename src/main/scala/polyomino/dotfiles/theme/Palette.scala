@@ -19,8 +19,8 @@ case class Palette(
 
 object Palette:
   val FallbackPalette: Palette = Palette(
-    name = "aws",
-    label = "AWS Cloud (dark)",
+    name = "matriz",
+    label = "Matriz Custom (dark)",
     base = "#071521",
     mantle = "#040d15",
     text = "#e0e6ed",
@@ -31,18 +31,17 @@ object Palette:
     blue = "#ff9900"
   )
 
-  def listAll(ctx: Context): Seq[String] =
+  def listAll(ctx: Context): Seq[String] = {
     val discovered = discoverConfFiles(ctx).keys.toSeq
-    if discovered.nonEmpty then discovered.sorted
-    else Seq("aws", "azure", "gcp", "oci")
+    val core = Seq("matriz", "encruza", "caravela", "aruanda")
+    (discovered ++ core).distinct.sorted
+  }
 
-  def find(name: String, ctx: Context): Palette =
+  def find(name: String, ctx: Context): Palette = {
     val lower = name.toLowerCase
     val confMap = discoverConfFiles(ctx)
-    if confMap.contains(lower) then
-      confMap(lower)
-    else
-      confMap.get(lower).orElse(confMap.get("aws")).getOrElse(FallbackPalette)
+    confMap.get(lower).getOrElse(FallbackPalette)
+  }
 
   private def discoverConfFiles(ctx: Context): Map[String, Palette] =
     var result = Map.empty[String, Palette]
@@ -69,7 +68,16 @@ object Palette:
         if !trimmed.startsWith("#") && trimmed.contains("=") then
           val parts = trimmed.split("=", 2)
           val k = parts(0).trim.toUpperCase
-          val v = parts(1).trim.stripPrefix("\"").stripSuffix("\"")
+          // Extract value between the first and last double quotes, ignore comments and stray characters
+          val raw = parts(1).trim
+          val firstQuote = raw.indexOf("\"")
+          val lastQuote = raw.lastIndexOf("\"")
+          val extracted = if (firstQuote >= 0 && lastQuote > firstQuote) {
+            raw.substring(firstQuote + 1, lastQuote)
+          } else {
+            raw.split("#", 2)(0).trim // fallback to raw before comment
+          }
+          val v = extracted.stripSuffix("\\") // remove trailing backslash if present
           kvMap += (k -> v)
 
       val name = kvMap.getOrElse("THEME_NAME", file.baseName)

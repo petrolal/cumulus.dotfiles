@@ -211,3 +211,47 @@ Implement the isometric wireframe Rubik's Cube ASCII graphic in `#EBB434`.
 
 ### Story 7.2: Configure custom fastfetch display fields
 Configure custom fastfetch display fields: `OS/Theme: Polyomino (Sway dotfiles)` and waypoint `Path: BSB -> LIS`.
+
+## Epic 8: Dynamic Multi-Theme Engine & Wallpaper Integration
+
+### Story 8.1: Central Token Injection Architecture
+- **Target files:** `~/.config/polyomino/theme.css` and `~/.config/sway/theme`
+- **Acceptance Criteria:**
+  - Waybar loads tokens via `@import "theme.css"`.
+  - Sway loads color variables via an included theme snippet.
+  - Changing the token file alters accents globally without touching layout rules.
+
+### Story 8.2: Theme Presets & Assets Definition
+- **Target files:** `themes/{matriz,encruza,caravela,aruanda}.conf` and corresponding wallpaper directory `assets/wallpapers/`.
+- **Acceptance Criteria:**
+  - Each preset specifies its primary accent, secondary accent, and matching wallpaper path.
+
+### Story 8.3: Theme Switcher CLI Script (`polyomino-theme`)
+- **Target file:** `scripts/polyomino-theme` (symlinked into `$PATH`).
+- **Acceptance Criteria:**
+  - Running `polyomino-theme set <theme_name>` updates the active token symlinks, triggers wallpaper change via `swaybg`/wallpaper daemon, reloads Waybar via `killall -SIGUSR2 waybar`, and executes `swaymsg reload` cleanly with zero flicker or broken borders.
+
+### Story 8.4: Visual Parity & Verification
+- **Acceptance Criteria:**
+  - Switching across all 4 themes preserves the ML4W detached floating‑pill layout, border radii (`12px`), and window gaps (`inner 8`, `outer 4`).
+
+---
+
+### Story 8.5: Decommission Legacy Theme Files, Cloud Palettes, and Assets
+- **Target areas:**
+  - Waybar legacy theme files in `~/.config/waybar/themes/`
+  - Sway legacy theme snippets in `~/.config/sway/themes/`
+  - Wallpaper assets `assets/wallpapers/cumulus*`, `assets/wallpapers/aws*`, `assets/wallpapers/oci*`, `assets/wallpapers/gcp*`
+  - Old switcher scripts referencing `cumulus`, `aws`, `oci`, `gcp`
+- **Tasks:**
+  1. **Audit:** Search repository for keywords `cumulus`, `aws`, `oci`, `gcp`, and hex tokens `#FF9900`, `#F80000`, `#C74634`, `#4285F4`.
+  2. **Removal:** Delete any matching files or directories.
+  3. **Sanitization:** Update default fallbacks in Waybar and Sway configs to reference the `matriz` preset.
+  4. **Script cleanup:** Remove switch‑case branches and script files that reference deprecated themes.
+- **Acceptance Criteria:**
+  - No occurrences of legacy theme names or cloud tokens remain in active configuration files.
+  - The `themes/` directory contains only `matriz.conf`, `encruza.conf`, `caravela.conf`, and `aruanda.conf`.
+  - `polyomino-theme set matriz` runs without missing file warnings.
+  - `git status` shows only deletions of legacy assets, with no dangling symlinks.
+
+---

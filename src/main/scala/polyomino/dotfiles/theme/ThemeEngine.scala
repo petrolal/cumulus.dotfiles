@@ -41,7 +41,7 @@ object ThemeEngine:
       val flavorOpt = os.read.lines(stateFile).find(_.startsWith("FLAVOR=")).map(_.stripPrefix("FLAVOR="))
       flavorOpt.map(f => Palette.find(f, ctx)).getOrElse(Palette.FallbackPalette)
     else
-      Palette.find("aws", ctx)
+      Palette.find("matriz", ctx)
 
   def applyTheme(
       ctx: Context,
@@ -74,6 +74,19 @@ object ThemeEngine:
          |""".stripMargin
     os.write.over(stateFile, stateContent)
     println(s"  \u001b[32m[OK]\u001b[0m Global theme state written -> $stateFile")
+    // 2a. Write token CSS file for external scripts (~/.config/polyomino/theme/tokens.css)
+    val tokensFile = stateDir / "tokens.css"
+    val tokensContent =
+      s"""@define-color base ${palette.base};
+@define-color mantle ${palette.mantle};
+@define-color text ${palette.text};
+@define-color accent ${palette.accent};
+@define-color red ${palette.red};
+@define-color green ${palette.green};
+@define-color yellow ${palette.yellow};
+@define-color blue ${palette.blue};"""
+    os.write.over(tokensFile, tokensContent)
+    println(s"  \u001b[32m[OK]\u001b[0m Token CSS written -> $tokensFile")
 
     // 2. Render Sway colors.conf (~/.config/sway/colors.conf)
     val swayDir = ctx.configDir / "sway"
@@ -133,10 +146,10 @@ object ThemeEngine:
     println(s"  \u001b[32m[OK]\u001b[0m Rendered Waybar theme -> $waybarThemeFile")
 
     val waybarStyleContent =
-      """@import "theme.css";
+      s"""@import "${ctx.configDir / "polyomino" / "theme" / "tokens.css"}";
         |
         |* {
-        |    font-family: "JetBrainsMono Nerd Font", sans-serif;
+        |    font-family: "JetBrains Mono", "Symbols Nerd Font", Iosevka, archcraft, sans-serif;
         |    font-size: 13px;
         |    min-height: 0;
         |    border: none;
@@ -147,6 +160,13 @@ object ThemeEngine:
         |window#waybar {
         |    background-color: @base;
         |    color: @text;
+        |    border-bottom: 2px solid @accent;
+        |    transition-property: background-color;
+        |    transition-duration: .5s;
+        |}
+        |
+        |window#waybar.hidden {
+        |   opacity: 0.5;
         |}
         |
         |tooltip {

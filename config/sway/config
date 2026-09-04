@@ -271,6 +271,11 @@ bindsym $mod+Shift+d exec wdisplays
 # Theme picker — wofi GUI to pick a cloud flavor + background mode
 # (flat color / wallpaper / rotate), front-end for polyomino-theme.
 bindsym $mod+Shift+t exec ~/.local/bin/polyomino-theme-picker
+bindsym $mod+F5 exec ~/.local/bin/polyomino-theme-cycle
+bindsym $mod+F1 exec polyomino-theme matriz
+bindsym $mod+F2 exec polyomino-theme encruza
+bindsym $mod+F3 exec polyomino-theme caravela
+bindsym $mod+F4 exec polyomino-theme aruanda
 
 # Lock screen, suspend, and shutdown
 # Note: lock is bound to $mod+Escape (not $mod+Shift+l — that collides with $mod+Shift+$right

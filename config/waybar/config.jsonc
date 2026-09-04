@@ -1,115 +1,28 @@
 // ~/.config/waybar/config.jsonc
-// Production Waybar layout — enterprise/dev workstation, no rice, tray-first for corporate apps.
+// Production Waybar layout — ML4W floating pill style.
 {
-    "layer": "top",
-    "position": "top",
-    "height": 32,
-    "spacing": 4,
-
-    "modules-left": ["sway/workspaces", "sway/mode"],
-    "modules-center": ["clock"],
-    "modules-right": [
-        "tray",
-        "network",
-        "bluetooth",
-        "pulseaudio",
-        "backlight",
-        "battery",
-        "custom/notification"
-    ],
-
-    "sway/workspaces": {
-        "disable-scroll": false,
-        "all-outputs": true,
-        "format": "{name}"
-    },
-
-    "sway/mode": {
-        "format": "<span style=\"italic\">{}</span>"
-    },
-
-    "clock": {
-        "tooltip": false,
-        "format": "{:%a %d %b  %H:%M}",
-        "on-click": "polyomino calendar",
-        "on-click-right": "swaync-client -d -sw 2>/dev/null || true"
-    },
-
-    // The system tray hosts NetworkManager applet (Wi-Fi + VPN state) and 1Password's tray icon.
-    // Both register themselves automatically via the StatusNotifierItem protocol — no per-app
-    // Waybar config is required beyond enabling this module.
-    "tray": {
-        "icon-size": 16,
-        "spacing": 8
-    },
-
-    "network": {
-        "format-wifi": "󰖩 {essid} ({signalStrength}%)",
-        "format-ethernet": "󰈀 {ifname}",
-        "format-disconnected": "󰖪 disconnected",
-        "format-linked": "󰈁 {ifname} (no IP)",
-        "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
-        "on-click": "kitty -e impala"
-    },
-
-    "bluetooth": {
-        "format": "󰂯 {status}",
-        "format-connected": "󰂱 {device_alias}",
-        "format-disabled": "󰂲",
-        "tooltip-format": "{controller_alias}: {status}",
-        "on-click": "kitty -e bluetui"
-    },
-
-    "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "󰖏 muted",
-        "format-icons": {
-            "default": ["󰕿", "󰖀", "󰕾"]
-        },
-        "scroll-step": 5,
-        "on-click": "kitty -e ncpamixer",
-        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-    },
-
-    "backlight": {
-        "format": "{icon} {percent}%",
-        "format-icons": ["󰃞", "󰃟", "󰃠"],
-        "on-scroll-up": "brightnessctl set +5%",
-        "on-scroll-down": "brightnessctl set 5%-"
-    },
-
-    // Remove this block entirely on desktop hardware with no battery (Waybar errors if the
-    // module is enabled with zero batteries detected). Kept here since laptops are the common case.
-    "battery": {
-        "states": {
-            "warning": 30,
-            "critical": 15
-        },
-        "format": "{icon} {capacity}%",
-        "format-charging": "󰂄 {capacity}%",
-        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
-    },
-
-    // Bridges Waybar to SwayNC (notification center): click to open the notification panel,
-    // badge shows unread count / DND state.
-    "custom/notification": {
-        "tooltip": false,
-        "format": "{icon}",
-        "format-icons": {
-            "notification": "󰂚<span foreground='#f38ba8'><sup>●</sup></span>",
-            "none": "󰂚",
-            "dnd-notification": "󰂛<span foreground='#f38ba8'><sup>●</sup></span>",
-            "dnd-none": "󰂛",
-            "inhibited-notification": "󰂚<span foreground='#f38ba8'><sup>●</sup></span>",
-            "inhibited-none": "󰂚",
-            "dnd-inhibited-notification": "󰂛<span foreground='#f38ba8'><sup>●</sup></span>",
-            "dnd-inhibited-none": "󰂛"
-        },
-        "return-type": "json",
-        "exec-if": "which swaync-client >/dev/null 2>&1 && pgrep -x swaync >/dev/null 2>&1",
-        "exec": "swaync-client -swb",
-        "on-click": "swaync-client -t -sw",
-        "on-click-right": "swaync-client -d -sw",
-        "escape": true
-    }
+	"include": "~/.config/waybar/modules.jsonc",
+	"layer": "top",
+	"position": "top",
+	"height": 32,
+	"spacing": 4,
+	"margin-top": 0,
+	"margin-left": 0,
+	"margin-right": 0,
+	"modules-left": [
+		"sway/workspaces",
+		"custom/spotify"
+	],
+	"modules-center": [
+		"sway/mode",
+		"sway/window"
+	],
+	"modules-right": [
+		"pulseaudio",
+		"bluetooth",
+		"network",
+		"battery",
+		"clock",
+		"tray"
+	]
 }

@@ -12,6 +12,13 @@
 window#waybar {
     background-color: @@BASE@@;
     color: @@TEXT@@;
+    border-bottom: 2px solid @@BASE@@;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+window#waybar.hidden {
+    opacity: 0.5;
 }
 
 tooltip {

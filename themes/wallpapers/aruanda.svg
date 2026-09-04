@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+  <!-- Deep Midnight Forest Canvas -->
+  <rect width="3840" height="2160" fill="#0B120F"/>
+
+  <!-- Background Canopy & Geometric Contour Lines -->
+  <g stroke="#14261C" stroke-width="1.5" fill="none">
+    <polygon points="1920,380 2520,780 2520,1380 1920,1780 1320,1380 1320,780"/>
+    <line x1="0" y1="1080" x2="3840" y2="1080" stroke-dasharray="10,14"/>
+    <line x1="1920" y1="0" x2="1920" y2="2160" stroke-dasharray="10,14"/>
+  </g>
+
+  <!-- Sacred Geometry: Branching Arrows & Solar Core -->
+  <g transform="translate(1920, 1080)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer Shield / Hexagonal Framing -->
+    <polygon points="0,-320 277,-160 277,160 0,320 -277,160 -277,-160" stroke="#1D3627" stroke-width="2"/>
+
+    <!-- Concentric Foliage Guidance Rings -->
+    <circle r="220" stroke="#172B1F" stroke-width="2"/>
+    <circle r="140" stroke="#172B1F" stroke-width="1.5" stroke-dasharray="6,8"/>
+
+    <!-- Mata Green Foliage Vectors (#10AC84) - Sacred Bow & Growth -->
+    <path d="M 0,260 L 0,-240" stroke="#10AC84" stroke-width="3"/>
+    <path d="M -90,-150 L 0,-240 L 90,-150" stroke="#10AC84" stroke-width="3"/>
+    <path d="M -60,-70 L 0,-130 L 60,-70" stroke="#10AC84" stroke-width="2.5"/>
+    <path d="M -40,0 L 0,-40 L 40,0" stroke="#10AC84" stroke-width="2"/>
+
+    <!-- Warm Amber Sunlight Nodes (#F5CD79) -->
+    <!-- Solar Core -->
+    <circle cx="0" cy="-240" r="6" fill="#F5CD79"/>
+    <circle cx="0" cy="0" r="8" stroke="#F5CD79" stroke-width="2" fill="#0B120F"/>
+    <circle cx="0" cy="0" r="3" fill="#F5CD79"/>
+
+    <!-- Accent Solar Rays -->
+    <line x1="-160" y1="-90" x2="-90" y2="-50" stroke="#F5CD79" stroke-width="2"/>
+    <line x1="160" y1="-90" x2="90" y2="-50" stroke="#F5CD79" stroke-width="2"/>
+    <circle cx="-160" cy="-90" r="4" fill="#F5CD79"/>
+    <circle cx="160" cy="-90" r="4" fill="#F5CD79"/>
+
+    <!-- Base Root Anchor -->
+    <path d="M -70,200 L 0,260 L 70,200" stroke="#1D3627" stroke-width="2"/>
+  </g>
+</svg>

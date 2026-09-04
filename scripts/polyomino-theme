@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Polyomino theme switcher script
+# Usage: polyomino-theme <theme>
+# Valid themes: matriz, encruza, caravela, aruanda
+
+CONFIG_DIR="${HOME}/.config/polyomino/theme"
+STATE_FILE="${CONFIG_DIR}/state"
+TOKENS_FILE="${CONFIG_DIR}/tokens.css"
+
+VALID_THEMES=("matriz" "encruza" "caravela" "aruanda")
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: polyomino-theme <theme>"
+  exit 1
+fi
+
+theme="$1"
+
+# Validate theme
+if [[ ! " ${VALID_THEMES[@]} " =~ " ${theme} " ]]; then
+  echo "Invalid theme: ${theme}"
+  echo "Valid themes: ${VALID_THEMES[*]}"
+  exit 1
+fi
+
+# Apply theme using existing polyomino CLI (delegates to ThemeEngine)
+polyomino theme "${theme}"
+
+# Reload Waybar (SIGUSR2 forces a reload)
+if command -v killall >/dev/null 2>&1; then
+  killall -SIGUSR2 waybar || true
+fi
+
+# Reload Sway configuration
+if command -v swaymsg >/dev/null 2>&1; then
+  swaymsg reload >/dev/null 2>&1 || true
+fi
+
+# Apply wallpaper if defined in state file
+if [[ -f "${STATE_FILE}" ]]; then
+  wallpaper=$(grep '^WALLPAPER=' "${STATE_FILE}" | cut -d= -f2-)
+  if [[ -n "$wallpaper" && -f "$wallpaper" ]]; then
+    swaymsg "output * bg \"$wallpaper\" fill" >/dev/null 2>&1 || true
+  fi
+fi
+
+echo "Theme switched to ${theme}"

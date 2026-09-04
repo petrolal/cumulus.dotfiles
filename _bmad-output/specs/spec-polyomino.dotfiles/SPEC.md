@@ -26,8 +26,8 @@ A vision to realize. The author requires a universally reproducible, enterprise-
   - **intent:** The system isolates enterprise secrets by loading them exclusively from a local, unversioned file (`~/.polyomino.local.zsh`).
   - **success:** Attempting to commit local API keys or loading them globally without the local zsh file is prevented by the configuration pipeline.
 - **CAP-4**
-  - **intent:** The system applies a unified, cloud-native "Polyomino" aesthetic (e.g., AWS, Azure, GCP themes) across the window manager, status bar, and terminal.
-  - **success:** Running `polyomino theme aws` instantly updates Waybar, Sway, and Wofi to the AWS color palette.
+  - **intent:** The system applies a unified, themed "Polyomino" aesthetic (e.g. Matriz, Encruza, Caravela, Aruanda) across the window manager, status bar, and terminal.
+  - **success:** Running `polyomino theme Matriz` instantly updates Waybar, Sway, and Wofi to the Matriz color palette.
 - **CAP-5**
   - **intent:** The system provisions out-of-the-box readiness for Java, Kotlin, and Spring Boot backend development.
   - **success:** `sdkman`, Java, and Kotlin compilers are correctly configured in the `PATH` after installation.
