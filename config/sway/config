@@ -1,7 +1,7 @@
 ### ~/.config/sway/config
 ### Production Sway configuration — Ubuntu 24.04, enterprise/dev workstation.
-### Style: plain, native Sway defaults + Catppuccin Mocha colors. No animations,
-### no SwayFX, no experimental compositors. ML4W-inspired keybindings.
+### Style: native Sway defaults + Catppuccin Mocha colors, running on SwayFX for
+### rounded corners/blur/shadows. ML4W-inspired keybindings.
 ###
 ### Reload after edits with: SUPER+SHIFT+C  (or `swaymsg reload`)
 
@@ -59,7 +59,8 @@ exec 1password --silent
 exec swayidle -w timeout 300 '~/.local/bin/polyomino-rubik-lock' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"'
 
 # Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
-exec_always ~/.local/bin/polyomino-autotiling
+# pkill guard prevents a leaked duplicate `swaymsg subscribe` process on every reload.
+exec_always pkill -f polyomino-autotiling; ~/.local/bin/polyomino-autotiling
 
 # Set FastFetch logo 
 exec_always --no-startup-id ~/.config/fastfetch/set_logo.sh
@@ -123,6 +124,8 @@ default_floating_border pixel 2
 gaps inner 10
 gaps outer 0
 smart_borders on
+focus_follows_mouse no
+workspace_auto_back_and_forth yes
 
 # SwayFX eye-candy (rounded corners, blur, shadows)
 corner_radius 10
@@ -165,6 +168,11 @@ assign [class="jetbrains-idea-ce"] $ws2
 assign [app_id="code"] $ws2
 assign [class="Code"] $ws2
 
+# 7: infra — terminal windows explicitly titled for VPN/infra work land here; must be assigned
+# before the generic kitty rule below, since sway's `assign` uses first-match-wins and a later,
+# more specific rule for the same app_id would otherwise never fire.
+assign [app_id="kitty" title="infra"] $ws7
+
 # 3: term
 assign [app_id="kitty"] $ws3
 
@@ -184,10 +192,9 @@ assign [class="aerc"] $ws5
 assign [app_id="obsidian"] $ws6
 assign [class="obsidian"] $ws6
 
-# 7: infra — terminal windows explicitly titled for VPN/infra work land here;
-# general infra CLI (openvpn3, kubectl, etc.) is run inside kitty terminals you move manually
-# with SUPER+SHIFT+7, since CLI tools have no window of their own to match on.
-assign [app_id="kitty" title="infra"] $ws7
+# general infra CLI (openvpn3, kubectl, etc.) runs inside kitty terminals titled "infra"
+# (assigned to ws7 above, before the generic kitty rule); move others manually with
+# SUPER+SHIFT+7, since CLI tools have no window of their own to match on.
 
 # 8: misc
 assign [app_id="telegramdesktop"] $ws8
@@ -210,6 +217,7 @@ bindsym $mod+Shift+a exec $term -e aerc
 bindsym $mod+Shift+n exec swaync-client -t -sw
 floating_modifier $mod normal
 bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
 # Moving around
