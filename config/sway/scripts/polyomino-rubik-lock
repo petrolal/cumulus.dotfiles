@@ -419,11 +419,22 @@ class RubikEngine:
         threading.Thread(target=worker, daemon=True).start()
 
     def update(self, dt):
-        # Checking feedback: Gyroscopic calculation spin
+        # Checking feedback: cube shuffles itself (a rapid run of random
+        # slice turns) rather than the whole cube spinning on the camera.
+        # Camera eases back to its resting isometric angle like the idle
+        # state, so the shuffle turns are the only motion reading as "busy".
         if self.is_checking:
             self.checking_time += dt
-            self.yaw += dt * 3.5
-            self.pitch = self.base_pitch + math.sin(self.checking_time * 6.0) * math.radians(5)
+            self.pitch += (self.base_pitch - self.pitch) * min(1.0, dt * 6.0)
+            diff = (self.base_yaw - self.yaw + math.pi) % (2 * math.pi) - math.pi
+            self.yaw += diff * min(1.0, dt * 5.0)
+            # Keep feeding the queue a fresh random turn whenever it runs dry,
+            # so the shuffle continues for however long auth actually takes.
+            if self.active_turn is None and not self.turn_queue:
+                slices = ['U', 'D', 'L', 'R', 'F', 'B']
+                s = random.choice(slices)
+                cw = random.choice([True, False])
+                self.active_turn = ActiveSliceTurn(s, cw, duration=0.12)
         else:
             if self.checking_time > 0.0:
                 self.checking_time = 0.0
