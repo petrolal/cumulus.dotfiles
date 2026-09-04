@@ -65,7 +65,10 @@ exec swayidle -w timeout 300 '~/.local/bin/polyomino-rubik-lock' timeout 600 'sw
 
 # Fibonacci spiral autotiling — splits focused window along its longer axis automatically.
 # pkill guard prevents a leaked duplicate `swaymsg subscribe` process on every reload.
-exec_always pkill -f polyomino-autotiling; ~/.local/bin/polyomino-autotiling
+# Pattern is anchored to the absolute path so it matches only the daemon process itself,
+# not the `sh -c '...polyomino-autotiling'` wrapper this exec_always line runs in
+# (an unanchored pattern would match that wrapper's own command line and kill it first).
+exec_always pkill -f "^$HOME/.local/bin/polyomino-autotiling"; ~/.local/bin/polyomino-autotiling
 
 # Set FastFetch logo 
 exec_always --no-startup-id ~/.config/fastfetch/set_logo.sh

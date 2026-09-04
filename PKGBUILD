@@ -39,7 +39,7 @@ optdepends=(
   'alacritty: for terminal screenshot region selection'
   'termite: alternative terminal for screenshot'
 )
-source=("git+https://github.com/petrolal/${pkgname}.git")
+source=("git+https://github.com/petrolal/polyomino.dotfiles.git")
 sha256sums=('SKIP')
 
 build() {

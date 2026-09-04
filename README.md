@@ -66,10 +66,10 @@ This file is automatically sourced by `zsh/zsh_config/40-environment.zsh` if it 
 # Stage 1: Bootstrap (install Java & Coursier)
 bash <(curl -fsSL https://raw.githubusercontent.com/petrolal/polyomino.dotfiles/master/bootstrap.sh)
 
-# Stage 2: Install polyomino binary from Maven Central
-cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
+# Stage 2: Install polyomino binary from Maven Central (resolves the latest release)
+cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino
 
-# Stage 3: Run installer (full setup: symlinks, Homebrew, GitHub CLI, Coursier, Desktop Apps)
+# Stage 3: Run installer (auto-clones this repo if needed, then full setup: symlinks, Homebrew, GitHub CLI, Coursier, Desktop Apps)
 polyomino install
 ```
 
@@ -82,8 +82,8 @@ cd ~/polyomino.dotfiles
 # Stage 1: Bootstrap
 ./bootstrap.sh
 
-# Stage 2: Install polyomino from Maven Central
-cs bootstrap io.github.petrolal::polyomino:0.1.0 -o ~/.local/bin/polyomino
+# Stage 2: Install polyomino from Maven Central (resolves the latest release)
+cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino
 
 # Stage 3: Full setup
 polyomino install

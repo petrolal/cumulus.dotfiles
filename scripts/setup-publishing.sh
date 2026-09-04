@@ -4,7 +4,7 @@
 set -euo pipefail
 
 echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║  polyomino-dotfiles Publishing Setup                            ║"
+echo "║  polyomino.dotfiles Publishing Setup                            ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo
 
@@ -43,8 +43,8 @@ read -p "Do you want to setup Maven Central publishing? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "Follow these steps:"
-  echo "  1. Create Sonatype account: https://issues.sonatype.org/"
-  echo "  2. Create ticket requesting rights for 'com.github.petrolal'"
+  echo "  1. Create a Central Portal account: https://central.sonatype.com/"
+  echo "  2. Verify the 'io.github.petrolal' namespace (via a GitHub-linked token or a DNS TXT record)"
   echo "  3. Generate GPG key:"
   echo "     gpg --full-generate-key"
   echo "  4. Upload public key:"
@@ -55,12 +55,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   read -p "Press Enter after completing these steps..."
   echo
   read -p "Enter your GPG Key ID: " GPG_KEY_ID
-  read -p "Enter your Sonatype username: " SONATYPE_USER
-  read -sp "Enter your Sonatype password: " SONATYPE_PASS
+  read -p "Enter your Central Portal token username: " SONATYPE_USER
+  read -sp "Enter your Central Portal token password: " SONATYPE_PASS
   echo
   echo
   echo "To add secrets to GitHub:"
-  echo "  1. Go to: https://github.com/petrolal/polyomino-dotfiles/settings/secrets/actions"
+  echo "  1. Go to: https://github.com/petrolal/polyomino.dotfiles/settings/secrets/actions"
   echo "  2. Add these secrets:"
   echo "     - SONATYPE_USERNAME: $SONATYPE_USER"
   echo "     - SONATYPE_PASSWORD: (paste your password)"
@@ -87,7 +87,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo
   echo
   echo "To add secrets to GitHub:"
-  echo "  1. Go to: https://github.com/petrolal/polyomino-dotfiles/settings/secrets/actions"
+  echo "  1. Go to: https://github.com/petrolal/polyomino.dotfiles/settings/secrets/actions"
   echo "  2. Add these secrets:"
   echo "     - AUR_SSH_PRIVATE_KEY: (paste your AUR SSH private key)"
   echo "     - MAINTAINER_EMAIL: $MAINTAINER_EMAIL"
@@ -126,6 +126,6 @@ echo "  2. Update version in build.sbt"
 echo "  3. Create and push a version tag:"
 echo "     git tag -a v0.1.0 -m 'Release version 0.1.0'"
 echo "     git push origin --tags"
-echo "  4. Watch the CI/CD pipeline: https://github.com/petrolal/polyomino-dotfiles/actions"
+echo "  4. Watch the CI/CD pipeline: https://github.com/petrolal/polyomino.dotfiles/actions"
 echo
 echo "For detailed instructions, see: PUBLISHING.md"

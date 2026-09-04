@@ -5,6 +5,31 @@ import polyomino.dotfiles.error.{CommandError, PolyominoError}
 import upickle.default._
 
 object DeployInstaller:
+  val DotfilesRepoUrl: String = "https://github.com/petrolal/polyomino.dotfiles.git"
+
+  // Guarantees `cs bootstrap io.github.petrolal::polyomino -o ~/.local/bin/polyomino`
+  // followed by `polyomino install` works with no prior manual `git clone` step:
+  // if ctx.dotfilesDir isn't already a checkout, fetch it before wiring symlinks.
+  def ensureDotfilesRepo(ctx: Context): Either[PolyominoError, Unit] =
+    if os.exists(ctx.dotfilesDir / "config") && os.exists(ctx.dotfilesDir / "zsh") then
+      Right(())
+    else if os.exists(ctx.dotfilesDir) then
+      Left(CommandError(
+        s"${ctx.dotfilesDir} exists but doesn't look like a polyomino.dotfiles checkout " +
+        s"(missing config/ or zsh/). Remove it or set POLYOMINO_DOTFILES_DIR to the correct path."
+      ))
+    else
+      println(s"[1;36m[polyomino install][0m No dotfiles checkout found at ${ctx.dotfilesDir} - cloning $DotfilesRepoUrl...")
+      try
+        val res = os.proc("git", "clone", DotfilesRepoUrl, ctx.dotfilesDir.toString).call(check = false)
+        if res.exitCode == 0 then
+          println(s"  [32m[OK][0m Cloned dotfiles to ${ctx.dotfilesDir}")
+          Right(())
+        else
+          Left(CommandError(s"git clone of $DotfilesRepoUrl failed with exit code ${res.exitCode}", res.exitCode))
+      catch
+        case e: Exception => Left(CommandError(s"Failed to clone dotfiles repo: ${e.getMessage}"))
+
   val Subcommands: Seq[String] = Seq(
     "theme", "runtime-refresh", "os-colorscheme", "lock", "idle",
     "screenshot", "draw-window", "sway-draw-window", "calendar", "autotiling", "healthcheck", "backup", "restore", "update", "notify-config",
@@ -16,6 +41,12 @@ object DeployInstaller:
 
   def run(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     println("[1;32m[polyomino install][0m Deploying polyomino.dotfiles configurations & symlinks...")
+
+    ensureDotfilesRepo(ctx) match
+      case Left(err) => Left(err)
+      case Right(_) => runDeploy(ctx, args)
+
+  private def runDeploy(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     val binDir = ctx.home / ".local" / "bin"
     os.makeDir.all(binDir)
 

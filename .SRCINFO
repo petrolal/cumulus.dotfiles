@@ -31,7 +31,7 @@ pkgbase = polyomino-dotfiles
 	depends = zsh
 	optdepends = alacritty: for terminal screenshot region selection
 	optdepends = termite: alternative terminal for screenshot
-	source = git+https://github.com/petrolal/polyomino-dotfiles.git
+	source = git+https://github.com/petrolal/polyomino.dotfiles.git
 	sha256sums = SKIP
 
 pkgname = polyomino-dotfiles
