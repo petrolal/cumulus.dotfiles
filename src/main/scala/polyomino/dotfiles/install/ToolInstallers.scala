@@ -392,40 +392,58 @@ object ToolInstallers:
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Node.js environment provisioned."))
 
   private def installYazi(ctx: Context): Either[PolyominoError, Unit] =
-    println(s"\u001b[1;36m[polyomino install-yazi]\u001b[0m Installing yazi file manager (latest) & plugins...")
+    println(s"\u001b[1;36m[polyomino install-yazi]\u001b[0m Installing yazi file manager & plugins...")
     val cargoHomeBin = ctx.home / ".cargo" / "bin"
     def cargoAvailable(): Boolean =
       isAvailable("cargo") || os.exists(cargoHomeBin / "cargo")
 
-    if !cargoAvailable() then
-      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping yazi installation.")
-      Right(())
+    val pm = detectPackageManager()
+    val isYaziInstalled = isAvailable("yazi") || os.exists(cargoHomeBin / "yazi")
+
+    if !isYaziInstalled then
+      val installedViaPm = pm match
+        case PackageManager.Pacman =>
+          runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "yazi")).isRight
+        case PackageManager.Brew =>
+          runPkgInstall("brew", Seq("install", "yazi")).isRight
+        case _ => false
+
+      if !installedViaPm && cargoAvailable() then
+        val cargoExe = if isAvailable("cargo") then "cargo" else (cargoHomeBin / "cargo").toString
+        try
+          // Yazi on crates.io requires yazi-build meta-package
+          val res = os.proc(cargoExe, "install", "--force", "yazi-build").call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
+          if res.exitCode == 0 then
+            println(s"  \u001b[32m[OK]\u001b[0m yazi installed successfully via cargo.")
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m yazi cargo install exited with code ${res.exitCode}")
+        catch
+          case e: Exception =>
+            println(s"  \u001b[33m[NOTE]\u001b[0m yazi cargo installation skipped: ${e.getMessage}")
     else
-      val cargoExe = if isAvailable("cargo") then "cargo" else (cargoHomeBin / "cargo").toString
-      try
-        // Always install latest from cargo
-        val res = os.proc(cargoExe, "install", "--locked", "yazi-fm", "yazi-cli").call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
-        if res.exitCode == 0 then
-          println(s"  \u001b[32m[OK]\u001b[0m yazi installed successfully.")
-          
-          // Install requested plugins
-          val yaExe = if isAvailable("ya") then "ya" else (cargoHomeBin / "ya").toString
-          val plugins = Seq("yazi-rs/plugins:git", "yazi-rs/plugins:full-border", "yazi-rs/plugins:starship", "yazi-rs/plugins:mount")
-          for plugin <- plugins do
-            val pluginRes = os.proc(yaExe, "pack", "-a", plugin).call(stdin = os.Inherit, stdout = os.Inherit, stderr = os.Inherit, check = false)
-            if pluginRes.exitCode == 0 then
-              println(s"  \u001b[32m[OK]\u001b[0m Installed plugin: $plugin")
-            else
-              println(s"  \u001b[33m[NOTE]\u001b[0m Failed to install plugin: $plugin (code ${pluginRes.exitCode})")
-              
-          Right(())
+      println(s"  \u001b[32m[OK]\u001b[0m yazi is already installed.")
+
+    // Install requested plugins
+    val yaExe = if isAvailable("ya") then "ya" else (cargoHomeBin / "ya").toString
+    if isAvailable("ya") || os.exists(cargoHomeBin / "ya") then
+      val plugins = Seq("yazi-rs/plugins:git", "yazi-rs/plugins:full-border", "Rolv-Apneseth/starship", "yazi-rs/plugins:mount")
+      for plugin <- plugins do
+        // Try modern `ya pkg add` first, fallback to legacy `ya pack -a`
+        val pkgRes = os.proc(yaExe, "pkg", "add", plugin).call(stdin = os.Inherit, stdout = os.Pipe, stderr = os.Pipe, check = false)
+        val combinedOut = (pkgRes.out.text() + " " + pkgRes.err.text()).toLowerCase
+        if pkgRes.exitCode == 0 || combinedOut.contains("already exists") then
+          println(s"  \u001b[32m[OK]\u001b[0m Plugin ready: $plugin")
         else
-          println(s"  \u001b[33m[NOTE]\u001b[0m yazi cargo install exited with code ${res.exitCode}")
-          Right(())
-      catch
-        case e: Exception =>
-          println(s"  \u001b[33m[NOTE]\u001b[0m yazi installation skipped: ${e.getMessage}")
-          Right(())
+          val packRes = os.proc(yaExe, "pack", "-a", plugin).call(stdin = os.Inherit, stdout = os.Pipe, stderr = os.Pipe, check = false)
+          val packOut = (packRes.out.text() + " " + packRes.err.text()).toLowerCase
+          if packRes.exitCode == 0 || packOut.contains("already exists") then
+            println(s"  \u001b[32m[OK]\u001b[0m Plugin ready: $plugin")
+          else
+            println(s"  \u001b[33m[NOTE]\u001b[0m Failed to install plugin: $plugin (code ${pkgRes.exitCode})")
+
+      os.proc(yaExe, "pkg", "install").call(stdin = os.Inherit, stdout = os.Pipe, stderr = os.Pipe, check = false)
+
+    Right(())
 
   private def installFastfetch(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
