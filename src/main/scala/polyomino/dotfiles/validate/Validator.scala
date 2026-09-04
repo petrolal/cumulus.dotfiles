@@ -37,7 +37,7 @@ object Validator:
     val requiredTools = Seq(
       "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp",
       "pactl", "brightnessctl", "gsettings", "git", "tar", "curl", "unzip",
-      "fc-cache", "which", "zsh"
+      "fc-cache", "which", "zsh", "fastfetch"
     )
 
     for tool <- requiredTools do
@@ -64,7 +64,8 @@ object Validator:
       ctx.configDir / "kitty",
       ctx.configDir / "waybar",
       ctx.configDir / "wofi",
-      ctx.configDir / "rofi"
+      ctx.configDir / "rofi",
+      ctx.configDir / "fastfetch"
     )
 
     for path <- requiredPaths do

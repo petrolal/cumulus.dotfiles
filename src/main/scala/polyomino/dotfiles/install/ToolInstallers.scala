@@ -31,6 +31,7 @@ object ToolInstallers:
       case "install-telegram" => installTelegram(ctx)
       case "install-node" | "install-npm" | "install-npx" => installNode(ctx)
       case "install-yazi" => installYazi(ctx)
+      case "install-fastfetch" => installFastfetch(ctx)
       case "full-install" => installAll(ctx)
       case _ => Left(CommandError(s"Unknown installer task '$name'", 1))
 
@@ -39,13 +40,13 @@ object ToolInstallers:
     println(s"\u001b[1;36m[polyomino install-deps]\u001b[0m Installing system & build dependencies (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sbt", "jdk-openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sbt", "jdk-openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which", "fastfetch"))
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "gcc", "gcc-c++", "java-latest-openjdk-devel", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "gcc", "gcc-c++", "java-latest-openjdk-devel", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "which", "fastfetch"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "build-essential", "default-jdk", "git", "curl", "fontconfig", "zsh", "tar", "unzip"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "build-essential", "default-jdk", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "fastfetch"))
       case PackageManager.Brew =>
-        runPkgInstall("brew", Seq("install", "openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip"))
+        runPkgInstall("brew", Seq("install", "openjdk", "gcc", "git", "curl", "fontconfig", "zsh", "tar", "unzip", "fastfetch"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package dependency installation recommended for current OS."))
 
@@ -65,12 +66,14 @@ object ToolInstallers:
     println(s"\u001b[1;36m[polyomino install-apps]\u001b[0m Installing core desktop apps (PM: $pm)...")
     pm match
       case PackageManager.Pacman =>
-        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim"))
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "libpulse", "playerctl", "wireplumber", "ttf-jetbrains-mono-nerd", "swaync", "mako", "cmake", "ncurses", "neovim", "fastfetch"))
         if isAvailable("yay") then runPkgInstall("yay", Seq("-S", "--needed", "--noconfirm", "--answerclean", "None", "--answerdiff", "None", "ncpamixer", "onlyoffice-bin")) else Right(())
       case PackageManager.Dnf =>
-        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors"))
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch"))
       case PackageManager.Apt =>
-        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors"))
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "sway", "waybar", "kitty", "wofi", "swaylock", "swayidle", "grim", "slurp", "brightnessctl", "playerctl", "wireplumber", "pulseaudio-utils", "fonts-jetbrains-mono", "sway-notification-center", "mako", "neovim", "onlyoffice-desktopeditors", "fastfetch"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "fastfetch"))
       case _ =>
         Right(println("  \u001b[33m[NOTE]\u001b[0m Manual package installation recommended for current OS."))
 
@@ -296,7 +299,7 @@ object ToolInstallers:
 
   private def installTools(ctx: Context): Either[PolyominoError, Unit] =
     val pm = detectPackageManager()
-    println(s"\u001b[1;36m[polyomino install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, impala, kalker, aerc)...")
+    println(s"\u001b[1;36m[polyomino install-tools]\u001b[0m Installing TUI tools (spotify_player, bluetui, impala, aerc)...")
 
     val cargoHomeBin = ctx.home / ".cargo" / "bin"
     def cargoAvailable(): Boolean =
@@ -352,16 +355,7 @@ object ToolInstallers:
     else
       println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping impala installation.")
 
-    // 3. kalker Calculator TUI (cargo / pacman)
-    if pm == PackageManager.Pacman then
-      runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "kalker"))
-    else if cargoAvailable() then
-      println("  \u001b[36m[INFO]\u001b[0m Installing/Updating kalker calculator via cargo...")
-      runCargo("kalker")
-    else
-      println("  \u001b[33m[NOTE]\u001b[0m cargo not available; skipping kalker installation.")
-
-    // 4. aerc Email Client TUI (package manager)
+    // 3. aerc Email Client TUI (package manager)
     println("  \u001b[36m[INFO]\u001b[0m Installing/Updating aerc email client...")
     pm match
       case PackageManager.Pacman => runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "aerc"))
@@ -433,6 +427,21 @@ object ToolInstallers:
           println(s"  \u001b[33m[NOTE]\u001b[0m yazi installation skipped: ${e.getMessage}")
           Right(())
 
+  private def installFastfetch(ctx: Context): Either[PolyominoError, Unit] =
+    val pm = detectPackageManager()
+    println(s"\u001b[1;36m[polyomino install-fastfetch]\u001b[0m Checking/Installing Fastfetch (PM: $pm)...")
+    pm match
+      case PackageManager.Pacman =>
+        runPkgInstall("sudo", Seq("pacman", "-S", "--needed", "--noconfirm", "fastfetch"))
+      case PackageManager.Dnf =>
+        runPkgInstall("sudo", Seq("dnf", "install", "-y", "fastfetch"))
+      case PackageManager.Apt =>
+        runPkgInstall("sudo", Seq("apt-get", "install", "-y", "fastfetch"))
+      case PackageManager.Brew =>
+        runPkgInstall("brew", Seq("install", "fastfetch"))
+      case _ =>
+        Right(println("  \u001b[33m[NOTE]\u001b[0m Manual installation of fastfetch required for current OS."))
+
   private def installAll(ctx: Context): Either[PolyominoError, Unit] =
     println("\u001b[1;36m[polyomino full-install]\u001b[0m Installing all system dependencies, desktop apps, fonts, and tooling...")
     for
@@ -441,6 +450,7 @@ object ToolInstallers:
       _ <- installGh(ctx)
       _ <- installCoursier(ctx)
       _ <- installApps(ctx)
+      _ <- installFastfetch(ctx)
       _ <- installSwaync(ctx)
       _ <- installFonts(ctx)
       _ <- installBrowser(ctx)

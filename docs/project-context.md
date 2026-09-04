@@ -190,7 +190,7 @@ polyomino.dotfiles/
 | `polyomino install-devops` | Install devops tooling (docker, terraform, kubectl) |
 | `polyomino install-zsh` | Install zsh + oh-my-zsh + plugins, set shell |
 | `polyomino install-sdkman` | Install SDKMAN! and JVM tooling |
-| `polyomino install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
+| `polyomino install-tools` | Install TUI tools (spotify_player, bluetui, aerc) |
 
 ### Desktop Management
 | Command | Purpose |

@@ -181,7 +181,6 @@ object WofiPickers:
       case a if a.contains("polyomino screenshot region") => "Screenshot region selection"
       case a if a.contains("polyomino screenshot window") => "Screenshot active window"
       case a if a.contains("swaync-client -t -sw") => "Toggle notification center"
-      case a if a.contains("kitty -e kalker") => "Calculator (kalker)"
       case a if a.contains("kitty -e yazi") => "File manager (yazi)"
       case a if a.contains("kitty -e spotify_player") => "Spotify player TUI"
       case a if a.contains("kitty -e bluetui") => "Bluetooth manager (bluetui)"
@@ -216,7 +215,6 @@ object WofiPickers:
   val defaultKeybindings: Seq[String] = Seq(
     "Mod4+Return              → Open Kitty terminal",
     "Mod4+d                   → Application launcher",
-    "Mod4+c                   → Calculator (kalker)",
     "Mod4+Shift+q             → Close focused window",
     "Mod4+Shift+e             → Exit Sway dialog",
     "Mod4+f                   → Toggle fullscreen",

@@ -22,3 +22,9 @@ if [ -d "$ZSH_CONFIG_DIR" ]; then
   done
   unset _zsh_config_file
 fi
+
+# ── Run fastfetch on new interactive terminal ──
+if [[ -o interactive ]] && command -v fastfetch >/dev/null 2>&1; then
+  fastfetch
+fi
+

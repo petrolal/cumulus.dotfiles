@@ -32,6 +32,13 @@ class InstallSuite extends FunSuite:
     val swayncLink = ctx.configDir / "swaync"
     assert(os.exists(swayncLink) || os.isLink(swayncLink))
 
+  test("DeployInstaller creates symlinks for fastfetch config"):
+    assume(!isCI)
+    val ctx = Context.discover().toOption.get
+    DeployInstaller.run(ctx, List("--links-only"))
+    val fastfetchLink = ctx.configDir / "fastfetch"
+    assert(os.exists(fastfetchLink) || os.isLink(fastfetchLink))
+
   test("DeployInstaller writes valid manifest JSON"):
     assume(!isCI)
     val ctx = Context.discover().toOption.get
@@ -54,7 +61,7 @@ class InstallSuite extends FunSuite:
     val tasks = Seq(
       "install-deps", "install-brew", "install-gh", "install-coursier",
       "install-fonts", "install-apps", "install-swaync", "install-browser", "install-devops",
-      "install-zsh", "install-sdkman", "install-tools", "full-install"
+      "install-zsh", "install-sdkman", "install-tools", "install-fastfetch", "full-install"
     )
     tasks.foreach { task =>
       assert(DeployInstaller.Subcommands.contains(task), s"Missing task: $task")

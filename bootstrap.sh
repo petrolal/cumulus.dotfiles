@@ -61,6 +61,17 @@ install_system_deps() {
         fonts-jetbrains-mono
       echo -e "  \033[32m[OK]\033[0m System packages installed"
       ;;
+    dnf)
+      sudo dnf install -y \
+        gcc gcc-c++ git curl wget \
+        zsh fontconfig fastfetch \
+        sway waybar kitty wofi swaylock swayidle grim slurp \
+        brightnessctl playerctl wireplumber pulseaudio-libs sway-notification-center mako \
+        firefox \
+        neovim \
+        docker
+      echo -e "  \033[32m[OK]\033[0m System packages installed"
+      ;;
     *)
       echo -e "  \033[33m[NOTE]\033[0m Package manager '$pkg_mgr' not automatically managed. Skipping installation."
       ;;
@@ -129,7 +140,7 @@ install_coursier() {
 
 install_tools() {
   local pkg_mgr="$1"
-  echo -e "  \033[1;36m[polyomino]\033[0m Installing terminal & TUI tools (spotify_player, bluetui, kalker)..."
+  echo -e "  \033[1;36m[polyomino]\033[0m Installing terminal & TUI tools (spotify_player, bluetui)..."
 
   # Ensure cargo/rust and required build dependencies are available
   if ! command -v cargo &> /dev/null; then
@@ -188,17 +199,7 @@ install_tools() {
     cargo install bluetui --locked 2>/dev/null || true
   fi
 
-  # 3. kalker Calculator TUI (cargo / pacman)
-  if command -v kalker &> /dev/null; then
-    echo -e "  \033[32m[OK]\033[0m kalker calculator already installed"
-  elif [ "$pkg_mgr" = "pacman" ] && pacman -Si kalker &> /dev/null; then
-    sudo pacman -S --needed --noconfirm kalker 2>/dev/null || true
-  elif command -v cargo &> /dev/null; then
-    echo -e "  \033[36m[INFO]\033[0m Installing kalker calculator via cargo..."
-    cargo install kalker --locked 2>/dev/null || true
-  fi
-
-  # 4. aerc Email Client TUI (package manager)
+  # 3. aerc Email Client TUI (package manager)
   if command -v aerc &> /dev/null; then
     echo -e "  \033[32m[OK]\033[0m aerc email client already installed"
   else
@@ -246,7 +247,7 @@ echo ""
 install_system_deps "$PKG_MGR"
 echo ""
 
-# Install TUI tools (spotify_player, bluetui, kalker)
+# Install TUI tools (spotify_player, bluetui)
 install_tools "$PKG_MGR"
 echo ""
 

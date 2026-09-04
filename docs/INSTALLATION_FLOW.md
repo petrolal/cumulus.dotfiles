@@ -105,7 +105,7 @@ This automates the complete configuration and environment provisioning:
 - **GitHub CLI (`gh`)**: Provisions `gh` across system package managers or Homebrew (`polyomino install-gh`)
 - **Coursier (`cs`)**: Ensures Coursier launcher is present in `~/.local/bin/cs` (`polyomino install-coursier`)
 - **Desktop Apps & Fonts**: Sway, Waybar, Kitty, Wofi, JetBrainsMono Nerd Font (`polyomino install-apps`, `polyomino install-fonts`)
-- **TUI Tools**: `spotify_player`, `bluetui`, `kalker`, `aerc` (`polyomino install-tools`)
+- **TUI Tools**: `spotify_player`, `bluetui`, `aerc` (`polyomino install-tools`)
 
 **System Health Check:**
 - Verify all symlinks

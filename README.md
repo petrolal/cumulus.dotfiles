@@ -180,7 +180,7 @@ All desktop automation, installers, maintenance, and system utilities are built 
 | `polyomino install-brew` | Install Homebrew package manager |
 | `polyomino install-gh` | Install GitHub CLI (`gh`) |
 | `polyomino install-coursier` | Install Coursier (`cs`) Scala application launcher |
-| `polyomino install-tools` | Install TUI tools (spotify_player, bluetui, kalker, aerc) |
+| `polyomino install-tools` | Install TUI tools (spotify_player, bluetui, aerc) |
 | `polyomino full-install` | Install system dependencies, Homebrew, gh, Coursier, apps, fonts, and tooling |
 
 ---
@@ -193,7 +193,6 @@ All desktop automation, installers, maintenance, and system utilities are built 
 |---|---|
 | `Mod+Return` | Open terminal (kitty) |
 | `Mod+D` | App launcher (wofi drun) |
-| `Mod+C` | Calculator TUI (`kalker`) |
 | `Mod+Shift+F` | File manager TUI (`yazi`) |
 | `Mod+Shift+M` | Spotify player TUI (`spotify_player`) |
 | `Mod+Shift+U` | Bluetooth manager TUI (`bluetui`) |

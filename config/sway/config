@@ -187,7 +187,6 @@ assign [class="TelegramDesktop"] $ws8
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec $launcher
-bindsym $mod+c exec $term -e kalker
 bindsym $mod+Shift+b exec google-chrome-stable
 bindsym $mod+Shift+f exec $term -e yazi
 bindsym $mod+Shift+m exec $term -e spotify_player
