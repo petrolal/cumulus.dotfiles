@@ -177,12 +177,36 @@ object ToolInstallers:
       case PackageManager.Brew => runPkgInstall("brew", Seq("install", "zsh", "curl", "git"))
       case _ => Right(println("  \u001b[32m[OK]\u001b[0m Zsh environment provisioned."))
 
+  /** Install a SDKMAN! candidate and mark it the default so its
+    * `current/bin` symlink is populated. SDKMAN!'s init script (sourced
+    * from zsh_config/99-sdkman-cargo.zsh) puts every candidate's
+    * `current/bin` on PATH, so `install` + `default` is all that is
+    * needed to inject the JDK / Kotlin compilers into the user's PATH.
+    * Fail-soft: never aborts the install pipeline. */
+  private def installSdkCandidate(initScript: os.Path, candidate: String): Unit =
+    try
+      println(s"  \u001b[36m[INFO]\u001b[0m Installing SDKMAN! candidate '$candidate'...")
+      val res = os.proc(
+        "bash", "-c",
+        s"source ${initScript} && sdk install $candidate && sdk default $candidate"
+      ).call(check = false)
+      if res.exitCode == 0 then
+        println(s"  \u001b[32m[OK]\u001b[0m SDKMAN! candidate '$candidate' installed and set as default.")
+      else
+        println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! candidate '$candidate' install exited with code ${res.exitCode}")
+    catch
+      case e: Exception =>
+        println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! candidate '$candidate' install skipped: ${e.getMessage}")
+
   private def installSdkman(ctx: Context): Either[PolyominoError, Unit] =
     println("\u001b[1;36m[polyomino install-sdkman]\u001b[0m Installing SDKMAN! and JVM tooling...")
     val sdkmanDir = ctx.home / ".sdkman"
+    val initScript = sdkmanDir / "bin" / "sdkman-init.sh"
     if os.exists(sdkmanDir) then
       println("  \u001b[36m[INFO]\u001b[0m Updating SDKMAN!...")
-      os.proc("bash", "-c", s"source ${sdkmanDir}/bin/sdkman-init.sh && sdk selfupdate force").call(check = false)
+      os.proc("bash", "-c", s"source ${initScript} && sdk selfupdate force").call(check = false)
+      installSdkCandidate(initScript, "java")
+      installSdkCandidate(initScript, "kotlin")
       Right(())
     else
       try
@@ -190,10 +214,14 @@ object ToolInstallers:
         val res = os.proc("bash", "-c", "curl -s 'https://get.sdkman.io' | bash").call(check = false)
         if res.exitCode == 0 then
           println("  \u001b[32m[OK]\u001b[0m SDKMAN! provisioned successfully.")
-          Right(())
         else
           println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! install exited with code ${res.exitCode}")
-          Right(())
+        if os.exists(initScript) then
+          installSdkCandidate(initScript, "java")
+          installSdkCandidate(initScript, "kotlin")
+        else
+          println("  \u001b[33m[NOTE]\u001b[0m SDKMAN! init script missing; skipping JDK/Kotlin candidate install.")
+        Right(())
       catch
         case e: Exception =>
           println(s"  \u001b[33m[NOTE]\u001b[0m SDKMAN! install skipped: ${e.getMessage}")

@@ -335,10 +335,10 @@ object CalendarPopup:
       |
       |def main():
       |    parser = argparse.ArgumentParser()
-      |    parser.add_argument("--base", default="#071521")
-      |    parser.add_argument("--accent", default="#FF9900")
-      |    parser.add_argument("--text", default="#E0E6ED")
-      |    parser.add_argument("--mantle", default="#040D15")
+      |    parser.add_argument("--base", default="#0F1117")
+      |    parser.add_argument("--accent", default="#EBB434")
+      |    parser.add_argument("--text", default="#F8FAFC")
+      |    parser.add_argument("--mantle", default="#191C24")
       |    parser.add_argument("--red", default="#EF4444")
       |    parser.add_argument("--theme-file", default="")
       |    parser.add_argument("--target-output", default="")

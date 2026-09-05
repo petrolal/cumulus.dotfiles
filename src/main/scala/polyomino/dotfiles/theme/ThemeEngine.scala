@@ -157,22 +157,34 @@ object ThemeEngine:
         |    transition: none;
         |}
         |
+        |/* Floating Island Waybar — 3 detached segments, 12px radii */
         |window#waybar {
         |    background-color: transparent;
         |    color: @text;
-        |    transition-property: background-color;
-        |    transition-duration: .5s;
+        |    margin: 8px 12px 0 12px;
         |}
         |
         |window#waybar.hidden {
         |   opacity: 0.5;
         |}
         |
+        |/* The three detached floating segments */
+        |#left,
+        |#center,
+        |#right,
+        |.modules-left,
+        |.modules-center,
+        |.modules-right {
+        |    background-color: @mantle;
+        |    border-radius: 12px;
+        |    padding: 2px 4px;
+        |}
+        |
         |tooltip {
         |    background-color: @base;
         |    color: @text;
         |    border: 2px solid @accent;
-        |    border-radius: 8px;
+        |    border-radius: 12px;
         |    padding: 12px 16px;
         |}
         |
@@ -183,24 +195,30 @@ object ThemeEngine:
         |}
         |
         |#workspaces {
-        |    background-color: @mantle;
+        |    background-color: transparent;
         |    color: @accent;
-        |    border-radius: 8px;
-        |    padding: 4px;
-        |    margin: 4px 6px 4px 6px;
+        |    padding: 0;
         |}
         |
+        |/* Workspace indicators — centered glyphs in equal-width pills */
         |#workspaces button {
-        |    padding: 0 8px;
+        |    min-width: 20px;
+        |    padding: 2px 8px;
+        |    margin: 2px 3px;
         |    background-color: transparent;
         |    color: @text;
-        |    border-radius: 6px;
+        |    border-radius: 10px;
+        |}
+        |
+        |#workspaces button label {
+        |    padding: 0;
         |}
         |
         |#workspaces button.focused,
         |#workspaces button.active {
-        |    background-color: @base;
-        |    color: @accent;
+        |    background-color: @accent;
+        |    color: @base;
+        |    border-radius: 10px;
         |}
         |
         |#workspaces button:hover {
@@ -213,9 +231,10 @@ object ThemeEngine:
         |    color: @base;
         |}
         |
-        |/* Floating pill modules */
+        |/* Capsule contents inside the segments */
         |#clock,
         |#tray,
+        |#window,
         |#network,
         |#bluetooth,
         |#pulseaudio,
@@ -226,20 +245,25 @@ object ThemeEngine:
         |#custom-notification,
         |#custom-spotify,
         |#mode {
-        |    background-color: @mantle;
-        |    padding: 0 12px;
-        |    margin: 4px 2px;
-        |    border-radius: 8px;
+        |    background-color: transparent;
+        |    padding: 0 8px;
         |    color: @text;
         |}
         |
         |#tray {
+        |    padding: 0 6px;
+        |}
+        |
+        |/* Center navigation clock capsule */
+        |#clock {
+        |    color: @text;
+        |    font-weight: bold;
         |    padding: 0 10px;
         |}
         |
-        |/* Polyomino Pill Accent Colors — one distinct hue per module */
+        |/* Right-side hardware capsule accents — Audio green, Wi-Fi teal, Battery gold */
         |#pulseaudio {
-        |    color: #10AC84;
+        |    color: @green;
         |}
         |
         |#network,
@@ -264,7 +288,17 @@ object ThemeEngine:
         |}
         |
         |#custom-spotify {
-        |    color: #1DB954;
+        |    color: @green;
+        |}
+        |
+        |/* Trailing POLYOMINO pill */
+        |#custom-polyomino {
+        |    background-color: @accent;
+        |    color: @base;
+        |    font-weight: bold;
+        |    padding: 0 12px;
+        |    margin: 4px 0 4px 6px;
+        |    border-radius: 12px;
         |}
         |
         |#clock:hover,

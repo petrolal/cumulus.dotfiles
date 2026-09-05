@@ -8,20 +8,26 @@ class MainSuite extends FunSuite:
   override def munitTests(): Seq[Test] =
     if isCI then Nil else super.munitTests()
 
+  /** Run Main.dispatch without letting its help/version/error output pollute the test log. */
+  private def dispatch(args: Array[String]): Int =
+    val sink = java.io.ByteArrayOutputStream()
+    val out = java.io.PrintStream(sink)
+    Console.withOut(out)(Console.withErr(out)(Main.dispatch(args)))
+
   test("Main.dispatch returns 0 for version"):
-    val code = Main.dispatch(Array("version"))
+    val code = dispatch(Array("version"))
     assertEquals(code, 0)
 
   test("Main.dispatch returns 0 for -v"):
-    val code = Main.dispatch(Array("-v"))
+    val code = dispatch(Array("-v"))
     assertEquals(code, 0)
 
   test("Main.dispatch returns 0 for --version"):
-    val code = Main.dispatch(Array("--version"))
+    val code = dispatch(Array("--version"))
     assertEquals(code, 0)
 
   test("Main.dispatch returns non-zero for unknown command"):
-    val code = Main.dispatch(Array("non-existent-command-12345"))
+    val code = dispatch(Array("non-existent-command-12345"))
     assert(code != 0)
 
   test("Main.dispatch routes sdd command"):
@@ -30,21 +36,21 @@ class MainSuite extends FunSuite:
     assertEquals(true, true)
 
   test("Main.dispatch routes theme command"):
-    val code = Main.dispatch(Array("theme", "list"))
+    val code = dispatch(Array("theme", "list"))
     assertEquals(code, 0)
 
   test("Main.dispatch routes validate command"):
-    val code = Main.dispatch(Array("validate"))
+    val code = dispatch(Array("validate"))
     assert(code == 0 || code == 1)
 
   test("Main.dispatch routes healthcheck (alias for validate)"):
-    val code = Main.dispatch(Array("healthcheck"))
+    val code = dispatch(Array("healthcheck"))
     assert(code == 0 || code == 1)
 
   test("Main.dispatch with no args shows help"):
-    val code = Main.dispatch(Array())
+    val code = dispatch(Array())
     assertEquals(code, 0)
 
   test("Main.dispatch handles argv[0] symlink routing"):
-    val code = Main.dispatch(Array("version"))
+    val code = dispatch(Array("version"))
     assertEquals(code, 0)

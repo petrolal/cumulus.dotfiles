@@ -20,15 +20,15 @@ case class Palette(
 object Palette:
   val FallbackPalette: Palette = Palette(
     name = "matriz",
-    label = "Matriz Custom (dark)",
-    base = "#071521",
-    mantle = "#040d15",
-    text = "#e0e6ed",
-    accent = "#ff9900",
-    red = "#ef4444",
-    green = "#10b981",
-    yellow = "#f59e0b",
-    blue = "#ff9900"
+    label = "Matriz (Gold/Teal)",
+    base = "#0F1117",
+    mantle = "#191C24",
+    text = "#F8FAFC",
+    accent = "#EBB434",
+    red = "#EF4444",
+    green = "#10B981",
+    yellow = "#F59E0B",
+    blue = "#EBB434"
   )
 
   def listAll(ctx: Context): Seq[String] = {
@@ -82,13 +82,13 @@ object Palette:
 
       val name = kvMap.getOrElse("THEME_NAME", file.baseName)
       val label = kvMap.getOrElse("THEME_LABEL", name)
-      val base = kvMap.getOrElse("BASE", "#071521")
+      val base = kvMap.getOrElse("BASE", "#0F1117")
       val mantle = kvMap.getOrElse("MANTLE", base)
-      val text = kvMap.getOrElse("TEXT", "#e0e6ed")
-      val accent = kvMap.getOrElse("BLUE", kvMap.getOrElse("ACCENT", "#ff9900"))
-      val red = kvMap.getOrElse("RED", "#ef4444")
-      val green = kvMap.getOrElse("GREEN", "#10b981")
-      val yellow = kvMap.getOrElse("YELLOW", "#f59e0b")
+      val text = kvMap.getOrElse("TEXT", "#F8FAFC")
+      val accent = kvMap.getOrElse("BLUE", kvMap.getOrElse("ACCENT", "#EBB434"))
+      val red = kvMap.getOrElse("RED", "#EF4444")
+      val green = kvMap.getOrElse("GREEN", "#10B981")
+      val yellow = kvMap.getOrElse("YELLOW", "#F59E0B")
       val blue = kvMap.getOrElse("BLUE", accent)
 
       Some(Palette(

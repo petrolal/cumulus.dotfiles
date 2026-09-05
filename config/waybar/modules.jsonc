@@ -1,4 +1,38 @@
 {
+	// ── Floating Island segments (3 detached groups) ──
+	"group/left": {
+		"orientation": "horizontal",
+		"modules": [
+			"sway/workspaces",
+			"custom/spotify"
+		]
+	},
+	"group/center": {
+		"orientation": "horizontal",
+		"modules": [
+			"sway/mode",
+			"sway/window",
+			"clock"
+		]
+	},
+	"group/right": {
+		"orientation": "horizontal",
+		"modules": [
+			"pulseaudio",
+			"bluetooth",
+			"network",
+			"cpu",
+			"memory",
+			"battery",
+			"tray",
+			"custom/polyomino"
+		]
+	},
+	// trailing brand pill
+	"custom/polyomino": {
+		"format": "POLYOMINO",
+		"tooltip": false
+	},
 	// waybar-battery
 	"battery": {
 		"interval": 30,
@@ -49,13 +83,13 @@
 		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
 		"on-click": "kitty -e bluetui"
 	},
-	// waybar-clock
+	// waybar-clock — center navigation capsule, compass delimiter between time and date
 	"clock": {
-		"interval": 60,
+		"interval": 1,
 		"align": 0,
 		"rotate": 0,
 		"tooltip": false,
-		"format": " {:%H:%M:%S  %b %Y}",
+		"format": " {:%H:%M:%S}   {:%a %d %b}",
 		"on-click": "~/.local/bin/polyomino calendar"
 	},
 	// waybar-idle-inhibitor
