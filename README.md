@@ -142,14 +142,28 @@ sbt nativeImage
 
 ## Automated Deployment (GitHub Actions)
 
-Releases are published automatically to **Maven Central** and **GitHub Releases** via GitHub Actions whenever a version tag is pushed:
+Version tags are created automatically. After CI passes on `master`,
+[`.github/workflows/auto-tag.yml`](.github/workflows/auto-tag.yml) reads the
+[Conventional Commit](https://www.conventionalcommits.org/) subjects since the last tag and
+bumps [SemVer](https://semver.org/) accordingly:
+
+| Commit marker since the last tag | Bump |
+|---|---|
+| `type!:` / `type(scope)!:`, or `BREAKING CHANGE:` in the body | major (`v3.3.2` → `v4.0.0`) |
+| `feat:` / `feature:` | minor (`v3.3.2` → `v3.4.0`) |
+| `fix:` / `perf:` / `refactor:` / `revert:` | patch (`v3.3.2` → `v3.3.3`) |
+| only `docs` / `chore` / `ci` / `style` / `test` / `build`, or unconventional | no tag, no release |
+
+The highest-precedence marker in the range wins. Add `[skip release]` to a commit subject to
+suppress it. To release out of band, push a tag by hand:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The workflow ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) performs:
+Either path runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which publishes
+to **Maven Central** and **GitHub Releases** and performs:
 1. Code checkout and GraalVM JDK 21 setup.
 2. Maven Central release publication (`sbt ci-release`).
 3. GraalVM Native Image compilation (`sbt nativeImage`).

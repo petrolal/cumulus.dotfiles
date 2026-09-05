@@ -1,0 +1,144 @@
+name: Auto Tag
+
+# Reads Conventional Commit messages since the last v* tag and, when they warrant
+# a release, creates + pushes the next SemVer tag and dispatches deploy.yml.
+#
+#   type!: / type(scope)!: / "BREAKING CHANGE:" in body  -> major
+#   feat: / feature:                                     -> minor
+#   fix: / perf: / refactor: / revert:                   -> patch
+#   docs/chore/ci/style/test/build only, or unconventional -> no tag
+#
+# Highest precedence in the commit range wins. Put "[skip release]" in a commit
+# subject to suppress. Runs only after the CI workflow succeeds on master/main.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches:
+      - master
+      - main
+
+concurrency:
+  group: auto-tag
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Compute & push release tag
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          set -euo pipefail
+
+          LAST_TAG="$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)"
+          if [ -z "$LAST_TAG" ]; then
+            BASE="0.0.0"; RANGE=""
+          else
+            BASE="${LAST_TAG#v}"; RANGE="${LAST_TAG}..HEAD"
+          fi
+          echo "Last tag: ${LAST_TAG:-<none>} (base $BASE)"
+
+          if [ -n "$(git tag --points-at HEAD)" ]; then
+            echo "HEAD is already tagged; nothing to do."
+            echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          major=0; minor=0; patch=0; count=0
+          while IFS= read -r -d '' msg; do
+            count=$((count + 1))
+            subject="${msg%%$'\n'*}"
+            lc="$(printf '%s' "$subject" | tr '[:upper:]' '[:lower:]')"
+
+            case "$lc" in
+              *"[skip release]"*|*"[skip-release]"*)
+                echo "Found [skip release] marker; suppressing."
+                echo "release=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            esac
+
+            if printf '%s' "$lc" | grep -qE '^[a-z]+(\([^)]*\))?!:' \
+               || printf '%s' "$msg" | grep -qE '^BREAKING[ -]CHANGE:'; then
+              major=1
+            elif printf '%s' "$lc" | grep -qE '^(feat|feature)(\([^)]*\))?:'; then
+              minor=1
+            elif printf '%s' "$lc" | grep -qE '^(fix|perf|refactor|revert)(\([^)]*\))?:'; then
+              patch=1
+            fi
+          done < <(git log --format='%B%x00' ${RANGE:+$RANGE})
+
+          if [ "$count" -eq 0 ]; then
+            echo "No new commits since $LAST_TAG."
+            echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          MA="${BASE%%.*}"; rest="${BASE#*.}"; MI="${rest%%.*}"; PA="${rest#*.}"
+          MA="${MA%%[!0-9]*}"; MI="${MI%%[!0-9]*}"; PA="${PA%%[!0-9]*}"
+          MA="${MA:-0}"; MI="${MI:-0}"; PA="${PA:-0}"
+
+          if [ "$major" -eq 1 ]; then
+            MA=$((MA + 1)); MI=0; PA=0; level=major
+          elif [ "$minor" -eq 1 ]; then
+            MI=$((MI + 1)); PA=0; level=minor
+          elif [ "$patch" -eq 1 ]; then
+            PA=$((PA + 1)); level=patch
+          else
+            echo "Only non-release commit types in range; no tag."
+            echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          NEW_VERSION="${MA}.${MI}.${PA}"
+          NEW_TAG="v${NEW_VERSION}"
+          echo "Bump: $level  ${LAST_TAG:-v0.0.0} -> $NEW_TAG"
+          {
+            echo "release=true"
+            echo "level=$level"
+            echo "new_version=$NEW_VERSION"
+            echo "new_tag=$NEW_TAG"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create & push tag
+        if: steps.bump.outputs.release == 'true'
+        env:
+          NEW_TAG: ${{ steps.bump.outputs.new_tag }}
+          LEVEL: ${{ steps.bump.outputs.level }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG ($LEVEL bump, automated)"
+          git push origin "refs/tags/$NEW_TAG"
+
+      - name: Dispatch deploy workflow
+        if: steps.bump.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ steps.bump.outputs.new_tag }}
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          set -euo pipefail
+          gh workflow run deploy.yml --ref "$NEW_TAG" -f version="$NEW_VERSION"
+          echo "Dispatched deploy.yml for $NEW_TAG"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.bump.outputs.release }}" = "true" ]; then
+            echo "### Released \`${{ steps.bump.outputs.new_tag }}\` (${{ steps.bump.outputs.level }} bump)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### No release — no version-bumping commits since the last tag" >> "$GITHUB_STEP_SUMMARY"
+          fi
