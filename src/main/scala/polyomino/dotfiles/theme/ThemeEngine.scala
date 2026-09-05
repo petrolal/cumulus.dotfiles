@@ -254,6 +254,16 @@ object ThemeEngine:
         |    padding: 0 6px;
         |}
         |
+        |/* Collapse the window/mode capsules when nothing is focused so the
+        |   clock stays centred in the middle pill instead of being shoved right.
+        |   Waybar adds the `empty` class to sway/window when no window is focused. */
+        |#window.empty,
+        |#mode.empty {
+        |    padding: 0;
+        |    margin: 0;
+        |    border: none;
+        |}
+        |
         |/* Center navigation clock capsule */
         |#clock {
         |    color: @text;

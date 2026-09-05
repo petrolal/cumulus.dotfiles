@@ -89,7 +89,7 @@
 		"align": 0,
 		"rotate": 0,
 		"tooltip": false,
-		"format": " {:%H:%M:%S}   {:%a %d %b}",
+		"format": " {:%H:%M:%S   %a %d %b}",
 		"on-click": "~/.local/bin/polyomino calendar"
 	},
 	// waybar-idle-inhibitor

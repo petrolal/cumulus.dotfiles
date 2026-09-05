@@ -39,7 +39,7 @@
 			"align": 0,
 			"rotate": 0,
 			"tooltip": false,
-			"format": " {:%H:%M:%S}   {:%a %d %b}",
+			"format": " {:%H:%M:%S   %a %d %b}",
 			"on-click": "~/.local/bin/polyomino calendar --output HDMI-A-1"
 		}
 	},
@@ -68,7 +68,7 @@
 			"align": 0,
 			"rotate": 0,
 			"tooltip": false,
-			"format": " {:%H:%M:%S}   {:%a %d %b}",
+			"format": " {:%H:%M:%S   %a %d %b}",
 			"on-click": "~/.local/bin/polyomino calendar --output eDP-1"
 		}
 	}
