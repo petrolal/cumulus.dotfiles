@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+	<defs>
+		<!-- Obsidian & Carmine Palette Styles -->
+		<style>
+      .bg-canvas { fill: #0A0B0E; }
+      .grid-lines { stroke: #16181F; stroke-width: 1.5px; fill: none; }
+      .poly-bg { stroke: #1E222B; stroke-width: 2px; fill: none; opacity: 0.4; }
+      .struct-slate { stroke: #232731; stroke-width: 3px; fill: none; stroke-linejoin: round; }
+      .graphite-beam { stroke: #3A3F4D; stroke-width: 3.5px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .carmine-trace { stroke: #EE5253; stroke-width: 4px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .carmine-fill { fill: #EE5253; }
+      .hud-bracket { stroke: #2B303C; stroke-width: 1.5px; fill: none; }
+      .hud-title { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 32px; font-weight: 700; fill: #F8FAFC; letter-spacing: 0.25em; }
+      .hud-sub { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 16px; font-weight: 600; fill: #EE5253; letter-spacing: 0.2em; }
+    </style>
+
+		<!-- Isometric Blueprint Grid Pattern -->
+		<pattern id="encruza-grid-v2" width="160" height="277.12"
+			patternUnits="userSpaceOnUse">
+			<path d="M80 0 L160 46.18 L160 138.56 L80 184.74 L0 138.56 L0 46.18 Z"
+				class="grid-lines" />
+			<path d="M80 0 L80 92.37 M0 46.18 L80 92.37 M160 46.18 L80 92.37"
+				class="grid-lines" />
+		</pattern>
+	</defs>
+
+	<!-- Monolith Dark Canvas -->
+	<rect width="3840" height="2160" class="bg-canvas" />
+	<rect width="3840" height="2160" fill="url(#encruza-grid-v2)" />
+
+	<!-- Background Polyomino Tetromino Wireframes -->
+	<g class="poly-bg">
+		<!-- Top Left -->
+		<path d="M 440,300 h 360 v 180 h -180 v 180 h -180 z" />
+		<path d="M 800,480 h 180 v 360 h -180 z" />
+		<!-- Top Right -->
+		<path d="M 3020,320 h 360 v 180 h -180 v 360 h -180 z" />
+		<path d="M 2840,500 h 180 v 180 h -180 z" />
+		<!-- Bottom Right -->
+		<path d="M 2960,1380 h 200 v 400 h -200 z" />
+		<path d="M 3160,1580 h 200 v 200 h -200 z" />
+		<!-- Bottom Left -->
+		<path d="M 520,1360 h 200 v 200 h 200 v 200 h -400 z" />
+		<path d="M 720,1560 h 200 v 400 h -200 z" />
+	</g>
+
+	<!-- Central Emblem: Diamond Crossroads with Interlocking L-Chambers -->
+	<g transform="translate(1920, 1080)">
+		<!-- Radial Framing & Cross-Axis Guides -->
+		<g class="struct-slate">
+			<circle cx="0" cy="0" r="580" stroke-dasharray="8 12" />
+			<circle cx="0" cy="0" r="320" stroke-dasharray="4 8" />
+			<line x1="-720" y1="0" x2="720" y2="0" />
+			<line x1="0" y1="-720" x2="0" y2="720" />
+			<line x1="-480" y1="-480" x2="480" y2="480" stroke-dasharray="6 6" />
+			<line x1="-480" y1="480" x2="480" y2="-480" stroke-dasharray="6 6" />
+		</g>
+
+		<!-- Structural Slate Diamond Frame (Rotated Square Crossroads) -->
+		<g class="graphite-beam">
+			<!-- Outer Diamond -->
+			<polygon points="0,-480 480,0 0,480 -480,0" />
+			<!-- Inner Offset Diamond -->
+			<polygon points="0,-360 360,0 0,360 -360,0" />
+			<polygon points="0,-240 240,0 0,240 -240,0" stroke-dasharray="10 8" />
+
+			<!-- Cross-Brace Structural Trusses -->
+			<line x1="-480" y1="0" x2="-240" y2="0" />
+			<line x1="240" y1="0" x2="480" y2="0" />
+			<line x1="0" y1="-480" x2="0" y2="-240" />
+			<line x1="0" y1="240" x2="0" y2="480" />
+
+			<!-- Interlocking Corridor Brackets -->
+			<path d="M -360,0 L -360,-120 L -240,-120" />
+			<path d="M 360,0 L 360,120 L 240,120" />
+			<path d="M 0,-360 L 120,-360 L 120,-240" />
+			<path d="M 0,360 L -120,360 L -120,240" />
+		</g>
+
+		<!-- Glowing Carmine Red Interlocking L-Seams (#EE5253) -->
+		<g class="carmine-trace">
+			<!-- Quadrant L-Seams Rotating Clockwise -->
+			<!-- Top-Right L-Branch -->
+			<path d="M 0,-240 L 120,-240 L 120,-120 L 240,-120 L 240,0" />
+			<path d="M 60,-300 L 180,-300 L 180,-180 L 300,-180" />
+
+			<!-- Bottom-Right L-Branch -->
+			<path d="M 240,0 L 240,120 L 120,120 L 120,240 L 0,240" />
+			<path d="M 300,60 L 300,180 L 180,180 L 180,300" />
+
+			<!-- Bottom-Left L-Branch -->
+			<path d="M 0,240 L -120,240 L -120,120 L -240,120 L -240,0" />
+			<path d="M -60,300 L -180,300 L -180,180 L -300,180" />
+
+			<!-- Top-Left L-Branch -->
+			<path d="M -240,0 L -240,-120 L -120,-120 L -120,-240 L 0,-240" />
+			<path d="M -300,-60 L -300,-180 L -180,-180 L -180,-300" />
+
+			<!-- Core Boundary Accent Seams -->
+			<path d="M -60,-60 L 60,-60 L 60,60 L -60,60 Z" />
+		</g>
+
+		<!-- Center Solid Focal Point -->
+		<rect x="-30" y="-30" width="60" height="60" class="carmine-fill" />
+
+		<!-- Perimeter Calibrated Waypoint Nodes -->
+		<circle cx="0" cy="-480" r="5" class="carmine-fill" />
+		<circle cx="480" cy="0" r="5" class="carmine-fill" />
+		<circle cx="0" cy="480" r="5" class="carmine-fill" />
+		<circle cx="-480" cy="0" r="5" class="carmine-fill" />
+		<circle cx="180" cy="-180" r="4.5" class="carmine-fill" />
+		<circle cx="180" cy="180" r="4.5" class="carmine-fill" />
+		<circle cx="-180" cy="180" r="4.5" class="carmine-fill" />
+		<circle cx="-180" cy="-180" r="4.5" class="carmine-fill" />
+	</g>
+
+	<!-- Bottom-Left Technical HUD: Name & Polyomino Only -->
+	<g transform="translate(140, 1970)">
+		<!-- Accent Bracket & Lead Point -->
+		<path class="hud-bracket" d="M 0,-70 L 0,35 L 280,35" />
+		<rect x="-4" y="-70" width="8" height="8" class="carmine-fill" />
+
+		<!-- Minimal Typography -->
+		<text x="25" y="-20" class="hud-title">ENCRUZA</text>
+		<text x="26" y="18" class="hud-sub">POLYOMINO</text>
+	</g>
+</svg>

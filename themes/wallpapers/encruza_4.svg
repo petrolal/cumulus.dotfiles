@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+	<defs>
+		<!-- Encruza Tone Tokens: Obsidian Canvas, Graphite & Carmine Red -->
+		<style>
+      .bg-canvas { fill: #0A0B0E; }
+      .grid-lines { stroke: #16181F; stroke-width: 1.5px; fill: none; }
+      .poly-bg { stroke: #1E222B; stroke-width: 2px; fill: none; opacity: 0.35; }
+      .guide-axis { stroke: #1E222B; stroke-width: 1.5px; fill: none; stroke-dasharray: 6 10; }
+      .struct-slate { stroke: #232731; stroke-width: 2.5px; fill: none; stroke-linejoin: round; }
+      .graphite-bloom { stroke: #3A3F4D; stroke-width: 3px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .carmine-trace { stroke: #EE5253; stroke-width: 4px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .carmine-fill { fill: #EE5253; }
+      .hud-bracket { stroke: #2B303C; stroke-width: 1.5px; fill: none; }
+      .hud-title { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 32px; font-weight: 700; fill: #F8FAFC; letter-spacing: 0.25em; }
+      .hud-sub { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 16px; font-weight: 600; fill: #EE5253; letter-spacing: 0.2em; }
+    </style>
+
+		<!-- Isometric Matrix Background Grid -->
+		<pattern id="encruza-rose-grid" width="160" height="277.12"
+			patternUnits="userSpaceOnUse">
+			<path d="M80 0 L160 46.18 L160 138.56 L80 184.74 L0 138.56 L0 46.18 Z"
+				class="grid-lines" />
+			<path d="M80 0 L80 92.37 M0 46.18 L80 92.37 M160 46.18 L80 92.37"
+				class="grid-lines" />
+		</pattern>
+	</defs>
+
+	<!-- Canvas -->
+	<rect width="3840" height="2160" class="bg-canvas" />
+	<rect width="3840" height="2160" fill="url(#encruza-rose-grid)" />
+
+	<!-- Background Polyomino Shapes -->
+	<g class="poly-bg">
+		<!-- Top Left -->
+		<path d="M 480,320 h 360 v 180 h -180 v 180 h -180 z" />
+		<path d="M 840,500 h 180 v 360 h -180 z" />
+		<!-- Top Right -->
+		<path d="M 3000,300 h 180 v 180 h 180 v 360 h -180 v -180 h -180 z" />
+		<path d="M 2820,480 h 180 v 180 h -180 z" />
+		<!-- Bottom Right -->
+		<path d="M 2920,1380 h 200 v 400 h -200 z" />
+		<path d="M 3120,1580 h 200 v 200 h -200 z" />
+		<!-- Bottom Left -->
+		<path d="M 540,1380 h 200 v 200 h 200 v 200 h -400 z" />
+		<path d="M 740,1580 h 200 v 400 h -200 z" />
+	</g>
+
+	<!-- Central Geometric Rose / Crossroads Emblem -->
+	<g transform="translate(1920, 1080)">
+		<!-- Radial Framing & Cross-Axis Guides -->
+		<g class="guide-axis">
+			<circle cx="0" cy="0" r="560" />
+			<circle cx="0" cy="0" r="420" />
+			<circle cx="0" cy="0" r="260" />
+			<line x1="-700" y1="0" x2="700" y2="0" />
+			<line x1="0" y1="-700" x2="0" y2="700" />
+			<line x1="-480" y1="-480" x2="480" y2="480" />
+			<line x1="-480" y1="480" x2="480" y2="-480" />
+		</g>
+
+		<!-- Outer Octagonal Calyx / Framing Geometry -->
+		<g class="struct-slate">
+			<polygon
+				points="0,-520 367.7,-367.7 520,0 367.7,367.7 0,520 -367.7,367.7 -520,0 -367.7,-367.7" />
+			<polygon
+				points="0,-440 311.1,-311.1 440,0 311.1,311.1 0,440 -311.1,311.1 -440,0 -311.1,-311.1"
+				stroke-dasharray="10 8" />
+		</g>
+
+		<!-- Structural Graphite Geometric Petals (Nested Rotated Hexagons & Quadrants) -->
+		<g class="graphite-bloom">
+			<!-- Outer Petal Tier (Layer 3) -->
+			<polygon
+				points="0,-360 254.5,-254.5 360,0 254.5,254.5 0,360 -254.5,254.5 -360,0 -254.5,-254.5" />
+
+			<!-- Intermediate Stepped Petals (Layer 2) -->
+			<path d="M 0,-360 L 120,-240 L 240,-240 L 240,-120 L 360,0" />
+			<path d="M 360,0 L 240,120 L 240,240 L 120,240 L 0,360" />
+			<path d="M 0,360 L -120,240 L -240,240 L -240,120 L -360,0" />
+			<path d="M -360,0 L -240,-120 L -240,-240 L -120,-240 L 0,-360" />
+
+			<!-- Inner Rose Bud Lattice (Layer 1) -->
+			<rect x="-180" y="-180" width="360" height="360" />
+			<rect x="-130" y="-130" width="260" height="260" transform="rotate(45)" />
+		</g>
+
+		<!-- Glowing Carmine Red Rose Spiral & Vector Cuts (#EE5253) -->
+		<g class="carmine-trace">
+			<!-- Unfolding Spiral Bloom Vectors -->
+			<path
+				d="M 0,-70 L 70,-70 L 70,70 L -70,70 L -70,-140 L 140,-140 L 140,140 L -140,140 L -140,-210 L 210,-210" />
+
+			<!-- Stepped External Rose Petal Outlines -->
+			<path d="M 0,-360 L 180,-360 L 180,-180 L 360,-180 L 360,0" />
+			<path d="M 360,0 L 360,180 L 180,180 L 180,360 L 0,360" />
+			<path d="M 0,360 L -180,360 L -180,180 L -360,180 L -360,0" />
+			<path d="M -360,0 L -360,-180 L -180,-180 L -180,-360 L 0,-360" />
+
+			<!-- Crossroads Stem Spines (Cardinal Ray Cuts) -->
+			<line x1="0" y1="-360" x2="0" y2="-520" />
+			<line x1="360" y1="0" x2="520" y2="0" />
+			<line x1="0" y1="360" x2="0" y2="520" />
+			<line x1="-360" y1="0" x2="-520" y2="0" />
+		</g>
+
+		<!-- Center Rose Core -->
+		<rect x="-35" y="-35" width="70" height="70" class="carmine-fill" />
+		<circle cx="0" cy="0" r="12" fill="#0A0B0E" />
+
+		<!-- Calibrated Nodes & Thorns -->
+		<circle cx="0" cy="-520" r="5" class="carmine-fill" />
+		<circle cx="520" cy="0" r="5" class="carmine-fill" />
+		<circle cx="0" cy="520" r="5" class="carmine-fill" />
+		<circle cx="-520" cy="0" r="5" class="carmine-fill" />
+
+		<circle cx="367.7" cy="-367.7" r="4.5" class="carmine-fill" />
+		<circle cx="367.7" cy="367.7" r="4.5" class="carmine-fill" />
+		<circle cx="-367.7" cy="367.7" r="4.5" class="carmine-fill" />
+		<circle cx="-367.7" cy="-367.7" r="4.5" class="carmine-fill" />
+
+		<circle cx="210" cy="-210" r="5" class="carmine-fill" />
+	</g>
+
+	<!-- Bottom-Left Technical HUD: Name & Polyomino Only -->
+	<g transform="translate(140, 1970)">
+		<!-- Accent Bracket & Lead Point -->
+		<path class="hud-bracket" d="M 0,-70 L 0,35 L 280,35" />
+		<rect x="-4" y="-70" width="8" height="8" class="carmine-fill" />
+
+		<!-- Minimal Typography -->
+		<text x="25" y="-20" class="hud-title">ENCRUZA</text>
+		<text x="26" y="18" class="hud-sub">POLYOMINO</text>
+	</g>
+</svg>
