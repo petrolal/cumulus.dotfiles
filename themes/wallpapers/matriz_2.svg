@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%"
+	style="background:#0F1117">
+	<defs>
+		<!-- Isometric Grid Background Pattern -->
+		<pattern id="iso-matrix" width="160" height="277.12" patternUnits="userSpaceOnUse">
+			<path d="M80 0 L160 46.18 L160 138.56 L80 184.74 L0 138.56 L0 46.18 Z"
+				fill="none" stroke="#16181F" stroke-width="1.2" />
+			<path d="M80 0 L80 92.37 M0 46.18 L80 92.37 M160 46.18 L80 92.37"
+				fill="none" stroke="#16181F" stroke-width="1.2" />
+		</pattern>
+
+		<style>
+      .dim-struct { stroke: #2B303C; stroke-width: 2px; fill: none; stroke-linejoin: round; }
+      .dim-sub { stroke: #1E222B; stroke-width: 1.5px; fill: none; stroke-linejoin: round; }
+      .flock-block { stroke: #2B303C; stroke-width: 1.5px; fill: #12151D; fill-opacity: 0.75; stroke-linejoin: round; }
+      .gold-trace { stroke: #EBB434; stroke-width: 3.5px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .teal-trace { stroke: #00D2D3; stroke-width: 3.5px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .marker-dot { fill: #EBB434; }
+      .teal-dot { fill: #00D2D3; }
+      .hud-bracket { stroke: #2B303C; stroke-width: 1.5px; fill: none; }
+      .hud-title { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 32px; font-weight: 700; fill: #F8FAFC; letter-spacing: 0.25em; }
+      .hud-sub { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 16px; font-weight: 600; fill: #EBB434; letter-spacing: 0.2em; }
+    </style>
+	</defs>
+
+	<!-- Global Matrix Background Grid -->
+	<rect width="3840" height="2160" fill="url(#iso-matrix)" />
+
+	<!-- Technical Coordinate Targets & Corner Calibrations -->
+	<g class="dim-struct" opacity="0.4">
+		<path d="M120 100 L160 100 M120 100 L120 140" />
+		<path d="M3720 100 L3680 100 M3720 100 L3720 140" />
+		<path d="M3720 2060 L3680 2060 M3720 2060 L3720 2020" />
+	</g>
+
+	<!-- Detailed Center Complex (1920, 1080) -->
+	<g transform="translate(1920, 1080)">
+		<!-- Outer Radial Blueprint Guide Rings & Crosshairs -->
+		<g class="dim-sub">
+			<circle cx="0" cy="0" r="620" stroke-dasharray="4 8" />
+			<circle cx="0" cy="0" r="440" stroke-dasharray="2 12" />
+			<line x1="-800" y1="0" x2="800" y2="0" stroke-dasharray="6 6" />
+			<line x1="0" y1="-500" x2="0" y2="500" stroke-dasharray="6 6" />
+		</g>
+
+		<!-- Flanking Deconstructed Polyomino / Tetromino Wings -->
+		<!-- Left Wing Polyominos -->
+		<g class="flock-block">
+			<polygon points="-760,-40 -660,-97.7 -660,-10 -760,47.7" />
+			<polygon points="-660,-10 -560,-67.7 -560,20 -660,77.7" />
+			<polygon points="-860,60 -760,2.3 -760,90 -860,147.7" />
+			<polygon points="-660,77.7 -560,20 -460,77.7 -560,135.4" />
+			<polygon points="-560,-155 -460,-212.7 -460,-125 -560,-67.3" />
+		</g>
+
+		<!-- Right Wing Polyominos -->
+		<g class="flock-block">
+			<polygon points="560,-97.7 660,-40 660,47.7 560,-10" />
+			<polygon points="660,-10 760,-67.7 760,20 660,77.7" />
+			<polygon points="760,60 860,2.3 860,90 760,147.7" />
+			<polygon points="460,77.7 560,20 660,77.7 560,135.4" />
+			<polygon points="460,-212.7 560,-155 560,-67.3 460,-125" />
+		</g>
+
+		<!-- Central Core Geometry: Isometric Cube Shell -->
+		<g class="dim-struct">
+			<polygon points="0,-360 311.7,-180 311.7,180 0,360 -311.7,180 -311.7,-180" />
+			<path d="M0,-360 L0,0 L311.7,180 M0,0 L-311.7,180" />
+
+			<!-- Stepped Internal Divisions -->
+			<path d="M-207.8,-120 L0,-240 L207.8,-120 L207.8,120 L0,240 L-207.8,120 Z" />
+			<path d="M-103.9,-60 L0,-120 L103.9,-60 L103.9,60 L0,120 L-103.9,60 Z" />
+			<path d="M0,-240 L0,240 M-207.8,0 L207.8,0" />
+
+			<!-- Blueprint Technical Extensions -->
+			<path d="M-311.7,-180 L-460,-265.6 M311.7,-180 L460,-265.6" />
+			<path d="M-311.7,180 L-560,323.2 M311.7,180 L560,323.2" />
+		</g>
+
+		<!-- Secondary Structural Grid Connectors -->
+		<path class="dim-struct"
+			d="
+      M -660,-10 L -311.7,-10
+      M -560,135.4 L -207.8,120
+      M 660,-10 L 311.7,-10
+      M 560,135.4 L 207.8,120
+    " />
+
+		<!-- Gold Accent Cuts (#EBB434) -->
+		<g class="gold-trace">
+			<path d="M -660,-97.7 L -560,-155 L -460,-97.7 L -460,20 L -311.7,-60" />
+			<path d="M 0,-360 L 103.9,-300 L 103.9,-180 L 207.8,-120 L 311.7,-60" />
+			<path d="M -207.8,120 L -103.9,180 L -103.9,300 L 0,360" />
+			<path d="M 207.8,0 L 311.7,60 L 460,0 L 560,57.7 L 660,0" />
+			<path d="M -311.7,60 L -460,140 L -460,220" />
+			<path d="M 103.9,-60 L 207.8,0 L 207.8,120" />
+		</g>
+
+		<!-- Teal Accent Seams (#00D2D3) -->
+		<g class="teal-trace">
+			<path
+				d="M -560,20 L -460,-37.7 L -311.7,42.3 L -207.8,-17.7 L 0,-137.7 L 103.9,-77.7" />
+			<path d="M 0,-120 L 0,120 L -103.9,60 L -103.9,-60 L 0,-120" />
+			<path d="M 0,120 L 103.9,180 L 103.9,300" />
+			<path d="M -207.8,-120 L 0,0 L 207.8,-120" />
+			<path d="M 311.7,180 L 460,100 L 560,157.7 L 660,100" />
+			<path d="M 0,0 L 0,240" />
+		</g>
+
+		<!-- Technical Node Points -->
+		<circle cx="0" cy="-360" r="4.5" class="marker-dot" />
+		<circle cx="0" cy="360" r="4.5" class="marker-dot" />
+		<circle cx="-311.7" cy="-60" r="4.5" class="teal-dot" />
+		<circle cx="311.7" cy="60" r="4.5" class="teal-dot" />
+		<circle cx="207.8" cy="120" r="3.5" class="marker-dot" />
+		<circle cx="-207.8" cy="120" r="3.5" class="teal-dot" />
+	</g>
+
+	<!-- Bottom-Left Technical HUD: Name & Polyomino Only -->
+	<g transform="translate(140, 1970)">
+		<!-- Accent Bracket & Lead Point -->
+		<path class="hud-bracket" d="M 0,-70 L 0,35 L 280,35" />
+		<rect x="-4" y="-70" width="8" height="8" fill="#EBB434" />
+
+		<!-- Minimal Typography -->
+		<text x="25" y="-20" class="hud-title">MATRIZ</text>
+		<text x="26" y="18" class="hud-sub">POLYOMINO</text>
+	</g>
+</svg>
+

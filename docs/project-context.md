@@ -127,8 +127,11 @@ polyomino.dotfiles/
 │       ├── sysutils/
 │       │   └── SysUtils.scala              # Lock screen, idle daemon, screenshot helpers
 │       │
+│       ├── wallpaper/
+│       │   └── WallpaperEngine.scala        # Swap wallpaper within the active flavor (next/prev/random)
+│       │
 │       ├── pickers/
-│       │   └── WofiPickers.scala           # Wofi GUI launchers (theme-picker, whichkey)
+│       │   └── WofiPickers.scala           # Wofi GUI launchers (theme-picker, wallpaper-picker, whichkey)
 │       │
 │       ├── maintenance/
 │       │   └── Maintenance.scala           # Backup/restore snapshots, git pull & re-install
@@ -165,7 +168,7 @@ polyomino.dotfiles/
 | **Sway Window Manager** | IPC socket (`SWAYSOCK`) via `swaymsg` | Layout autotiling (`swaymsg split v/h`), window focus, config reload |
 | **Waybar** | Signal trigger (`pkill -SIGUSR1 waybar`) | Status bar reload and dynamic style updates |
 | **Kitty Terminal** | IPC signaling (`kill -USR1`) | Live theme color palette updates without restart |
-| **Wofi Launcher** | Graphical UI menus | Interactive theme selection (`theme-picker`), keybindings cheatsheet (`whichkey`) |
+| **Wofi Launcher** | Graphical UI menus | Interactive theme selection (`theme-picker`), wallpaper selection (`wallpaper-picker`), keybindings cheatsheet (`whichkey`) |
 | **Neovim** | `$NVIM_LISTEN_ADDRESS` IPC | Live color scheme reload |
 | **GTK / GNOME Settings** | `gsettings` CLI | Sync dark/light color-scheme setting |
 | **Swaylock** | Configuration file substitution | Lock screen styling (colors, font) per active theme |
@@ -196,7 +199,9 @@ polyomino.dotfiles/
 | Command | Purpose |
 |---------|---------|
 | `polyomino theme` | Apply desktop theme flavor + wallpaper mode live |
+| `polyomino wallpaper` | Swap the wallpaper within the active flavor (`next`/`prev`/`random`/`list`/`<name>`) without re-theming |
 | `polyomino theme-picker` | Wofi GUI menu to select and apply themes |
+| `polyomino wallpaper-picker` | Wofi GUI menu of the active flavor's wallpapers |
 | `polyomino runtime-refresh` | Trigger live reload signals across running apps |
 | `polyomino os-colorscheme` | Sync GNOME/GTK dark/light color-scheme setting |
 | `polyomino autotiling` | Background daemon: Fibonacci spiral window autotiling |

@@ -62,14 +62,102 @@ object WofiPickers:
       val resMode = os.proc(shellableModeArgs*).call(stdin = modes.mkString("\n"), check = false)
 
       val selectedModeStr = resMode.out.text().trim
+      if selectedModeStr.isEmpty then return Right(())
       val (mode, interval) = if selectedModeStr.contains("Rotate") then
         ("rotate", "30m")
       else
         ("wallpaper", "30m")
 
-      ThemeEngine.applyTheme(ctx, selectedTheme, mode = mode, customWallpaper = None, interval = interval)
+      // Step 3 (static mode only): if the chosen flavor ships more than one
+      // wallpaper, let the user pick which one instead of silently taking the
+      // first. "Auto" keeps the previous behaviour.
+      val customWallpaper: Option[String] =
+        if mode != "wallpaper" then None
+        else
+          val palName = polyomino.dotfiles.theme.Palette.find(selectedTheme, ctx).name
+          val choices = polyomino.dotfiles.wallpaper.WallpaperEngine.wallpapersForFlavor(ctx, palName)
+          if choices.size <= 1 then None
+          else
+            val AutoLabel = "◆  Auto (first)"
+            val labels = AutoLabel +: choices.map(p => s"   ${p.last}")
+            val wpArgs = Seq("wofi")
+              ++ (if os.exists(wofiConfigFile) then Seq("--conf", wofiConfigFile.toString) else Seq.empty)
+              ++ Seq(
+                "--show", "dmenu",
+                "--prompt", s"Wallpaper for '$selectedTheme'",
+                "--width", "560",
+                "--lines", Math.min(labels.size, 8).toString,
+                "--columns", "1",
+                "--insensitive",
+                "--cache-file", "/dev/null"
+              ) ++ (if os.exists(wofiStyleFile) then Seq("--style", wofiStyleFile.toString) else Seq.empty)
+            val shellableWpArgs: Seq[os.Shellable] = wpArgs.map(s => (s: os.Shellable))
+            val resWp = os.proc(shellableWpArgs*).call(stdin = labels.map(escapeMarkup).mkString("\n"), check = false)
+            val picked = resWp.out.text().trim
+            if picked.isEmpty || picked == AutoLabel then None
+            else
+              val name = picked.replaceFirst("^(◆  | +)", "").trim
+              choices.find(p => p.last == name || p.baseName == name).map(_.toString)
+
+      ThemeEngine.applyTheme(ctx, selectedTheme, mode = mode, customWallpaper = customWallpaper, interval = interval)
     catch
       case e: Exception => Left(CommandError(s"Wofi theme-picker failed: ${e.getMessage}"))
+
+  def runWallpaperPicker(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
+    import polyomino.dotfiles.wallpaper.WallpaperEngine
+
+    // Toggle behavior: close an already-open wallpaper picker
+    try
+      val checkRes = os.proc("pgrep", "-f", "wofi.*--prompt.*Wallpaper").call(check = false)
+      if checkRes.exitCode == 0 then
+        val pids = checkRes.out.text().trim.split("\\s+").filter(_.nonEmpty)
+        for pid <- pids do
+          try os.proc("kill", pid).call(check = false) catch case _: Exception => ()
+        return Right(())
+    catch
+      case _: Exception => ()
+
+    val flavor = WallpaperEngine.activeFlavor(ctx)
+    val options = WallpaperEngine.wallpapersForFlavor(ctx, flavor)
+    if options.isEmpty then
+      return Left(CommandError(s"No wallpapers for flavor '$flavor' in themes/wallpapers/"))
+
+    println(s"[1;35m[polyomino wallpaper-picker][0m Launching Wofi GUI wallpaper picker for '$flavor'...")
+    val current = WallpaperEngine.currentWallpaper(ctx)
+    val RandomLabel = "🎲  Random"
+    val labels = RandomLabel +: options.map { p =>
+      val mark = if current.contains(p.toString) then "● " else "  "
+      s"$mark${p.last}"
+    }
+    val inputList = labels.map(escapeMarkup).mkString("\n")
+
+    val wofiConfigFile = ctx.configDir / "wofi" / "config"
+    val wofiStyleFile = ctx.configDir / "wofi" / "style.css"
+
+    try
+      val pickerArgs = Seq("wofi")
+        ++ (if os.exists(wofiConfigFile) then Seq("--conf", wofiConfigFile.toString) else Seq.empty)
+        ++ Seq(
+          "--show", "dmenu",
+          "--prompt", s"Wallpaper · $flavor",
+          "--width", "560",
+          "--lines", Math.min(labels.size, 8).toString,
+          "--columns", "1",
+          "--insensitive",
+          "--cache-file", "/dev/null"
+        ) ++ (if os.exists(wofiStyleFile) then Seq("--style", wofiStyleFile.toString) else Seq.empty)
+      val shellablePicker: Seq[os.Shellable] = pickerArgs.map(s => (s: os.Shellable))
+      val res = os.proc(shellablePicker*).call(stdin = inputList, check = false)
+
+      val selected = res.out.text().trim
+      if selected.isEmpty then return Right(())
+      if selected == RandomLabel then
+        WallpaperEngine.run(ctx, List("random"))
+      else
+        val name = selected.replaceFirst("^(● |  )", "").trim
+        WallpaperEngine.run(ctx, List(name))
+    catch
+      case e: Exception => Left(CommandError(s"Wofi wallpaper-picker failed: ${e.getMessage}"))
 
   def runWhichkey(ctx: Context, args: List[String]): Either[PolyominoError, Unit] =
     // Toggle behavior: check if whichkey wofi is already running
@@ -195,6 +283,10 @@ object WofiPickers:
     action match
       case a if a.contains("polyomino-whichkey") => "Keybindings cheatsheet"
       case a if a.contains("polyomino-theme-picker") => "Theme and wallpaper picker"
+      case a if a.contains("wallpaper next") || a.contains("wallpaper cycle") => "Next wallpaper (active theme)"
+      case a if a.contains("wallpaper prev") || a.contains("wallpaper previous") => "Previous wallpaper (active theme)"
+      case a if a.contains("wallpaper random") => "Random wallpaper (active theme)"
+      case a if a.contains("polyomino-wallpaper") || a.contains("wallpaper-picker") || a.contains("polyomino wallpaper") => "Wallpaper picker (active theme)"
       case a if a.contains("preview-lock") => "Preview lockscreen (Safe test window)"
       case a if a.contains("rubik-lock") || a.contains("polyomino-lock") || a.contains("lock") => "Lock screen (3D Rubik's Cube Lock)"
       case a if a.contains("systemctl suspend") => "Suspend system"
@@ -250,6 +342,8 @@ object WofiPickers:
     "Mod4+Shift+a             → Email client (aerc)",
     "Mod4+Shift+n             → Toggle notification center",
     "Mod4+Shift+t             → Theme and wallpaper picker",
+    "Mod4+Shift+p             → Wallpaper picker (active theme)",
+    "Mod4+F6                  → Next wallpaper (active theme)",
     "Mod4+? / Mod4+/          → Keybindings cheatsheet",
     "Mod4+Escape              → Lock screen (3D Rubik's Cube Lock)",
     "Print                    → Screenshot full screen",

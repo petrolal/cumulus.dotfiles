@@ -752,16 +752,16 @@ object ThemeEngine:
   def resolveWallpaperForFlavor(ctx: Context, flavor: String): Option[String] =
     val wallpapersDir = ctx.dotfilesDir / "themes" / "wallpapers"
     if os.exists(wallpapersDir) then
-      val candidates = Seq(
-        wallpapersDir / s"${flavor}.svg",
-        wallpapersDir / s"${flavor}_2.svg",
-        wallpapersDir / s"${flavor}_3.svg",
-        wallpapersDir / s"${flavor}.png",
-        wallpapersDir / s"${flavor}.jpg"
-      )
-      candidates.find(os.exists).map(_.toString).orElse {
-        os.list(wallpapersDir).find(f => f.ext == "svg" || f.ext == "png" || f.ext == "jpg").map(_.toString)
-      }
+      // Prefer any wallpaper that belongs to this flavor (`<flavor>.svg`,
+      // `<flavor>_2.png`, `<flavor>-nebula.svg`, …); WallpaperEngine owns the
+      // matching rules and is the source of truth for the picker/cycler too.
+      polyomino.dotfiles.wallpaper.WallpaperEngine
+        .wallpapersForFlavor(ctx, flavor)
+        .headOption
+        .map(_.toString)
+        .orElse {
+          os.list(wallpapersDir).find(f => f.ext == "svg" || f.ext == "png" || f.ext == "jpg").map(_.toString)
+        }
     else None
 
   def listWallpapers(ctx: Context): Seq[String] =

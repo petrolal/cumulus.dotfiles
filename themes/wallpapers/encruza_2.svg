@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+	<defs>
+		<!-- Dark Blueprint Canvas & Tone Styles -->
+		<style>
+      .bg-canvas { fill: #0A0B0E; }
+      .grid-lines { stroke: #16181F; stroke-width: 1.5px; fill: none; }
+      .poly-bg { stroke: #1E222B; stroke-width: 2px; fill: none; }
+      .struct-slate { stroke: #3A3F4D; stroke-width: 3px; fill: none; stroke-linejoin: round; }
+      .cross-axis { stroke: #232731; stroke-width: 4px; fill: none; }
+      .carmine-trace { stroke: #EE5253; stroke-width: 4px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .carmine-fill { fill: #EE5253; }
+      .hud-bracket { stroke: #2B303C; stroke-width: 1.5px; fill: none; }
+      .hud-title { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 32px; font-weight: 700; fill: #F8FAFC; letter-spacing: 0.25em; }
+      .hud-sub { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 16px; font-weight: 600; fill: #EE5253; letter-spacing: 0.2em; }
+    </style>
+
+		<!-- Isometric Matrix Background Grid Pattern -->
+		<pattern id="encruza-grid" width="160" height="277.12" patternUnits="userSpaceOnUse">
+			<path d="M80 0 L160 46.18 L160 138.56 L80 184.74 L0 138.56 L0 46.18 Z"
+				class="grid-lines" />
+			<path d="M80 0 L80 92.37 M0 46.18 L80 92.37 M160 46.18 L80 92.37"
+				class="grid-lines" />
+		</pattern>
+	</defs>
+
+	<!-- Canvas -->
+	<rect width="3840" height="2160" class="bg-canvas" />
+	<rect width="3840" height="2160" fill="url(#encruza-grid)" />
+
+	<!-- Background Polyomino Tetromino Wireframes -->
+	<g class="poly-bg">
+		<!-- Top Left Blocks -->
+		<path d="M 500,320 h 180 v 180 h -180 z" />
+		<path d="M 680,320 h 180 v 360 h -180 z" />
+		<path d="M 320,500 h 180 v 180 h 180 v 180 h -360 z" />
+		<!-- Top Right Blocks -->
+		<path d="M 3100,280 h 360 v 180 h -180 v 180 h -180 z" />
+		<path d="M 3280,460 h 180 v 360 h -180 z" />
+		<!-- Bottom Right Blocks -->
+		<path d="M 2950,1450 h 200 v 400 h -200 z" />
+		<path d="M 3150,1650 h 200 v 200 h -200 z" />
+		<path d="M 2750,1650 h 200 v 200 h -200 z" />
+		<!-- Bottom Left Blocks -->
+		<path d="M 620,1380 h 360 v 180 h -180 v 180 h -180 z" />
+	</g>
+
+	<!-- Central Industrial Crossroads Emblem -->
+	<g transform="translate(1920, 1080)">
+		<!-- Structural Slate Cross Axes -->
+		<g class="cross-axis">
+			<line x1="-650" y1="0" x2="650" y2="0" />
+			<line x1="0" y1="-650" x2="0" y2="650" />
+			<line x1="-460" y1="-460" x2="460" y2="460" />
+			<line x1="-460" y1="460" x2="460" y2="-460" />
+		</g>
+
+		<!-- Concentric Iron Frame Rings -->
+		<circle cx="0" cy="0" r="480" class="struct-slate" />
+		<circle cx="0" cy="0" r="400" class="struct-slate" />
+		<circle cx="0" cy="0" r="280" class="struct-slate" stroke-dasharray="8 12" />
+
+		<!-- Concentric Iron Frame Square -->
+		<rect x="-380" y="-380" width="760" height="760" class="struct-slate" />
+		<rect x="-310" y="-310" width="620" height="620" class="struct-slate"
+			stroke-dasharray="16 12" />
+		<rect x="-440" y="-440" width="880" height="880" class="struct-slate" opacity="0.6" />
+
+		<!-- Slate Structural Interlocking Spokes & Dividers -->
+		<g class="struct-slate">
+			<line x1="-380" y1="-380" x2="-140" y2="-140" />
+			<line x1="380" y1="-380" x2="140" y2="-140" />
+			<line x1="-380" y1="380" x2="-140" y2="140" />
+			<line x1="380" y1="380" x2="140" y2="140" />
+
+			<line x1="-380" y1="0" x2="-140" y2="0" />
+			<line x1="380" y1="0" x2="140" y2="0" />
+			<line x1="0" y1="-380" x2="0" y2="-140" />
+			<line x1="0" y1="380" x2="0" y2="140" />
+		</g>
+
+		<!-- Solid Carmine Red Central Core -->
+		<rect x="-90" y="-90" width="180" height="180" class="carmine-fill" />
+
+		<!-- Glowing Carmine Interlocking L-Shaped Seams / Vectors -->
+		<g class="carmine-trace">
+			<!-- Top Sector -->
+			<path d="M -40,-90 L -40,-260 L -120,-340 L -120,-480" />
+			<path d="M 0,-90 L 0,-280 L 100,-380 L 100,-480" />
+			<path d="M 40,-90 L 40,-220 L 160,-340 L 260,-340" />
+
+			<!-- Bottom Sector -->
+			<path d="M 40,90 L 40,260 L 120,340 L 120,480" />
+			<path d="M 0,90 L 0,280 L -100,380 L -100,480" />
+			<path d="M -40,90 L -40,220 L -160,340 L -260,340" />
+
+			<!-- Left Sector -->
+			<path d="M -90,-40 L -260,-40 L -340,-120 L -480,-120" />
+			<path d="M -90,0 L -280,0 L -380,100 L -480,100" />
+			<path d="M -90,40 L -220,40 L -340,160 L -340,260" />
+
+			<!-- Right Sector -->
+			<path d="M 90,40 L 260,40 L 340,120 L 480,120" />
+			<path d="M 90,0 L 280,0 L 380,-100 L 480,-100" />
+			<path d="M 90,-40 L 220,-40 L 340,-160 L 340,-260" />
+		</g>
+	</g>
+
+	<!-- Bottom-Left Technical HUD: Name & Polyomino Only -->
+	<g transform="translate(140, 1970)">
+		<!-- Accent Bracket & Lead Point -->
+		<path class="hud-bracket" d="M 0,-70 L 0,35 L 280,35" />
+		<rect x="-4" y="-70" width="8" height="8" class="carmine-fill" />
+
+		<!-- Minimal Typography -->
+		<text x="25" y="-20" class="hud-title">ENCRUZA</text>
+		<text x="26" y="18" class="hud-sub">POLYOMINO</text>
+	</g>
+</svg>
+

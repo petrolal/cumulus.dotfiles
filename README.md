@@ -166,7 +166,9 @@ All desktop automation, installers, maintenance, and system utilities are built 
 | `polyomino install` | Deploy configs, run system package installer (`bootstrap.sh`), and execute `healthcheck` |
 | `polyomino healthcheck` | Read-only sanity check of all symlinks, binaries, fonts, and PATH configurations |
 | `polyomino theme` | Select desktop theme (custom palettes) & wallpaper mode |
+| `polyomino wallpaper` | Swap the wallpaper within the active flavor (`next`/`prev`/`random`/`list`/`<name>`) — does not re-theme |
 | `polyomino-theme-picker` | Wofi GUI picker for desktop theme selection (`Mod+Shift+T`) |
+| `polyomino-wallpaper` | Wofi GUI picker for the active flavor's wallpapers (`Mod+Shift+P`) |
 | `polyomino-whichkey` | Wofi cheatsheet of Sway keybindings (`Mod+Shift+?`) |
 | `polyomino lock` | Screen lock styled to active theme (`Mod+Escape`) |
 | `polyomino idle` | Swayidle daemon management (auto-lock, DPMS, suspend) |
@@ -198,6 +200,10 @@ All desktop automation, installers, maintenance, and system utilities are built 
 | `Mod+Shift+U` | Bluetooth manager TUI (`bluetui`) |
 | `Mod+Shift+A` | Email client TUI (`aerc`) |
 | `Mod+Shift+T` | Theme picker GUI (`polyomino-theme-picker`) |
+| `Mod+Shift+P` | Wallpaper picker GUI for the active flavor (`polyomino-wallpaper`) |
+| `Mod+F6` | Cycle to the next wallpaper in the active flavor |
+| `Mod+F1`–`Mod+F4` | Apply flavor matriz / encruza / caravela / aruanda |
+| `Mod+F5` | Cycle desktop flavor |
 | `Mod+Shift+?` | Which-key cheatsheet (`polyomino-whichkey`) |
 | `Mod+Shift+Q` | Kill focused window |
 | `Mod+Shift+C` | Reload Sway config |

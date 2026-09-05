@@ -321,6 +321,13 @@ bindsym $mod+F2 exec polyomino-theme encruza
 bindsym $mod+F3 exec polyomino-theme caravela
 bindsym $mod+F4 exec polyomino-theme aruanda
 
+# Wallpaper picker — swap the wallpaper *within* the active flavor without
+# re-theming. $mod+Shift+p opens a wofi list of that flavor's wallpapers;
+# $mod+F6 cycles to the next one. Add more wallpapers as
+# themes/wallpapers/<flavor>-<name>.{svg,png,jpg}.
+bindsym $mod+Shift+p exec ~/.local/bin/polyomino-wallpaper
+bindsym $mod+F6 exec ~/.local/bin/polyomino wallpaper next
+
 # Lock screen, suspend, and shutdown
 # Note: lock is bound to $mod+Escape (not $mod+Shift+l — that collides with $mod+Shift+$right
 # (vim-style "l" = right, see `set $right l` above), which silently wins

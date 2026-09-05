@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="100%" height="100%">
+	<defs>
+		<!-- Sacred Forest Tone Styles -->
+		<style>
+      .bg-canvas { fill: #0B120F; }
+      .grid-lines { stroke: #14261C; stroke-width: 1.5px; fill: none; }
+      .poly-bg { stroke: #172B1F; stroke-width: 2px; fill: none; }
+      .shield-frame { stroke: #1D3627; stroke-width: 3.5px; fill: none; stroke-linejoin: round; }
+      .foliage-ring { stroke: #1D3627; stroke-width: 2px; fill: none; stroke-dasharray: 6 10; }
+      .mata-trace { stroke: #10AC84; stroke-width: 4px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .amber-trace { stroke: #F5CD79; stroke-width: 3.5px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .solar-node { fill: #F5CD79; }
+      .mata-node { fill: #10AC84; }
+      .hud-bracket { stroke: #1D3627; stroke-width: 1.5px; fill: none; }
+      .hud-title { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 32px; font-weight: 700; fill: #F8FAFC; letter-spacing: 0.25em; }
+      .hud-sub { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 16px; font-weight: 600; fill: #10AC84; letter-spacing: 0.2em; }
+    </style>
+
+		<!-- Isometric Matrix Background Grid Pattern -->
+		<pattern id="aruanda-grid" width="160" height="277.12" patternUnits="userSpaceOnUse">
+			<path d="M80 0 L160 46.18 L160 138.56 L80 184.74 L0 138.56 L0 46.18 Z"
+				class="grid-lines" />
+			<path d="M80 0 L80 92.37 M0 46.18 L80 92.37 M160 46.18 L80 92.37"
+				class="grid-lines" />
+		</pattern>
+	</defs>
+
+	<!-- Canvas -->
+	<rect width="3840" height="2160" class="bg-canvas" />
+	<rect width="3840" height="2160" fill="url(#aruanda-grid)" />
+
+	<!-- Background Polyomino Tetromino Wireframes -->
+	<g class="poly-bg">
+		<!-- Top Left -->
+		<path d="M 520,360 h 200 v 200 h -200 z" />
+		<path d="M 720,360 h 200 v 400 h -200 z" />
+		<path d="M 320,560 h 200 v 200 h 200 v 200 h -400 z" />
+		<!-- Top Right -->
+		<path d="M 3050,320 h 400 v 200 h -200 v 200 h -200 z" />
+		<path d="M 3250,520 h 200 v 400 h -200 z" />
+		<!-- Bottom Right -->
+		<path d="M 2900,1400 h 200 v 200 h 200 v 200 h -400 z" />
+		<path d="M 3100,1600 h 200 v 400 h -200 z" />
+		<!-- Bottom Left -->
+		<path d="M 580,1420 h 400 v 200 h -200 v 200 h -200 z" />
+	</g>
+
+	<!-- Central Sacred Geometry Forest Emblem -->
+	<g transform="translate(1920, 1080)">
+		<!-- Concentric Foliage Rings & Radial Rays -->
+		<g class="foliage-ring">
+			<circle cx="0" cy="0" r="540" />
+			<circle cx="0" cy="0" r="420" stroke-dasharray="12 12" />
+			<circle cx="0" cy="0" r="300" />
+			<circle cx="0" cy="0" r="140" stroke-dasharray="4 6" />
+			<line x1="-580" y1="0" x2="580" y2="0" stroke-dasharray="4 8" />
+			<line x1="0" y1="-580" x2="0" y2="580" stroke-dasharray="4 8" />
+		</g>
+
+		<!-- Outer Hexagonal Shield Structure -->
+		<g class="shield-frame">
+			<polygon points="0,-480 415.7,-240 415.7,240 0,480 -415.7,240 -415.7,-240" />
+			<polygon points="0,-380 329.1,-190 329.1,190 0,380 -329.1,190 -329.1,-190"
+				stroke-dasharray="14 10" />
+			<!-- Inner Shield Structural Braces -->
+			<line x1="0" y1="-480" x2="0" y2="480" />
+			<line x1="-415.7" y1="-240" x2="415.7" y2="240" />
+			<line x1="-415.7" y1="240" x2="415.7" y2="-240" />
+		</g>
+
+		<!-- Mata Green Growth Vectors & Branching Arrows (#10AC84) -->
+		<g class="mata-trace">
+			<!-- Central Upward Growth Trunk & Arrow -->
+			<path d="M 0,380 L 0,-240" />
+			<path d="M -80,-160 L 0,-240 L 80,-160" />
+			<path d="M -50,-290 L 0,-340 L 50,-290" />
+			<path d="M 0,-340 L 0,-480" />
+
+			<!-- Left Branching Upward Arrows -->
+			<path d="M 0,180 L -140,80 L -140,-60 L -220,-140" />
+			<path d="M -260,-100 L -220,-140 L -180,-100" />
+			<path d="M -140,80 L -280,0 L -280,-120 L -350,-190" />
+			<path d="M -390,-160 L -350,-190 L -320,-150" />
+
+			<!-- Right Branching Upward Arrows -->
+			<path d="M 0,180 L 140,80 L 140,-60 L 220,-140" />
+			<path d="M 180,-100 L 220,-140 L 260,-100" />
+			<path d="M 140,80 L 280,0 L 280,-120 L 350,-190" />
+			<path d="M 320,-150 L 350,-190 L 390,-160" />
+
+			<!-- Base Root Chevron Guides -->
+			<path d="M -180,260 L 0,380 L 180,260" />
+			<path d="M -120,200 L 0,280 L 120,200" />
+		</g>
+
+		<!-- Warm Amber Solar Core & Node Rays (#F5CD79) -->
+		<g class="amber-trace">
+			<!-- Solar-Core Inner Ring & Hex Core -->
+			<polygon points="0,-70 60.6,-35 60.6,35 0,70 -60.6,35 -60.6,-35" />
+			<circle cx="0" cy="0" r="24" stroke-width="2" />
+
+			<!-- Symmetrical Solar Rays & Circuit Seams -->
+			<path d="M 0,-70 L 0,-140" />
+			<path d="M 60.6,-35 L 140,-80 L 210,-40" />
+			<path d="M -60.6,-35 L -140,-80 L -210,-40" />
+			<path d="M 60.6,35 L 140,80 L 210,120" />
+			<path d="M -60.6,35 L -140,80 L -210,120" />
+
+			<!-- Outer Node Connections -->
+			<path d="M -220,-140 L -329.1,-190" />
+			<path d="M 220,-140 L 329.1,-190" />
+			<path d="M 0,-380 L 0,-480" />
+			<path d="M -180,260 L -329.1,190" />
+			<path d="M 180,260 L 329.1,190" />
+		</g>
+
+		<!-- Botanical & Solar Accent Nodes -->
+		<circle cx="0" cy="0" r="6" class="solar-node" />
+		<circle cx="0" cy="-480" r="5" class="solar-node" />
+		<circle cx="-220" cy="-140" r="4.5" class="mata-node" />
+		<circle cx="220" cy="-140" r="4.5" class="mata-node" />
+		<circle cx="-350" cy="-190" r="4.5" class="mata-node" />
+		<circle cx="350" cy="-190" r="4.5" class="mata-node" />
+		<circle cx="210" cy="-40" r="3.5" class="solar-node" />
+		<circle cx="-210" cy="-40" r="3.5" class="solar-node" />
+		<circle cx="0" cy="380" r="5" class="mata-node" />
+	</g>
+
+	<!-- Bottom-Left Technical HUD: Name & Polyomino Only -->
+	<g transform="translate(140, 1970)">
+		<!-- Accent Bracket & Lead Point -->
+		<path class="hud-bracket" d="M 0,-70 L 0,35 L 280,35" />
+		<rect x="-4" y="-70" width="8" height="8" class="solar-node" />
+
+		<!-- Minimal Typography -->
+		<text x="25" y="-20" class="hud-title">ARUANDA</text>
+		<text x="26" y="18" class="hud-sub">POLYOMINO</text>
+	</g>
+</svg>
